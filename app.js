@@ -5,9 +5,42 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 let user=null,profile=null,currentRoom=null,channel=null;
 const $=id=>document.getElementById(id), sections=['login','lobby','create','game'];
 function show(id){sections.forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide')}
-async function boot(){const {data}=await sb.auth.getSession();if(data.session){user=data.session.user;await loadProfile()}else show('login')}
-$('loginForm').onsubmit=async e=>{e.preventDefault();const nickname=$('nick').value.trim();const {data,error}=await sb.auth.signInAnonymously();if(error)return alert(error.message);user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}
-async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;$('me').textContent=profile?.nickname||'Гравець';show('lobby');await refreshLobby();subscribeLobby()}
+function authView(which){$('authLogin').classList.toggle('hide',which!=='login');$('authRegister').classList.toggle('hide',which!=='register')}
+$('showRegister').onclick=()=>authView('register');
+$('showLogin').onclick=()=>authView('login');
+
+async function boot(){const {data}=await sb.auth.getSession();if(data.session){user=data.session.user;await loadProfile()}else{show('login');authView('login')}}
+$('registerForm').onsubmit=async e=>{
+ e.preventDefault();
+ const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;
+ if(password!==password2)return alert('Паролі не співпадають');
+ const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});
+ if(error)return alert(error.message);
+ if(data.session){
+   user=data.user;
+   await sb.from('profiles').upsert({id:user.id,nickname});
+   await loadProfile();
+ }else{
+   alert('Акаунт створено ✓ Перевір свою електронну пошту та підтвердь реєстрацію. Після цього повернись і увійди.');
+   authView('login');
+   $('loginEmail').value=email;
+ }
+};
+$('loginForm').onsubmit=async e=>{
+ e.preventDefault();
+ const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;
+ const {data,error}=await sb.auth.signInWithPassword({email,password});
+ if(error)return alert('Не вдалося увійти. Перевір email, пароль і чи підтверджена пошта.');
+ user=data.user;
+ let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+ if(!p){
+   const nickname=user.user_metadata?.nickname||email.split('@')[0].slice(0,20);
+   await sb.from('profiles').upsert({id:user.id,nickname});
+ }
+ await loadProfile();
+};
+$('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();await sb.auth.signOut();user=null;profile=null;$('logoutBtn').classList.add('hide');$('me').textContent='Гість';show('login');authView('login')};
+async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile){await sb.auth.signOut();return alert('Профіль не знайдено')} $('me').textContent=profile.nickname||'Гравець';$('logoutBtn').classList.remove('hide');show('lobby');await refreshLobby();await refreshAdminPanel();subscribeLobby()}
 $('newRoom').onclick=()=>show('create');document.querySelectorAll('.back').forEach(b=>b.onclick=()=>leaveRoom());
 $('createForm').onsubmit=async e=>{e.preventDefault();const room={owner_id:user.id,name:$('roomName').value.trim()||'Мій стіл',max_players:+$('maxPlayers').value,turn_seconds:+$('turnTime').value,ante:+$('ante').value};const {data,error}=await sb.from('rooms').insert(room).select().single();if(error)return alert(error.message);await sb.from('room_players').insert({room_id:data.id,user_id:user.id});openRoom(data.id)}
 async function refreshLobby(){const {data:rooms}=await sb.from('rooms').select('*,room_players(count)').order('created_at',{ascending:false});$('rooms').innerHTML='';(rooms||[]).filter(r=>(r.room_players?.[0]?.count||0)>0).forEach(r=>{let d=document.createElement('div');d.className='room';d.innerHTML=`<div><b>${esc(r.name)}</b><p>${r.room_players[0].count}/${r.max_players} • ${r.turn_seconds} сек • ставка ${r.ante} ◉</p></div><button>Зайти</button>`;d.querySelector('button').onclick=()=>joinRoom(r);$('rooms').appendChild(d)});if(!$('rooms').children.length)$('rooms').innerHTML='<p>Активних столів поки немає. Створи перший.</p>';await refreshFriends();await refreshInvites()}
@@ -24,4 +57,21 @@ async function refreshInvites(){const {data}=await sb.from('invites').select('id
 function subscribeLobby(){sb.channel('lobby').on('postgres_changes',{event:'*',schema:'public',table:'rooms'},refreshLobby).on('postgres_changes',{event:'*',schema:'public',table:'room_players'},refreshLobby).on('postgres_changes',{event:'INSERT',schema:'public',table:'invites',filter:`to_user=eq.${user.id}`},refreshInvites).subscribe()}
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{$('turnStatus').textContent=b.textContent.trim()});
 document.querySelectorAll('.card').forEach(card=>{let c=card.querySelector('.cover'),sy=0,base=0,drag=false;card.onpointerdown=e=>{drag=true;sy=e.clientY;base=+(c.dataset.y||0);card.setPointerCapture(e.pointerId)};card.onpointermove=e=>{if(!drag)return;let y=Math.max(0,Math.min(card.clientHeight,base+e.clientY-sy));c.dataset.y=y;c.style.transform=`translateY(${y}px)`};card.onpointerup=()=>drag=false});
+
+// Admin requests for virtual chips. Admin access is enforced in SQL, not by nickname.
+if($('contactAdmin'))$('contactAdmin').onclick=()=>$('adminDialog').showModal();
+if($('closeAdminDialog'))$('closeAdminDialog').onclick=()=>$('adminDialog').close();
+if($('adminRequestForm'))$('adminRequestForm').onsubmit=async e=>{e.preventDefault();const amount=+$('chipAmount').value,message=$('adminRequestText').value.trim();const {error}=await sb.from('chip_requests').insert({user_id:user.id,amount,message,status:'pending'});if(error)return alert(error.message);$('adminDialog').close();alert('Заявку надіслано адміну ✓')};
+async function refreshAdminPanel(){
+ if(!profile||!$('adminPanel'))return;
+ const {data:isAdmin}=await sb.rpc('is_admin');
+ if(!isAdmin){$('adminPanel').classList.add('hide');return}
+ $('adminPanel').classList.remove('hide');
+ const {data,error}=await sb.from('chip_requests').select('id,user_id,amount,message,profiles(nickname)').eq('status','pending').order('created_at');
+ if(error){$('chipRequests').textContent='Помилка завантаження заявок';return}
+ $('chipRequests').innerHTML='';
+ (data||[]).forEach(r=>{let d=document.createElement('div');d.className='invite';d.innerHTML=`<b>${esc(r.profiles?.nickname||'Гравець')}</b> — ${r.amount} ◉${r.message?' — '+esc(r.message):''} `;let b=document.createElement('button');b.textContent='Нарахувати';b.onclick=async()=>{const {error}=await sb.rpc('grant_virtual_chips',{target_user:r.user_id,chip_amount:r.amount,request_id:r.id});if(error)return alert(error.message);await refreshAdminPanel();alert('Фішки нараховано ✓')};d.appendChild(b);$('chipRequests').appendChild(d)});
+ if(!$('chipRequests').children.length)$('chipRequests').innerHTML='<p>Нових заявок немає.</p>';
+}
+
 function esc(s=''){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}boot();
