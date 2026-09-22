@@ -1,6 +1,35 @@
 <!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TRYNKA</title><link rel="stylesheet" href="style.css"></head><body>
-<header><b>♠ TRYNKA</b><span>Українська карткова гра</span><button onclick="rules.showModal()">Правила</button></header>
-<main id="home"><section class="hero"><div><small>♠ ♥ ♦ ♣ • ВІРТУАЛЬНІ ФІШКИ</small><h1>Тринька.<br><i>Три карти — один характер.</i></h1><p>Швидка карткова гра для 2–8 гравців. Створи стіл, запроси друзів і перевір комбінацію.</p><button class="go" onclick="show('lobby')">▶ Грати зараз</button></div><div class="preview"><div class="pot">БАНК<br><strong>120 ◉</strong></div><div class="cards"><b>A♥</b><b>10♠</b><b>6♦</b></div></div></section><section class="features"><div>⚡ <b>Швидкі раунди</b><span>30 секунд на хід</span></div><div>🛡 <b>Віртуальні фішки</b><span>Без реальних грошей</span></div><div>👥 <b>2–8 гравців</b><span>Грай з друзями</span></div></section></main>
-<main id="lobby" class="hide"><button onclick="show('home')">← Назад</button><h2>Обери стіл</h2><div class="rooms"><article onclick="game()">Новачки <b>Анте 10 ◉</b><span>3/6 гравців</span></article><article onclick="game()">Швидкий стіл <b>Анте 20 ◉</b><span>4/6 гравців</span></article><article onclick="game()">Великий стіл <b>Анте 50 ◉</b><span>5/8 гравців</span></article><article onclick="game()">Дуель <b>Анте 100 ◉</b><span>1/2 гравців</span></article></div></main>
-<main id="game" class="hide"><nav><button onclick="show('lobby')">← Вийти</button><b>Стіл #TR-204</b><span>Баланс: 5 000 ◉</span></nav><section class="table"><div class="player top">Макс<br><b>860 ◉</b></div><div class="player left">Олена<br><b>1 240 ◉</b></div><div class="player right">Ігор<br><b>2 110 ◉</b></div><div class="bank">БАНК<br><strong id="pot">60 ◉</strong><small id="status">Ваш хід • <i id="timer">30</i>с</small></div><div class="hand"><b>A♥</b><b>10♠</b><b>6♦</b></div></section><section class="actions"><button onclick="act('Пас')">Пас</button><button onclick="act('Показати')">Показати</button><button onclick="act('Підтримати')">Підтримати 20</button><button onclick="act('Підняти')">Підняти +20</button></section></main>
-<dialog id="rules"><button onclick="rules.close()">×</button><h2>Правила</h2><p>24 карти, 3 карти кожному. Очки рахуються за однією мастю. Якщо всі масті різні — найстарша карта.</p><p><b>Три шістки — 34<br>Три тузи — 33<br>Три десятки — 30</b></p><p>Дії: підтримати, підняти, показати або пас.</p></dialog><script src="app.js"></script></body></html>
+<header><b>♠ TRYNKA</b><span>Українська карткова гра</span><button id="rulesBtn">Правила</button></header>
+
+<main id="home"><section class="hero"><div><small>♠ ♥ ♦ ♣ • ВІРТУАЛЬНІ ФІШКИ</small><h1>Тринька.<br><i>Три карти — один характер.</i></h1><p>Створюй власні столи, обирай правила й грай у Триньку з друзями.</p><div class="heroBtns"><button class="go" data-page="lobby">▶ Грати зараз</button><button data-page="create">＋ Створити стіл</button></div></div><div class="preview"><div class="pot">БАНК<br><strong>120 ◉</strong></div><div class="miniCards"><b>A♥</b><b>10♠</b><b>6♦</b></div></div></section></main>
+
+<main id="lobby" class="hide page"><div class="pageTop"><button data-page="home">← Назад</button><button class="go" data-page="create">＋ Створити стіл</button></div><h2>Ігрові столи</h2><p class="muted">Обери готовий стіл або створи свій.</p><div id="rooms" class="rooms"></div></main>
+
+<main id="create" class="hide page"><button data-page="lobby">← Назад</button><h2>Створити стіл</h2><form id="createForm" class="form">
+<label>Назва столу<input id="roomName" maxlength="24" value="Мій стіл"></label>
+<label>Кількість гравців<select id="players"><option>2</option><option>3</option><option>4</option><option selected>6</option><option>8</option></select></label>
+<label>Час на хід<select id="turnTime"><option value="15">15 секунд</option><option value="30" selected>30 секунд</option><option value="45">45 секунд</option><option value="60">60 секунд</option></select></label>
+<label>Початкова ставка<select id="ante"><option value="5">5 ◉</option><option value="10" selected>10 ◉</option><option value="20">20 ◉</option><option value="50">50 ◉</option><option value="100">100 ◉</option></select></label>
+<label>Стартові фішки<select id="chips"><option value="500">500 ◉</option><option value="1000" selected>1 000 ◉</option><option value="2000">2 000 ◉</option><option value="5000">5 000 ◉</option></select></label>
+<label class="check"><input id="privateRoom" type="checkbox"> Приватний стіл</label>
+<div id="passwordWrap" class="hide"><label>Пароль<input id="roomPassword" maxlength="12" placeholder="Пароль столу"></label></div>
+<button class="go wide" type="submit">Створити і сісти за стіл</button>
+</form></main>
+
+<main id="game" class="hide page gamePage"><nav><button data-page="lobby">← Вийти</button><b id="gameTitle">Стіл</b><span id="balance">Баланс: 1 000 ◉</span></nav>
+<section class="table">
+<div class="player top">Макс<br><b>860 ◉</b></div><div class="player left">Олена<br><b>1 240 ◉</b></div><div class="player right">Ігор<br><b>2 110 ◉</b></div>
+<div class="bank">БАНК<br><strong id="pot">60 ◉</strong><small id="status">Ваш хід • <i id="timer">30</i>с</small></div>
+<div class="deck">КОЛОДА<br>▰</div>
+<div class="hand" aria-label="Ваші карти">
+<div class="peekCard" data-rank="A" data-suit="♥" data-red="1"><div class="face">A♥</div><div class="cover"></div></div>
+<div class="peekCard" data-rank="10" data-suit="♠"><div class="face">10♠</div><div class="cover"></div></div>
+<div class="peekCard" data-rank="6" data-suit="♦" data-red="1"><div class="face">6♦</div><div class="cover"></div></div>
+</div>
+<div class="peekHint">↕ Потягни сорочку карти вниз, щоб повільно підглянути</div>
+</section>
+<section class="actions"><button data-act="fold">Пас</button><button data-act="call" class="call">Підтримати <span id="callValue">20</span> ◉</button><button data-act="raise">Підняти +20</button><button data-act="reveal">Вскритися</button></section>
+</main>
+
+<dialog id="rules"><button id="closeRules">×</button><h2>Правила</h2><p>Гравець одразу отримує три карти. Очки рахуються за однією мастю. Якщо всі масті різні — враховується найстарша карта.</p><p><b>Три шістки — 34<br>Три тузи — 33<br>Три десятки — 30</b></p><p>«Підтримати» зрівнює поточну ставку без її збільшення. «Вскритися» — порівняти карти з попереднім активним гравцем.</p></dialog>
+<script src="app.js"></script></body></html>
