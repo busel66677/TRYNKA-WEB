@@ -1,26 +1,16 @@
-const pages=[...document.querySelectorAll("main")];let turnSeconds=30,tick,currentBet=20,myBet=0,balance=1000,potValue=60;
-const defaults=[{name:"Новачки",players:6,time:30,ante:10,chips:1000,now:3},{name:"Швидкий стіл",players:6,time:15,ante:20,chips:1000,now:4},{name:"Великий стіл",players:8,time:45,ante:50,chips:2000,now:5}];
-let rooms=[...defaults];
-function show(id){pages.forEach(p=>p.classList.add("hide"));document.getElementById(id).classList.remove("hide");scrollTo(0,0);if(id==="lobby")renderRooms()}
-document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.page)));
-function renderRooms(){const box=document.getElementById("rooms");box.innerHTML="";rooms.forEach((r,i)=>{const el=document.createElement("article");el.className="room";el.innerHTML=`<h3>${r.name}</h3><b>Анте ${r.ante} ◉</b><span>${r.now||1}/${r.players} гравців • ${r.time} сек/хід • старт ${r.chips} ◉${r.private?" • 🔒":""}</span>`;el.addEventListener("click",()=>startGame(r));box.appendChild(el)})}
-privateRoom.addEventListener("change",()=>passwordWrap.classList.toggle("hide",!privateRoom.checked));
-createForm.addEventListener("submit",e=>{e.preventDefault();const name=roomName.value.trim()||"Мій стіл";const r={name,players:+players.value,time:+turnTime.value,ante:+ante.value,chips:+chips.value,private:privateRoom.checked,now:1};rooms.unshift(r);startGame(r)});
-function startGame(r){show("game");gameTitle.textContent=r.name+" • "+r.players+" гравців";turnSeconds=r.time;balance=r.chips;currentBet=r.ante;myBet=0;potValue=r.ante*3;update();resetCards();startTimer()}
-function update(){balanceEl().textContent="Баланс: "+balance.toLocaleString("uk-UA")+" ◉";pot.textContent=potValue+" ◉";callValue.textContent=Math.max(0,currentBet-myBet)}
-function balanceEl(){return document.getElementById("balance")}
-function startTimer(){clearInterval(tick);let n=turnSeconds;timer.textContent=n;status.innerHTML=`Ваш хід • <i id="timer">${n}</i>с`;tick=setInterval(()=>{const t=document.getElementById("timer");if(!t)return clearInterval(tick);t.textContent=--n;if(n<=0){clearInterval(tick);status.textContent="Час вийшов — пас"}},1000)}
-document.querySelectorAll("[data-act]").forEach(b=>b.addEventListener("click",()=>act(b.dataset.act)));
-function act(a){if(a==="call"){const need=Math.max(0,currentBet-myBet);const pay=Math.min(need,balance);balance-=pay;myBet+=pay;potValue+=pay;status.textContent=pay?`Підтримано ${pay} ◉ без підвищення`:"Ставка вже зрівняна";update()}
-if(a==="raise"){const target=currentBet+20,need=target-myBet,pay=Math.min(need,balance);balance-=pay;myBet+=pay;currentBet=myBet;potValue+=pay;status.textContent="Ставку піднято";update()}
-if(a==="fold")status.textContent="Пас";
-if(a==="reveal"){status.textContent="Вскриття з попереднім гравцем";revealAll()}
-if(a!=="call"&&a!=="raise")clearInterval(tick)}
-function resetCards(){document.querySelectorAll(".cover").forEach(c=>c.style.transform="translateY(0px)")}
-function revealAll(){document.querySelectorAll(".cover").forEach(c=>c.style.transform="translateY(110%)")}
-document.querySelectorAll(".peekCard").forEach(card=>{const cover=card.querySelector(".cover");let start=0,offset=0,drag=false;
-card.addEventListener("pointerdown",e=>{drag=true;start=e.clientY;offset=parseFloat(cover.dataset.y||0);card.classList.add("dragging");card.setPointerCapture(e.pointerId)});
-card.addEventListener("pointermove",e=>{if(!drag)return;const y=Math.max(0,Math.min(card.clientHeight,offset+(e.clientY-start)));cover.dataset.y=y;cover.style.transform=`translateY(${y}px)`});
-function end(){if(!drag)return;drag=false;card.classList.remove("dragging");let y=parseFloat(cover.dataset.y||0);if(y<12)y=0;cover.dataset.y=y;cover.style.transform=`translateY(${y}px)`}
-card.addEventListener("pointerup",end);card.addEventListener("pointercancel",end)});
-rulesBtn.addEventListener("click",()=>rules.showModal());closeRules.addEventListener("click",()=>rules.close());renderRooms();
+let balance=1000,xp=120,level=2,timerId;let friends=["Макс","Олена"];
+let rooms=[{name:"Новачки",players:6,time:30,ante:10,chips:1000,now:3},{name:"Швидкий стіл",players:6,time:15,ante:20,chips:1000,now:4},{name:"Вісімка",players:8,time:45,ante:50,chips:2000,now:5}];
+function show(id){document.querySelectorAll("main").forEach(x=>x.classList.add("hide"));document.getElementById(id).classList.remove("hide");if(id==="lobby")renderRooms();if(id==="friends")renderFriends();update();scrollTo(0,0)}
+function renderRooms(){roomsEl=document.getElementById("rooms");roomsEl.innerHTML="";rooms.forEach(r=>{let d=document.createElement("div");d.className="room";d.innerHTML=`<h3>${r.name}${r.private?" 🔒":""}</h3><b>Ставка ${r.ante} ◉</b><p>${r.now}/${r.players} гравців • ${r.time} сек/хід</p><button class="green">Сісти за стіл</button>`;d.querySelector("button").onclick=()=>start(r);roomsEl.appendChild(d)})}
+createForm.onsubmit=e=>{e.preventDefault();let r={name:rname.value||"Мій стіл",players:+players.value,time:+time.value,ante:+ante.value,chips:+chips.value,private:priv.checked,now:1};rooms.unshift(r);start(r)}
+function start(r){balance=r.chips;gameName.textContent=r.name+" • "+r.players+" гравців";pot.textContent=r.ante*3+" ◉";resetCards();show("game");startTimer(r.time)}
+function startTimer(sec){clearInterval(timerId);let n=sec;status.textContent=`Ваш хід • ${n}с`;timerId=setInterval(()=>{n--;status.textContent=`Ваш хід • ${n}с`;if(n<=0){clearInterval(timerId);status.textContent="Час вийшов — ВПАВ"}},1000)}
+function action(a){status.textContent=a;if(a==="ВСКРИВСЯ")document.querySelectorAll(".cover").forEach(c=>c.style.transform="translateY(110%)");if(a!=="ДАВ")clearInterval(timerId)}
+function resetCards(){document.querySelectorAll(".cover").forEach(c=>{c.dataset.y=0;c.style.transform="translateY(0)"})}
+document.querySelectorAll(".card").forEach(card=>{let c=card.querySelector(".cover"),startY=0,base=0,drag=false;card.onpointerdown=e=>{drag=true;startY=e.clientY;base=+(c.dataset.y||0);card.setPointerCapture(e.pointerId)};card.onpointermove=e=>{if(!drag)return;let y=Math.max(0,Math.min(card.clientHeight,base+e.clientY-startY));c.dataset.y=y;c.style.transform=`translateY(${y}px)`};card.onpointerup=()=>drag=false;card.onpointercancel=()=>drag=false})
+chatForm.onsubmit=e=>{e.preventDefault();let v=chatInput.value.trim();if(!v)return;let p=document.createElement("p");p.textContent="Ти: "+v;messages.appendChild(p);chatInput.value=""}
+function renderFriends(){friendList.innerHTML="";friends.forEach((n,i)=>{let d=document.createElement("div");d.className="panel friend";d.innerHTML=`🟢 <b>${n}</b><span>онлайн</span><button>Видалити</button>`;d.querySelector("button").onclick=()=>{friends.splice(i,1);renderFriends()};friendList.appendChild(d)})}
+addFriend.onclick=()=>{let n=friendInput.value.trim();if(n&&!friends.includes(n)){friends.push(n);friendInput.value="";renderFriends()}}
+give.onclick=()=>change(1);take.onclick=()=>change(-1);function change(s){let n=Math.max(1,+amount.value||1);if(adminPlayer.value==="Ти")balance=Math.max(0,balance+s*n);writeLog((s>0?"Нараховано ":"Списано ")+n+" ◉ — "+adminPlayer.value);update()}
+exchangeBtn.onclick=()=>{let n=Math.max(100,+exchange.value||1000);if(n>balance)return writeLog("Недостатньо фішок");balance-=n;xp+=Math.floor(n/10);level=Math.floor(xp/100)+1;writeLog(`Обмінено ${n} ◉ на ${Math.floor(n/10)} XP`);update()}
+function writeLog(t){let p=document.createElement("p");p.textContent=t;log.prepend(p)}function update(){bal.textContent=balance.toLocaleString("uk-UA")+" ◉";gameBal.textContent=balance.toLocaleString("uk-UA")+" ◉";profileBal.textContent=balance.toLocaleString("uk-UA")+" ◉";profileXp.textContent=xp+" XP • Рівень "+level}renderRooms();renderFriends();update();
