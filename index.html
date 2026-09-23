@@ -2,18 +2,29 @@
 <body><header><b>♠ TRYNKA <small>ONLINE</small></b><div><span id="onlineBadge">● 0 онлайн</span> <span id="me">Підключення…</span> <button id="profileBtn" class="hide">Кабінет</button> <button id="logoutBtn" class="hide">Вийти</button></div></header><main>
 <section id="login" class="panel auth"><h1>TRYNKA ONLINE</h1><div id="authLogin"><h2>Вхід</h2><form id="loginForm"><input id="loginEmail" type="email" placeholder="Email" required><input id="loginPassword" type="password" minlength="6" placeholder="Пароль" required><button>Увійти</button></form><p>Ще немає акаунта? <button id="showRegister">Зареєструватися</button></p></div><div id="authRegister" class="hide"><h2>Реєстрація</h2><form id="registerForm"><input id="regEmail" type="email" placeholder="Email" required><input id="regNick" maxlength="20" placeholder="Нік у грі" required><input id="regPassword" type="password" minlength="6" placeholder="Пароль" required><input id="regPassword2" type="password" minlength="6" placeholder="Повтори пароль" required><button>Створити акаунт</button></form><p>Вже є акаунт? <button id="showLogin">Увійти</button></p></div></section>
 <section id="lobby" class="hide">
-<div class="homeHero">
-  <div class="homeBrand"><span class="eyebrow">TRYNKA ONLINE</span><h1>Готовий до гри?</h1><p><span class="liveDot">●</span> <b id="onlineCount">0</b> гравців онлайн</p></div>
-  <div class="homeBalance"><small>МІЙ БАЛАНС</small><b><span id="myChips">0</span> ◉</b></div>
+<div class="lobbyShell">
+  <div class="welcomeBar">
+    <div><span class="eyebrow">TRYNKA ONLINE</span><h1>Головна</h1><p>Обери стіл або почни швидку гру</p></div>
+    <div class="walletCard"><span>Баланс</span><b><span id="myChips">0</span> ◉</b></div>
+  </div>
+  <div class="mainPlayCard">
+    <div class="mainPlayCopy"><span class="liveDot">● <b id="onlineCount">0</b> онлайн</span><h2>Готовий зіграти?</h2><p>Знайдемо вільний стіл автоматично.</p></div>
+    <button id="quickPlay" class="megaPlay">▶ ГРАТИ</button>
+  </div>
+  <div class="menuTiles">
+    <button id="newRoom"><span>＋</span><b>Створити стіл</b><small>Налаштуй свою гру</small></button>
+    <button id="browseTables"><span>♠</span><b>Столи</b><small>Вибрати вручну</small></button>
+    <button id="homeFriends"><span>👥</span><b>Друзі</b><small>Список і запрошення</small></button>
+    <button id="homeCabinet"><span>★</span><b>Кабінет</b><small>Профіль і статистика</small></button>
+  </div>
+  <div class="homeStats"><div><b id="onlineStat">0</b><span>гравців онлайн</span></div><div><b id="tablesStat">0</b><span>активних столів</span></div></div>
+  <div id="tablesArea" class="lobbyBlock"><div class="blockHead"><div><span class="eyebrow">LIVE</span><h2>Столи зараз</h2></div><span>Сідай на будь-яке вільне місце</span></div><div id="rooms" class="roomGrid"></div></div>
+  <div id="socialArea" class="socialDrawer">
+    <div class="panel"><h2>Друзі</h2><form id="friendForm"><input id="friendNick" placeholder="Нік друга"><button>Додати</button></form><div id="friends"></div></div>
+    <div class="panel"><h2>Запрошення</h2><div id="invites"></div><button id="contactAdmin" class="supportBtn">Написати адміну</button></div>
+  </div>
+  <div id="adminPanel" class="hide panel adminHome"><span class="eyebrow">ADMIN</span><h2>Керування</h2><div id="chipRequests"></div><div class="adminTools"><input id="adminPlayerSearch" placeholder="Нік гравця"><button id="adminFindPlayer">Знайти</button><div id="adminPlayerResult"></div><h4>Активні столи</h4><div id="adminRooms"></div></div><div id="securityAdmin"></div></div>
 </div>
-<div class="playHub">
-  <button id="quickPlay" class="playNow"><span class="playIcon">▶</span><span><b>ГРАТИ</b><small>Швидко знайти вільний стіл</small></span></button>
-  <div class="homeActions"><button id="newRoom"><b>＋ Створити стіл</b><small>Своя ставка та кількість місць</small></button><button id="browseTables"><b>♠ Знайти стіл</b><small>Переглянути активні столи</small></button><button id="homeFriends"><b>👥 Друзі</b><small>Запрошення та список друзів</small></button><button id="homeCabinet"><b>★ Мій кабінет</b><small>Статистика та профіль</small></button></div>
-</div>
-<div class="homeStats"><div><b id="onlineStat">0</b><span>Онлайн</span></div><div><b id="tablesStat">0</b><span>Активних столів</span></div></div>
-<div id="tablesArea" class="homeSection"><div class="sectionTitle"><div><span class="eyebrow">LIVE TABLES</span><h2>Активні столи</h2></div><span class="soft">Обери стіл і займи вільне місце</span></div><div id="rooms" class="roomGrid"></div></div>
-<div id="socialArea" class="homeSection socialGrid"><div class="panel"><h2>👥 Друзі</h2><form id="friendForm"><input id="friendNick" placeholder="Нік друга"><button>Додати</button></form><div id="friends"></div></div><div class="panel"><h2>✉ Запрошення</h2><div id="invites"></div><button id="contactAdmin" class="supportBtn">Зв’язатися з адміном</button></div></div>
-<div id="adminPanel" class="hide panel adminHome"><div class="sectionTitle"><div><span class="eyebrow">ADMIN</span><h2>Адмін-панель</h2></div></div><div id="chipRequests"></div><div class="adminTools"><h4>Керування</h4><input id="adminPlayerSearch" placeholder="Нік гравця"><button id="adminFindPlayer">Знайти гравця</button><div id="adminPlayerResult"></div><h4>Активні столи</h4><div id="adminRooms"></div></div><div id="securityAdmin"></div></div>
 </section>
 <section id="profile" class="hide"><button class="toLobby">← Лобі</button><div class="profilecard"><div class="avatar" id="profileAvatar">♠</div><div><span class="eyebrow">КАБІНЕТ ГРАВЦЯ</span><h1 id="profileNick">Гравець</h1><p id="profileEmail"></p></div></div><div class="statrow"><div class="stat"><b id="profileChips">0</b><span>Фішок</span></div><div class="stat"><b id="profileGames">0</b><span>Ігор</span></div><div class="stat"><b id="profileWins">0</b><span>Перемог</span></div></div><div class="panel"><h2>Історія віртуальних фішок</h2><div id="chipHistory"></div></div></section>
 <section id="create" class="hide"><button class="toLobby">← Лобі</button><h1>Створити стіл</h1><form id="createForm" class="panel form"><label>Назва<input id="roomName" value="Мій стіл"></label><label>Місць<select id="maxPlayers"><option>2</option><option>3</option><option>4</option><option selected>6</option><option>8</option></select></label><label>Час на хід<select id="turnTime"><option>15</option><option selected>30</option><option>45</option><option>60</option></select></label><label>Ставка<input id="ante" type="number" value="10" min="1"></label><button>Створити</button></form></section>
