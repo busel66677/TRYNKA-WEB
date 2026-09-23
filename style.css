@@ -20,3 +20,5 @@ box-shadow:inset 0 0 0 3px #8a6238,inset 0 0 75px #0009,0 18px 50px #0008}
 @keyframes dealCard{from{opacity:0;transform:translateY(-100px) scale(.7) rotate(15deg)}to{opacity:1}}
 .actionButtons button{box-shadow:0 5px 12px #0005;transition:.15s}.actionButtons button:not(:disabled):active{transform:translateY(2px)}
 @media(max-width:800px){.table{border-width:7px}.table:before{inset:10px}.dealerBadge{top:16%;width:62px;height:62px}.dealerBadge span{font-size:17px}.deckStack{left:calc(50% + 55px);top:20%;transform:scale(.8)}.centerInfo{width:62%;padding:10px}.centerInfo b{font-size:20px}.table:after{font-size:7px;letter-spacing:3px}}
+
+.adminTools{display:grid;gap:8px}.adminRow,.adminPlayer{display:grid;gap:7px;padding:9px 0;border-bottom:1px solid #203b2e}.adminRow{grid-template-columns:1fr auto;align-items:center}.adminPlayer span{color:#91a79b}.adminPlayer button,.adminRow button{padding:7px 9px;font-size:12px}
