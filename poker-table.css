@@ -1,0 +1,39 @@
+/* TRYNKA poker-table v1 */
+#game{max-width:1400px;margin:auto}
+#game .gameBar{max-width:1180px;margin:0 auto 10px;padding:8px 12px;background:#07110d;border:1px solid #1d382c;border-radius:12px}
+#game .gameIdentity h2{margin:2px 0;font-size:17px}
+#game .gamegrid{grid-template-columns:minmax(720px,1fr) 260px;gap:12px;align-items:start}
+#game .tableWrap{padding:34px 26px 22px;background:radial-gradient(circle at 50% 35%,#152431,#080e13 70%);border-radius:18px;min-height:650px;display:flex;flex-direction:column;justify-content:center}
+#game .table{width:min(100%,900px);height:510px;margin:auto;border:18px solid #35291f;border-radius:48%/42%;background:radial-gradient(ellipse at 50% 45%,#2d9a52 0,#237b43 42%,#14532f 78%,#0b3820 100%);box-shadow:0 28px 50px #000b,inset 0 0 0 3px #72593d,inset 0 0 55px #001d0f99;overflow:visible}
+#game .table:before{inset:14px;border-radius:47%/41%;border-color:#d8c58b44}
+#game .table:after{top:58%;font-size:9px;letter-spacing:4px;color:#fff1}
+#game .tableGlow{inset:18%;background:radial-gradient(ellipse,#b9ffbf12,transparent 72%)}
+#game .dealerBadge{width:54px;height:54px;top:44%;left:50%;border-width:1px;background:#15251d}
+#game .dealerBadge span{font-size:15px;top:3px}#game .dealerBadge small{font-size:7px;margin-top:16px}#game .dealerBadge b{font-size:6px;margin-top:-11px}
+#game .deckStack{left:calc(50% + 50px);top:45%;width:31px;height:43px}
+#game .centerInfo{top:34%;width:auto;min-width:190px;max-width:310px;padding:7px 14px;background:transparent;border:0;box-shadow:none;backdrop-filter:none}
+#game .centerInfo b{font-size:16px;text-shadow:0 2px 4px #000}#game .centerInfo span{font-size:11px;margin-top:3px}
+#game .potPile{transform:scale(.78);transform-origin:center bottom;margin-bottom:-3px}
+#game .contributionBoard{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:6px}#game .contributionBoard span{background:#0a1c13d9;border:1px solid #ffffff1c;border-radius:12px;padding:3px 7px;font-size:9px}
+#game .seat{width:122px;min-height:48px;border:1px solid #ffffff2c;border-radius:24px;background:#111b1ae8;box-shadow:0 6px 16px #0008;padding:6px 10px;transition:border-color .2s,box-shadow .2s,background .2s;will-change:auto}
+#game .seat.mine{border:2px solid #d9c35f;background:#17271f;box-shadow:0 0 0 3px #d9c35f18,0 7px 20px #0008}
+#game .seat.free{border-style:dashed;background:#07110daa;opacity:.72}
+#game .seat.s0{bottom:-20px;left:50%;transform:translateX(-50%)}
+#game .seat.s1{bottom:9%;left:-22px}#game .seat.s2{top:15%;left:-22px}#game .seat.s3{top:-20px;left:50%;transform:translateX(-50%)}
+#game .seat.s4{top:15%;right:-22px}#game .seat.s5{bottom:9%;right:-22px}#game .seat.s6{top:46%;left:-30px}#game .seat.s7{top:46%;right:-30px}
+#game .seatName{font-size:12px}#game .seatMeta{font-size:9px}
+#game .hand{bottom:38px;z-index:7;gap:0;height:94px;align-items:flex-end}
+#game .card{width:64px;height:92px;margin-left:-5px;padding:7px;font-size:18px;border-radius:7px;animation:none;transition:transform .22s ease,opacity .22s ease;box-shadow:0 7px 14px #0008}
+#game .card:first-child{margin-left:0;transform:rotate(-6deg) translateY(4px)}#game .card:nth-child(2){transform:translateY(-2px)}#game .card:nth-child(3){transform:rotate(6deg) translateY(4px)}
+#game .dealTrail{z-index:9}#game .flyingCard{position:absolute;left:calc(50% + 52px);top:46%;width:32px;height:46px;border-radius:5px;border:1px solid #d7b758;background:repeating-linear-gradient(45deg,#102b20,#102b20 4px,#183d2d 4px,#183d2d 8px);animation:trynkaDeal .7s cubic-bezier(.2,.75,.35,1) forwards;box-shadow:0 5px 12px #0008}@keyframes trynkaDeal{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:.2;transform:translate(-45px,205px) rotate(-12deg)}}
+#game .gameActions{bottom:-82px;width:min(94%,650px);background:#080d11f2;border:1px solid #2c3c43;border-radius:10px;padding:7px;box-shadow:0 8px 22px #0008}
+#game .roundMeta{height:18px;margin:0 0 5px;align-items:center;font-variant-numeric:tabular-nums}
+#game #roundTurn{display:inline-block;min-width:145px;text-align:center;white-space:nowrap}
+#game .actionButtons{gap:5px;flex-wrap:nowrap}.actionButtons button{padding:8px 10px;font-size:11px;border-radius:7px;white-space:nowrap}
+#game .tableHint{margin-top:88px;text-align:center;color:#70847a;font-size:11px}
+#game .gameSide{display:grid;gap:10px}#game .gameSide .panel{padding:11px;border-radius:11px;background:#08130f;border-color:#1d382c}#game .tableHistory{max-height:180px;overflow:auto}#game .historyHead h3{font-size:13px;margin:0}#game .historyHead span{font-size:9px}#game .actionLogRow,#game .sideHistoryRow{font-size:10px;padding:5px 0}
+#game .chat #messages{min-height:150px;max-height:190px;font-size:11px}#game .chat form input{padding:8px;font-size:11px}#game .chat form button{padding:7px 9px}
+#game #countdown,#game #turnStatus,#game #roundTurn{font-variant-numeric:tabular-nums}
+#game #turnStatus,#game #countdown{min-height:18px}
+@media(max-width:1050px){#game .gamegrid{grid-template-columns:1fr}#game .gameSide{grid-template-columns:repeat(3,1fr)}#game .tableWrap{min-height:620px}}
+@media(max-width:800px){#game .gamegrid{display:block}#game .gameSide{display:grid;grid-template-columns:1fr;margin-top:12px}#game .tableWrap{padding:28px 6px 18px;min-height:570px;overflow:hidden}#game .table{width:96%;height:430px;border-width:10px}#game .seat{width:88px;min-height:42px;padding:5px;font-size:10px}#game .seat.s1,#game .seat.s2,#game .seat.s6{left:-8px}#game .seat.s4,#game .seat.s5,#game .seat.s7{right:-8px}#game .hand{bottom:45px}#game .card{width:52px;height:76px;font-size:15px}#game .gameActions{bottom:-95px}#game .actionButtons{flex-wrap:wrap}#game .actionButtons button{font-size:10px;padding:7px 8px}#game .tableHint{margin-top:102px}}
