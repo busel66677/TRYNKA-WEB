@@ -3,7 +3,17 @@ const cfg=window.TRYNKA_CONFIG;
 if(!cfg) throw new Error('TRYNKA config missing');
 const botSb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let botBusy=false,lastBotRound=null;
+let botBusy=false,lastBotRound=null,isAdmin=false;
+
+async function refreshAdmin(){
+  const {data:{user}}=await botSb.auth.getUser();
+  if(!user){isAdmin=false;return false}
+  const {data:p}=await botSb.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();
+  isAdmin=!!p?.is_admin;
+  const btn=document.getElementById('addTestBot');
+  if(btn)btn.classList.toggle('hide',!isAdmin);
+  return isAdmin;
+}
 
 async function currentRoomId(){
   const {data:{user}}=await botSb.auth.getUser();
@@ -22,14 +32,15 @@ async function ensureBot(){
   const btn=document.getElementById('addTestBot');
   const old=btn?.textContent;
   try{
+    if(!await refreshAdmin())throw new Error('Кнопка BOT доступна тільки адміну');
     if(btn){btn.disabled=true;btn.textContent='Додаю BOT…'}
     const room_id=await currentRoomId();
-    if(!room_id)throw new Error('Не вдалося визначити стіл');
+    if(!room_id)throw new Error('Спочатку зайди за стіл і сядь на місце');
     const {data,error}=await botSb.functions.invoke('ensure-test-bot',{body:{room_id}});
     if(error)throw error;
     if(data?.error)throw new Error(data.error);
     if(btn)btn.textContent='✓ BOT за столом';
-    await sleep(900);
+    await sleep(700);
     location.reload();
   }catch(e){
     console.error('BOT add error',e);
@@ -59,7 +70,8 @@ async function botTick(){
 function wire(){
   const btn=document.getElementById('addTestBot');
   if(btn&&!btn.dataset.botWired){btn.dataset.botWired='1';btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();ensureBot()},true)}
+  refreshAdmin();
 }
-setInterval(wire,700);
+setInterval(wire,1000);
 setInterval(botTick,1200);
 wire();
