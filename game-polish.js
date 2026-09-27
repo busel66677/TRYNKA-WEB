@@ -1,68 +1,8 @@
-// TRYNKA table polish v2 — UI only. No MutationObserver: it caused repeated redraw/deal flashes.
+// TRYNKA visible dealer animation — one card at a time, 3 full circles.
 const $=id=>document.getElementById(id);
-let dealPlayed=false;
-let dealRunning=false;
-let lastCountdown='';
-
-function seatedTargets(){
-  return [...document.querySelectorAll('#seats .seat:not(.free)')];
-}
-
-function flyCardTo(target,delay,round){
-  setTimeout(()=>{
-    const table=document.querySelector('#game .table');
-    const deck=document.querySelector('#game .deckStack');
-    if(!table||!deck||!target||!document.body.contains(target)) return;
-    const tr=table.getBoundingClientRect();
-    const dr=deck.getBoundingClientRect();
-    const rr=target.getBoundingClientRect();
-    const card=document.createElement('div');
-    card.className='dealerFlyingCard';
-    const sx=dr.left-tr.left+dr.width/2-18;
-    const sy=dr.top-tr.top+dr.height/2-25;
-    const ex=rr.left-tr.left+rr.width/2-18;
-    const ey=rr.top-tr.top+rr.height/2-25;
-    card.style.left=sx+'px';
-    card.style.top=sy+'px';
-    table.appendChild(card);
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      card.style.transform=`translate(${ex-sx}px,${ey-sy}px) rotate(${round%2?'-7':'7'}deg)`;
-      card.style.opacity='.18';
-    }));
-    setTimeout(()=>card.remove(),820);
-  },delay);
-}
-
-function playDealOnce(){
-  if(dealPlayed||dealRunning) return;
-  const targets=seatedTargets();
-  if(targets.length<2) return;
-  dealPlayed=true;
-  dealRunning=true;
-  let n=0;
-  // Three real rounds: one card to every seated player, then repeat.
-  for(let round=0;round<3;round++){
-    for(const target of targets) flyCardTo(target,n++*780,round);
-  }
-  setTimeout(()=>{dealRunning=false},n*780+900);
-}
-
-// Lightweight state watcher. It reads the UI but never rewrites timer/status nodes,
-// so realtime updates cannot create a feedback loop or timer flicker.
-setInterval(()=>{
-  const game=$('game');
-  if(!game||game.classList.contains('hide')) return;
-  const countdown=($('countdown')?.textContent||'').trim();
-  const status=($('turnStatus')?.textContent||'').trim();
-
-  // A new countdown means a new deal is coming.
-  if(countdown.startsWith('Старт через') && !lastCountdown.startsWith('Старт через')){
-    dealPlayed=false;
-    document.querySelectorAll('.dealerFlyingCard').forEach(x=>x.remove());
-  }
-  lastCountdown=countdown;
-
-  if(!dealPlayed && (status.includes('Карти роздаються') || countdown==='Гра почалась')){
-    playDealOnce();
-  }
-},200);
+let dealPlayed=false,dealRunning=false,lastCountdown='';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function targets(){return [...document.querySelectorAll('#seats .seat:not(.free)')].sort((a,b)=>{const na=+(a.className.match(/s(\d+)/)?.[1]||0),nb=+(b.className.match(/s(\d+)/)?.[1]||0);return na-nb})}
+async function throwCard(target,index){const table=document.querySelector('#game .table'),deck=document.querySelector('#game .deckStack'),dealer=document.querySelector('#game .dealerBadge');if(!table||!deck||!target)return;const tr=table.getBoundingClientRect(),dr=deck.getBoundingClientRect(),rr=target.getBoundingClientRect();dealer?.classList.add('dealing');deck.classList.add('deckPulse');const c=document.createElement('div');c.className='dealerFlyingCard';c.innerHTML='<i></i>';const sx=dr.left-tr.left+dr.width/2-22,sy=dr.top-tr.top+dr.height/2-31,ex=rr.left-tr.left+rr.width/2-22,ey=rr.top-tr.top+rr.height/2-31;c.style.left=sx+'px';c.style.top=sy+'px';c.style.setProperty('--dx',(ex-sx)+'px');c.style.setProperty('--dy',(ey-sy)+'px');c.style.setProperty('--rot',(index%2?'-10deg':'10deg'));table.appendChild(c);await sleep(40);c.classList.add('fly');await sleep(650);target.classList.add('cardLanded');setTimeout(()=>target.classList.remove('cardLanded'),260);c.remove();deck.classList.remove('deckPulse');dealer?.classList.remove('dealing');await sleep(240)}
+async function playDeal(){if(dealPlayed||dealRunning)return;const ts=targets();if(ts.length<2)return;dealPlayed=true;dealRunning=true;document.querySelectorAll('.dealerFlyingCard').forEach(x=>x.remove());const status=$('turnStatus'),old=status?.textContent;try{for(let round=0;round<3;round++){for(let i=0;i<ts.length;i++){if(status)status.textContent=`Дилер роздає карти · ${round+1}/3`;await throwCard(ts[i],round*ts.length+i)}}}finally{if(status&&status.textContent.startsWith('Дилер роздає'))status.textContent=old||'Карти роздані';dealRunning=false}}
+setInterval(()=>{const game=$('game');if(!game||game.classList.contains('hide'))return;const countdown=($('countdown')?.textContent||'').trim(),status=($('turnStatus')?.textContent||'').trim();if(countdown.startsWith('Старт через')&&!lastCountdown.startsWith('Старт через')){dealPlayed=false;dealRunning=false;document.querySelectorAll('.dealerFlyingCard').forEach(x=>x.remove())}lastCountdown=countdown;if(!dealPlayed&&(status.includes('Карти роздаються')||countdown==='Гра почалась'))playDeal()},180);
