@@ -3,6 +3,10 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
 const cfg=window.TRYNKA_CONFIG;
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 
+function removeDisabledRules(){
+  document.querySelectorAll('[data-action="dark"]').forEach(el=>el.remove());
+  document.querySelectorAll('[data-action="svara"]').forEach(el=>el.remove());
+}
 function ensureStandButton(){
   const leave=document.getElementById('leaveRoom');
   if(!leave||document.getElementById('standUpBtn'))return;
@@ -33,5 +37,6 @@ document.addEventListener('click',async e=>{
   setTimeout(()=>{b.textContent='↑ Встати зі столу';b.disabled=false},1000);
 },true);
 
-ensureStandButton();
-new MutationObserver(ensureStandButton).observe(document.body,{childList:true,subtree:true});
+function syncUi(){ensureStandButton();removeDisabledRules()}
+syncUi();
+new MutationObserver(syncUi).observe(document.body,{childList:true,subtree:true});
