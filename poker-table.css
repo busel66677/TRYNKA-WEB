@@ -1,4 +1,4 @@
-/* TRYNKA poker-table v6 — cleaner hierarchy, one bank, clear turn, per-seat contribution */
+/* TRYNKA poker-table v7 — clear contribution badges on felt */
 #game{max-width:1440px;margin:auto}
 #game .gameBar{max-width:1210px;margin:0 auto 10px;padding:9px 14px;background:#07110d;border:1px solid #1d382c;border-radius:12px}
 #game .gameIdentity h2{margin:2px 0;font-size:17px}
@@ -11,26 +11,30 @@
 #game .dealerBadge small{font-size:7px;margin-top:16px}
 #game .dealerBadge b{font-size:6px;margin-top:-11px}
 #game .deckStack{left:calc(50% + 55px);top:49%;width:31px;height:43px;transition:none!important}
-
-/* Center: only the important game state */
 #game .centerInfo{top:21%;width:250px;min-height:auto;padding:9px 14px;background:#06150fd9;border:1px solid #d9c35f66;border-radius:14px;box-shadow:0 10px 26px #0007;backdrop-filter:blur(3px);z-index:5}
 #game .potPile{transform:scale(.68);transform-origin:center bottom;margin-bottom:-5px}
 #game #potBig{display:block;font-size:24px!important;line-height:29px;color:#ffe36e;text-shadow:0 2px 5px #000;margin:0 0 3px;font-weight:950;letter-spacing:.3px}
 #game #bankInfo{display:block;font-size:11px!important;color:#cfe1d6;margin:0}
 #game #countdown{display:block;font-size:11px;font-weight:900;color:#ffffff;margin-top:4px;min-height:14px;letter-spacing:.8px}
-#game #turnStatus{display:none!important}
-#game #contributionBoard{display:none!important}
-#game #revealShowdown{display:none!important}
+#game #turnStatus,#game #contributionBoard,#game #revealShowdown{display:none!important}
 
-/* Seats */
 #game .seat{width:132px;min-height:52px;border:1px solid #ffffff2c;border-radius:25px;background:#111b1aed;box-shadow:0 6px 16px #0008;padding:7px 11px;transition:none!important;animation:none!important;overflow:visible}
 #game .seatName{font-size:12px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
-#game .seatMeta{font-size:9px!important;font-weight:800!important;color:#b9cabe!important;text-align:center;margin-top:3px;letter-spacing:.2px}
+#game .seatMeta{font-size:9px!important;font-weight:900!important;color:#ffb1b1!important;text-align:center;margin-top:3px;letter-spacing:.3px;min-height:10px}
 #game .seat.mine{border:2px solid #d9c35f;background:#17271f}
 #game .seat.free{border-style:dashed;background:#07110daa;opacity:.52}
 #game .seat.foldedSeat{opacity:.48;filter:saturate(.6)}
 #game .seat.turnActive{border:3px solid #ffe36e!important;background:#223c29!important;box-shadow:0 0 0 4px #ffe36e24,0 0 30px #ffe36eaa,0 8px 20px #000a!important;z-index:30}
 #game .seat.turnActive:after{content:'ХІД';position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:#ffe36e;color:#171006;font-size:9px;font-weight:950;padding:3px 8px;border-radius:9px;letter-spacing:.8px;box-shadow:0 3px 8px #0008}
+
+#game .betBadge{position:absolute;z-index:35;display:flex;align-items:center;gap:5px;padding:5px 8px;background:#07110ff2;border:1px solid #ffe36e88;border-radius:12px;box-shadow:0 5px 14px #0009;white-space:nowrap;pointer-events:none}
+#game .betBadge span{font-size:10px;font-weight:800;color:#dce9e1}
+#game .betBadge b{font-size:12px;font-weight:950;color:#ffe36e}
+#game .betBadge.folded{opacity:.52}
+#game .seat.s0 .betBadge{left:50%;bottom:calc(100% + 7px);transform:translateX(-50%)}
+#game .seat.s3 .betBadge{left:50%;top:calc(100% + 7px);transform:translateX(-50%)}
+#game .seat.s1 .betBadge,#game .seat.s2 .betBadge,#game .seat.s6 .betBadge{left:calc(100% + 9px);top:50%;transform:translateY(-50%)}
+#game .seat.s4 .betBadge,#game .seat.s5 .betBadge,#game .seat.s7 .betBadge{right:calc(100% + 9px);top:50%;transform:translateY(-50%)}
 
 #game .seat.s0{bottom:-23px;left:50%;transform:translateX(-50%)}
 #game .seat.s1{bottom:8%;left:-24px}
@@ -41,26 +45,23 @@
 #game .seat.s6{top:45%;left:-31px}
 #game .seat.s7{top:45%;right:-31px}
 
-/* Own hand */
 #game .hand{bottom:50px;z-index:7;gap:0;height:96px;align-items:flex-end;transition:none!important}
 #game .hand.handRevealed{opacity:0;pointer-events:none}
 #game .card{width:64px;height:92px;margin-left:-5px;padding:7px;font-size:18px;border-radius:7px;animation:none!important;transition:none!important;box-shadow:0 7px 14px #0008}
 
-/* Revealed hands beside their owner */
 #game .openHand{position:absolute;z-index:50;display:flex;gap:3px;left:50%;top:calc(100% + 7px);transform:translateX(-50%);padding:4px;background:#07110ff3;border:1px solid #ffe36e;border-radius:8px;box-shadow:0 6px 16px #000a;white-space:nowrap}
 #game .openHand b{display:flex;align-items:center;justify-content:center;width:30px;height:42px;background:#fffdf5;color:#111;border:1px solid #ddd3bf;border-radius:4px;font-size:12px;font-weight:950}
 #game .openHand b.red{color:#c51f2d}
-#game .seat.s0 .openHand{top:auto;bottom:calc(100% + 7px)}
-#game .seat.s1 .openHand,#game .seat.s2 .openHand,#game .seat.s6 .openHand{left:calc(100% + 7px);top:50%;transform:translateY(-50%)}
-#game .seat.s4 .openHand,#game .seat.s5 .openHand,#game .seat.s7 .openHand{left:auto;right:calc(100% + 7px);top:50%;transform:translateY(-50%)}
+#game .seat.s0 .openHand{top:auto;bottom:calc(100% + 48px)}
+#game .seat.s3 .openHand{top:calc(100% + 48px)}
+#game .seat.s1 .openHand,#game .seat.s2 .openHand,#game .seat.s6 .openHand{left:calc(100% + 98px);top:50%;transform:translateY(-50%)}
+#game .seat.s4 .openHand,#game .seat.s5 .openHand,#game .seat.s7 .openHand{left:auto;right:calc(100% + 98px);top:50%;transform:translateY(-50%)}
 
-/* Dealer animation only */
 #game .dealerFlyingCard{position:absolute;width:44px;height:62px;border-radius:7px;border:2px solid #e7cf78;background:#f3ead0;box-shadow:0 8px 18px #000b;z-index:80;pointer-events:none;transform:translate(0,0) rotate(0) scale(.92);transition:transform .64s cubic-bezier(.18,.72,.24,1),opacity .64s ease!important;will-change:transform,opacity}
 #game .dealerFlyingCard i{position:absolute;inset:4px;border-radius:4px;border:1px solid #d9bd5a;background:repeating-linear-gradient(45deg,#103d2a 0,#103d2a 4px,#1d6846 4px,#1d6846 8px)}
 #game .dealerFlyingCard.fly{transform:translate3d(var(--dx),var(--dy),0) rotate(var(--rot)) scale(1.02);opacity:.96}
 #game .dealTrail .flyingCard{display:none!important}
 
-/* Action bar: no duplicate bank/stake, only clear turn + buttons */
 #game .gameActions{bottom:-88px;width:min(94%,660px);background:#080d11f5;border:1px solid #2c3c43;border-radius:11px;padding:8px;box-shadow:0 8px 22px #0008;transition:none!important}
 #game .roundMeta{display:flex;justify-content:center;align-items:center;margin-bottom:7px;padding:1px}
 #game #roundPot,#game #roundBet{display:none!important}
@@ -70,7 +71,6 @@
 #game #lastActionFlash{position:absolute;left:50%;top:106%;transform:translateX(-50%);min-width:150px;padding:5px 10px;background:#07110ff0;border:1px solid #ffffff22;border-radius:10px;font-size:10px;pointer-events:none}
 #game #lastActionFlash strong{color:#ffe36e;margin-left:6px}
 
-/* Side panels */
 #game .gameSide{display:grid;gap:10px}
 #game .gameSide .panel{padding:11px;border-radius:11px;background:#08130f;border-color:#1d382c}
 #game .tableHistory{max-height:180px;overflow:auto}
@@ -90,6 +90,9 @@
   #game #potBig{font-size:20px!important}
   #game .seat{width:92px;min-height:42px;padding:5px;font-size:10px}
   #game .seatName{font-size:10px}
+  #game .betBadge{padding:4px 6px}
+  #game .betBadge span{font-size:8px}
+  #game .betBadge b{font-size:10px}
   #game .seat.s1,#game .seat.s2,#game .seat.s6{left:-8px}
   #game .seat.s4,#game .seat.s5,#game .seat.s7{right:-8px}
   #game .hand{bottom:48px}
