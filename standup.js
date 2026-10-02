@@ -44,12 +44,28 @@ function cleanSeatUi(){
   document.querySelectorAll('#seats .seat').forEach(s=>{
     s.classList.remove('turnActive','foldedSeat');
     s.querySelector('.openHand')?.remove();
+    s.querySelector('.betBadge')?.remove();
   });
 }
 function setSeatMeta(seatNo,text){
   const seat=document.querySelector('#seats .seat.s'+seatNo);
   const meta=seat?.querySelector('.seatMeta');
   if(meta)meta.textContent=text;
+}
+function seatPlayerName(seat){
+  return (seat?.querySelector('.seatName')?.textContent||'Гравець').replace('★','').replace('ADMIN','').trim();
+}
+function paintBetBadge(seatNo,amount,folded){
+  const seat=document.querySelector('#seats .seat.s'+seatNo);
+  if(!seat)return;
+  const badge=document.createElement('div');
+  badge.className='betBadge'+(folded?' folded':'');
+  const name=document.createElement('span');
+  name.textContent=seatPlayerName(seat);
+  const value=document.createElement('b');
+  value.textContent=Number(amount||0)+' ◉';
+  badge.append(name,value);
+  seat.appendChild(badge);
 }
 function paintOpenHands(rows){
   document.querySelectorAll('.openHand').forEach(x=>x.remove());
@@ -92,7 +108,8 @@ async function syncUi(){
       const seat=document.querySelector('#seats .seat.s'+p.seat_no);
       if(!seat)continue;
       if(p.folded)seat.classList.add('foldedSeat');
-      setSeatMeta(p.seat_no,(p.folded?'ВПАВ · ':'ДАВ: ')+Number(p.contributed||0)+' ◉');
+      setSeatMeta(p.seat_no,p.folded?'ВПАВ':'');
+      paintBetBadge(p.seat_no,p.contributed,p.folded);
     }
 
     if(g.status==='playing'){
