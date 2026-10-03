@@ -3,8 +3,22 @@ const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null;
-let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0];
+let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3;
 const $=id=>document.getElementById(id), sections=['login','lobby','profile','create','game'];
+window.addEventListener('trynka:deal-start',()=>{
+  ownDealActive=true;ownDealtCount=0;lastHandPaint='';handPullY=[0,0,0];
+  const h=$('myHand');if(h)h.innerHTML='';
+  $('gameActions')?.classList.add('dealLocked');
+});
+window.addEventListener('trynka:own-card',e=>{
+  ownDealActive=true;ownDealtCount=Math.max(0,Math.min(3,Number(e.detail?.count||0)));lastHandPaint='';
+  renderHand();
+});
+window.addEventListener('trynka:deal-end',()=>{
+  ownDealActive=false;ownDealtCount=3;lastHandPaint='';
+  $('gameActions')?.classList.remove('dealLocked');
+  renderHand();
+});
 function show(id){sections.forEach(x=>$(x)?.classList.add('hide'));$(id)?.classList.remove('hide')}
 function authView(w){$('authLogin').classList.toggle('hide',w!=='login');$('authRegister').classList.toggle('hide',w!=='register')}
 $('showRegister').onclick=()=>authView('register'); $('showLogin').onclick=()=>authView('login');
@@ -55,9 +69,8 @@ async function renderHand(roomArg){
   const r=roomArg?.id?roomArg:(await sb.from('rooms').select('*').eq('id',currentRoom).single()).data;
   if(!r||r.game_status!=='playing'){
     $('myHand').innerHTML='';
-    lastHandPaint='';
-    handPullKey='';
-    handPullY=[0,0,0];
+    lastHandPaint='';handPullKey='';handPullY=[0,0,0];
+    ownDealActive=false;ownDealtCount=3;
     clearInterval(dealTimer);
     return;
   }
@@ -66,64 +79,94 @@ async function renderHand(roomArg){
   if(!h?.cards?.length)return;
   clearInterval(dealTimer);
 
-  const key=currentRoom+'|'+(r.deal_started_at||'')+'|'+h.cards.join('|');
-  if(key!==handPullKey){
-    handPullKey=key;
+  const dealKey=currentRoom+'|'+(r.deal_started_at||'')+'|'+h.cards.join('|');
+  if(dealKey!==handPullKey){
+    handPullKey=dealKey;
     handPullY=[0,0,0];
     lastHandPaint='';
   }
 
-  if(lastHandPaint===key&&$('myHand')?.querySelectorAll('.pullCard').length===3)return;
-  lastHandPaint=key;
+  const visible=ownDealActive?ownDealtCount:3;
+  const paintKey=dealKey+'|'+visible;
+  if(visible<=0){
+    if($('myHand').children.length)$('myHand').innerHTML='';
+    lastHandPaint=paintKey;
+    return;
+  }
+  if(lastHandPaint===paintKey&&$('myHand')?.querySelectorAll('.pullCard').length===visible)return;
+  lastHandPaint=paintKey;
 
-  $('myHand').innerHTML=h.cards.map((c,i)=>
+  $('myHand').innerHTML=h.cards.slice(0,visible).map((c,i)=>
     '<div class="card pullCard '+(/[♠♣]/.test(c)?'black ':'')+'" data-card-index="'+i+'">'+
       '<span class="cardFace">'+esc(c)+'</span>'+
-      '<div class="cardCover" data-y="'+Number(handPullY[i]||0)+'"><i>♠</i><small>ТЯГНИ ВНИЗ</small></div>'+
+      '<div class="cardCover"><i>♠</i><small>ПОТЯГНИ КАРТУ</small></div>'+
     '</div>'
   ).join('');
 
   $('myHand').querySelectorAll('.pullCard').forEach(card=>{
     const cover=card.querySelector('.cardCover');
     const idx=Number(card.dataset.cardIndex);
-    let dragging=false,startY=0,startOffset=Number(handPullY[idx]||0);
+    let dragging=false,startY=0,startOffset=Number(handPullY[idx]||0),moved=false;
 
     const apply=y=>{
-      const max=Math.max(0,card.clientHeight-14);
+      const max=Math.max(0,card.clientHeight-13);
       const next=Math.max(0,Math.min(max,y));
       handPullY[idx]=next;
-      cover.dataset.y=String(next);
-      cover.style.transform='translateY('+next+'px)';
-      card.classList.toggle('peeked',next>8);
-      card.classList.toggle('mostlyOpen',next>max*.72);
+      cover.style.transform='translate3d(0,'+next+'px,0)';
+      card.classList.toggle('peeked',next>7);
+      card.classList.toggle('mostlyOpen',next>max*.70);
     };
-
     apply(startOffset);
 
-    cover.addEventListener('pointerdown',e=>{
-      dragging=true;
-      startY=e.clientY;
-      startOffset=Number(handPullY[idx]||0);
-      cover.setPointerCapture?.(e.pointerId);
+    const begin=(clientY)=>{
+      dragging=true;moved=false;startY=clientY;startOffset=Number(handPullY[idx]||0);
       card.classList.add('pulling');
-      e.preventDefault();
-    });
-
-    cover.addEventListener('pointermove',e=>{
-      if(!dragging)return;
-      apply(startOffset+(e.clientY-startY));
-      e.preventDefault();
-    });
-
-    const end=e=>{
-      if(!dragging)return;
-      dragging=false;
-      card.classList.remove('pulling');
-      try{cover.releasePointerCapture?.(e.pointerId)}catch{}
-      e.preventDefault();
     };
-    cover.addEventListener('pointerup',end);
-    cover.addEventListener('pointercancel',end);
+    const move=(clientY)=>{
+      if(!dragging)return;
+      const dy=clientY-startY;
+      if(Math.abs(dy)>2)moved=true;
+      apply(startOffset+dy);
+    };
+    const end=()=>{
+      if(!dragging)return;
+      dragging=false;card.classList.remove('pulling');
+    };
+
+    card.addEventListener('pointerdown',e=>{
+      begin(e.clientY);
+      try{card.setPointerCapture(e.pointerId)}catch{}
+      e.preventDefault();
+    });
+    card.addEventListener('pointermove',e=>{
+      if(!dragging)return;
+      move(e.clientY);e.preventDefault();
+    });
+    card.addEventListener('pointerup',e=>{end();try{card.releasePointerCapture(e.pointerId)}catch{};e.preventDefault()});
+    card.addEventListener('pointercancel',end);
+
+    card.addEventListener('mousedown',e=>{if(e.pointerType)return;begin(e.clientY);e.preventDefault()});
+    const mouseMove=e=>{if(dragging)move(e.clientY)};
+    const mouseUp=()=>end();
+    window.addEventListener('mousemove',mouseMove);
+    window.addEventListener('mouseup',mouseUp);
+
+    card.addEventListener('touchstart',e=>{
+      if(!e.touches?.[0])return;
+      begin(e.touches[0].clientY);e.preventDefault();
+    },{passive:false});
+    card.addEventListener('touchmove',e=>{
+      if(!dragging||!e.touches?.[0])return;
+      move(e.touches[0].clientY);e.preventDefault();
+    },{passive:false});
+    card.addEventListener('touchend',end,{passive:false});
+
+    card.addEventListener('click',()=>{
+      if(moved)return;
+      const max=Math.max(0,card.clientHeight-13);
+      apply(Number(handPullY[idx]||0)>max*.55?0:max*.78);
+    });
+    card.ondragstart=()=>false;
   });
 
   const trail=$('dealTrail');
