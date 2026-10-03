@@ -9,7 +9,46 @@ function mount(){if(!$('v2Hub')&&$('tablesArea')){$('tablesArea').insertAdjacent
 }
 function league(xp=0){if(xp>=5000)return['Майстер','♛'];if(xp>=2500)return['Золото','◆'];if(xp>=1000)return['Срібло','◇'];if(xp>=300)return['Бронза','●'];return['Новачок','○']}
 async function loadHub(){if(!$('v2Hub')||!me)return;const cutoff=new Date(Date.now()-70000).toISOString();const [{data:rooms},{data:p},{data:achs},{data:mineA},{data:ts}]=await Promise.all([sb.from('rooms').select('id,name,max_players,ante,game_status,spectator_count,room_players(count)').order('created_at',{ascending:false}).limit(8),sb.from('profiles').select('xp,level,wins,games_played,best_win_streak').eq('id',me.id).single(),sb.from('achievements').select('*').order('title'),sb.from('player_achievements').select('achievement_key').eq('user_id',me.id),sb.from('tournaments').select('*,tournament_players(count)').order('created_at',{ascending:false}).limit(6)]);const hot=(rooms||[]).filter(r=>(r.room_players?.[0]?.count||0)>0).slice(0,5);$('hotTables').innerHTML=hot.map(r=>`<div class="hotRow"><div><b>${esc(r.name)}</b><small>${r.game_status==='playing'?'🟢 Грають':'🟡 Очікують'} · 👥 ${r.room_players?.[0]?.count||0}/${r.max_players} · 👁 ${r.spectator_count||0}</small></div><button data-watch="${r.id}">Дивитися</button></div>`).join('')||'<p class="muted">Поки немає активних столів.</p>';const [ln,icon]=league(p?.xp||0);$('leagueBox').innerHTML=`<div class="leagueHero"><span>${icon}</span><div><b>${ln}</b><small>Рівень ${p?.level||1} · ${p?.xp||0} XP</small></div></div><div class="miniStats"><span>🏆 ${p?.wins||0} перемог</span><span>🔥 серія ${p?.best_win_streak||0}</span></div>`;const unlocked=new Set((mineA||[]).map(x=>x.achievement_key));$('achievementsBox').innerHTML=(achs||[]).map(a=>`<div class="achievement ${unlocked.has(a.key)?'unlocked':''}"><span>${unlocked.has(a.key)?'★':'☆'}</span><div><b>${esc(a.title)}</b><small>${esc(a.description)}</small></div></div>`).join('')||'<p class="muted">Досягнення готуються.</p>';$('tournamentsBox').innerHTML=(ts||[]).map(t=>`<div class="tournamentRow"><div><b>${esc(t.name)}</b><small>${t.status==='registration'?'Реєстрація':'Статус: '+esc(t.status)} · ${t.tournament_players?.[0]?.count||0}/${t.max_players}</small></div>${t.status==='registration'?`<button data-tournament="${t.id}">Вступити</button>`:''}</div>`).join('')||'<p class="muted">Найближчих турнірів ще немає.</p>'}
-async function leaderboard(){let box=$('leaderboardBox');if(!box&&$('tablesArea')){box=document.createElement('section');box.id='leaderboardBox';box.className='leaderboardBox';$('tablesArea').after(box)}if(!box)return;const {data}=await sb.from('profiles').select('nickname,wins,games_played,xp,level').eq('is_bot',false).order('wins',{ascending:false}).limit(10);box.innerHTML=`<div class="rankHead"><div><span class="eyebrow">RANKING</span><h2>Топ гравців</h2></div><span>За перемогами</span></div><div class="rankList">${(data||[]).map((p,i)=>`<div class="rankRow"><span class="rankPos">${i+1}</span><b>${esc(p.nickname)}</b><span>${p.wins||0} перемог</span><small>${league(p.xp||0)[0]} · ${p.games_played||0} ігор</small></div>`).join('')}</div>`}
+async function leaderboard(){
+  let box=$('leaderboardBox');
+  if(!box&&$('tablesArea')){
+    box=document.createElement('section');
+    box.id='leaderboardBox';
+    box.className='leaderboardBox';
+    $('tablesArea').after(box);
+  }
+  if(!box)return;
+
+  const cutoff=Date.now()-70000;
+  const {data}=await sb.from('profiles')
+    .select('id,nickname,chips,wins,games_played,online_at,is_admin')
+    .eq('is_bot',false)
+    .order('chips',{ascending:false})
+    .limit(50);
+
+  const rows=(data||[]).map((p,i)=>{
+    const online=p.online_at&&new Date(p.online_at).getTime()>cutoff;
+    const you=p.id===me?.id;
+    return `<div class="ratingRow ${online?'online':''} ${you?'you':''}">
+      <span class="ratingPos">${i+1}</span>
+      <div class="ratingPlayer">
+        <b>${esc(p.nickname)}${p.is_admin?'<em>ADMIN</em>':''}${you?'<small>ВИ</small>':''}</b>
+        <span>${p.wins||0} перемог · ${p.games_played||0} ігор</span>
+      </div>
+      <strong>${Number(p.chips||0).toLocaleString('uk-UA')} ◉</strong>
+      <span class="ratingStatus"><i></i>${online?'ОНЛАЙН':'ОФЛАЙН'}</span>
+    </div>`;
+  }).join('');
+
+  const onlineCount=(data||[]).filter(p=>p.online_at&&new Date(p.online_at).getTime()>cutoff).length;
+
+  box.innerHTML=`<div class="rankHead">
+    <div><span class="eyebrow">RATING</span><h2>🏆 Рейтинг гравців</h2></div>
+    <span><b>${onlineCount}</b> онлайн</span>
+  </div>
+  <div class="ratingHeader"><span>№</span><span>Гравець</span><span>Монети</span><span>Статус</span></div>
+  <div class="ratingTable">${rows||'<p class="muted">Гравців ще немає.</p>'}</div>`;
+}
 async function currentRoom(){const title=$('roomTitle')?.textContent;if(!me||!title)return null;const {data}=await sb.from('room_players').select('room_id,ready').eq('user_id',me.id).order('joined_at',{ascending:false}).limit(1).maybeSingle();return data}
 async function watch(id){if(!me)return alert('Спочатку увійди');const {error}=await sb.rpc('join_as_spectator',{p_room:+id});if(error)return alert(error.message);const {data:r}=await sb.from('rooms').select('name').eq('id',id).single();alert(`Ви спостерігаєте за столом «${r?.name||id}». Карти гравців приховані.`)}
 function bind(){document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='refreshHot'){await loadHub();return}if(b.dataset.watch){await watch(b.dataset.watch);return}if(b.dataset.tournament){const {error}=await sb.rpc('join_tournament',{p_tournament:+b.dataset.tournament});alert(error?error.message:'Ви зареєстровані на турнір ✓');await loadHub();return}if(b.id==='joinPrivate'){const code=$('privateCode').value.trim();if(!code)return;const {data,error}=await sb.rpc('join_private_room',{p_code:code});if(error)return alert(error.message);location.hash='room-'+data;location.reload();return}if(b.id==='readyBtn'){const rp=await currentRoom();if(!rp)return alert('Спочатку сядь за стіл');const next=!rp.ready;const {error}=await sb.rpc('set_player_ready',{p_room:rp.room_id,p_ready:next});if(error)return alert(error.message);b.textContent=next?'✓ ГОТОВИЙ':'○ НЕ ГОТОВИЙ';b.classList.toggle('readyOn',next);return}if(b.id==='spectateBtn'){const rp=await currentRoom();if(rp)return watch(rp.room_id);return}if(b.parentElement?.classList.contains('reactions')){const rp=await currentRoom();if(!rp)return;const now=Date.now();if(now-lastReaction<1200)return;lastReaction=now;const {error}=await sb.rpc('send_room_reaction',{p_room:rp.room_id,p_emoji:b.textContent.trim()});if(!error){tone(600);showReaction(b.textContent.trim())}}});}
