@@ -284,3 +284,15 @@
   .avatarRewardHead small{text-align:left}
   .avatarChoice{flex-basis:68px;min-height:76px}
 }
+
+.ratingAvatar{
+  width:24px;height:24px;
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 auto;
+  margin-right:2px;
+  border-radius:50%;
+  background:#173326;
+  border:1px solid #45604f;
+  font-size:14px;
+}
