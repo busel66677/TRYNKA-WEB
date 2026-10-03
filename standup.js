@@ -14,7 +14,7 @@ async function getMe(){
 }
 async function myRoom(){
   const u=await getMe();if(!u)return null;
-  const {data}=await sb.from('room_players').select('room_id,seat_no').eq('user_id',u.id).order('joined_at',{ascending:false}).limit(1).maybeSingle();
+  const {data}=await sb.from('room_players').select('room_id,seat_no,table_chips').eq('user_id',u.id).order('joined_at',{ascending:false}).limit(1).maybeSingle();
   return data||null;
 }
 function mountStand(){
@@ -101,29 +101,39 @@ function paintSeats(ps,turnUser,lastAction=null){
   }
 }
 
-function updateSupportUi(g,ps){
+function updateSupportUi(g,ps,r,mySeat){
   mountGameInfo();
   const box=$('supportSummary');
   const mine=(ps||[]).find(p=>p.user_id===me?.id);
   const contributed=Number(mine?.contributed||0);
   const currentBet=Number(g?.current_bet||0);
   const need=Math.max(0,currentBet-contributed);
+  const tableStack=Number(mySeat?.table_chips||0);
+  const maxBet=Math.max(1,Number(r?.ante||1)*100);
   const myTurn=g?.status==='playing'&&g.turn_user_id===me?.id&&!mine?.folded;
+  const short=myTurn&&need>tableStack;
 
   if(box){
     box.innerHTML='<span>Банк: <b>'+Number(g?.pot||0)+' ◉</b></span>'+
       '<span>Ви дали: <b>'+contributed+' ◉</b></span>'+
-      '<span class="supportNeed '+(myTurn&&need>0?'urgent':'')+'">Мінімум підтримати: <b>'+need+' ◉</b></span>';
+      '<span class="supportNeed '+(myTurn&&need>0?'urgent ':'')+(short?'short':'')+'">Мінімум підтримати: <b>'+need+' ◉</b>'+(short?'<small>На столі '+tableStack+' ◉ — можна вскритися</small>':'')+'</span>'+
+      '<span>Макс. ставка: <b>'+maxBet+' ◉</b></span>';
   }
 
   const call=document.querySelector('#gameActions button[data-action="call"]');
   if(call){
     call.textContent=need>0?'ДАВ '+need+' ◉':'ПІДТРИМАТИ';
     call.dataset.need=String(need);
+    call.title=short?'Не вистачає '+(need-tableStack)+' ◉. Для повної підтримки монет недостатньо.':'';
+  }
+
+  const raise=document.querySelector('#gameActions button[data-action="raise"]');
+  if(raise){
+    raise.title='Максимальна загальна ставка: '+maxBet+' ◉';
   }
 
   if($('bankInfo')){
-    $('bankInfo').textContent='Поточна ставка: '+currentBet+' ◉'+(myTurn?' · Вам додати: '+need+' ◉':'');
+    $('bankInfo').textContent='Поточна ставка: '+currentBet+' ◉ · максимум: '+maxBet+' ◉'+(myTurn?' · Вам додати: '+need+' ◉':'');
   }
 }
 
@@ -184,7 +194,7 @@ async function syncUi(){
       sb.from('round_actions').select('id,user_id,action,amount,created_at').eq('round_id',g.id).order('created_at',{ascending:false}).limit(1).maybeSingle()
     ]);
     paintSeats(ps||[],g.status==='playing'?g.turn_user_id:null,lastAction||null);
-    updateSupportUi(g,ps||[]);
+    updateSupportUi(g,ps||[],r,rp);
 
     if(g.status==='playing'){
       let nick='Гравець';
