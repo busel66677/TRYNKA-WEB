@@ -97,7 +97,7 @@ function renderSeats(r,ps){
   for(let i=0;i<r.max_players;i++){
     const p=bySeat.get(i),d=document.createElement('div');
     d.className='seat s'+i+(p?.user_id===user.id?' mine':!p?' free':'');
-    d.innerHTML=p?'<div class="seatAvatar">♠</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div><div class="seatStack">◉ '+Number(p.profiles?.chips||0).toLocaleString('uk-UA')+'</div><div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
+    d.innerHTML=p?'<div class="seatAvatar">♠</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div><div class="seatStack">СТІЛ: ◉ '+Number(p.table_chips||0).toLocaleString('uk-UA')+'</div><div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
     if(!p&&r.game_status!=='playing')d.onclick=()=>takeSeat(i,r);
     if(p&&p.user_id!==user.id){d.title='Натисни, щоб поскаржитися';d.onclick=()=>reportPlayer(p.user_id,p.profiles?.nickname||'Гравець')}
     $('seats').appendChild(d)
