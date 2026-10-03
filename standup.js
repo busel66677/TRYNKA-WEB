@@ -77,16 +77,22 @@ function paintOpenHands(rows){
   const count=document.querySelectorAll('#seats .openHand').length;
   if(sig===lastOpenState&&count===(rows||[]).length)return;
   lastOpenState=sig;
+
   document.querySelectorAll('#seats .openHand').forEach(x=>x.remove());
+  document.querySelectorAll('#seats .seat.revealPairSeat').forEach(x=>x.classList.remove('revealPairSeat'));
 
   for(const r of rows||[]){
     const seat=document.querySelector('#seats .seat.s'+r.seat_no);
     if(!seat||!r.cards?.length)continue;
-    const box=document.createElement('div');box.className='openHand';
+    seat.classList.add('revealPairSeat');
+    const box=document.createElement('div');
+    box.className='openHand revealHand';
+    box.setAttribute('aria-label','Відкриті карти');
     for(const card of r.cards){
-      const c=document.createElement('b');c.textContent=card;
-      if(card.includes('♥')||card.includes('♦'))c.classList.add('red');
-      box.appendChild(c);
+      const cardEl=document.createElement('b');
+      cardEl.textContent=card;
+      if(card.includes('♥')||card.includes('♦'))cardEl.classList.add('red');
+      box.appendChild(cardEl);
     }
     seat.appendChild(box);
   }
