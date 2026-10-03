@@ -586,3 +586,25 @@
   #game .openHand.revealHand b{width:27px!important;height:37px!important;font-size:10px!important}
   .buyInCard{padding:15px}
 }
+
+/* v21 — max bet and short-stack reveal */
+#game .supportSummary{grid-template-columns:repeat(4,1fr)}
+#game .supportSummary .supportNeed small{
+  display:block;
+  margin-top:2px;
+  color:#ffcc85;
+  font-size:7px;
+  line-height:1.2;
+}
+#game .supportSummary .supportNeed.short{
+  border-color:#e79d4f;
+  background:#2b1c10;
+}
+#game .supportSummary .supportNeed.short b{color:#ffd08a}
+#game .seatStack{
+  color:#f0d16b!important;
+  font-weight:950!important;
+}
+@media(max-width:800px){
+  #game .supportSummary{grid-template-columns:1fr 1fr}
+}
