@@ -33,6 +33,16 @@ function mountStand(){
     lastSeatState='';lastOpenState='';await syncUi();
   });
 }
+function mountGameInfo(){
+  const actions=$('gameActions');
+  if(!actions||$('supportSummary'))return;
+  const box=document.createElement('div');
+  box.id='supportSummary';
+  box.className='supportSummary';
+  box.innerHTML='<span>Банк: <b>0 ◉</b></span><span>Ви дали: <b>0 ◉</b></span><span class="supportNeed">Мінімум підтримати: <b>0 ◉</b></span>';
+  const buttons=actions.querySelector('.actionButtons');
+  if(buttons)actions.insertBefore(box,buttons);else actions.appendChild(box);
+}
 function syncStand(seated){
   const leave=$('leaveRoom'),stand=$('standUpBtn');
   if(stand)stand.classList.toggle('hide',!seated);
@@ -45,15 +55,16 @@ function syncStand(seated){
 function playerName(seat){
   return (seat?.querySelector('.seatName')?.textContent||'Гравець').replace('★','').replace('ADMIN','').trim();
 }
-function paintSeats(ps,turnUser){
-  const sig=JSON.stringify((ps||[]).map(p=>[p.user_id,p.seat_no,Number(p.contributed||0),!!p.folded]).sort((a,b)=>a[1]-b[1]))+'|'+(turnUser||'');
-  const badges=document.querySelectorAll('#seats .betBadge').length;
-  if(sig===lastSeatState&&badges===(ps||[]).length)return;
+function paintSeats(ps,turnUser,lastAction=null){
+  const actionSig=lastAction?[lastAction.id,lastAction.user_id,lastAction.action,Number(lastAction.amount||0)]:[];
+  const sig=JSON.stringify((ps||[]).map(p=>[p.user_id,p.seat_no,Number(p.contributed||0),!!p.folded]).sort((a,b)=>a[1]-b[1]))+'|'+(turnUser||'')+'|'+JSON.stringify(actionSig);
+  if(sig===lastSeatState)return;
   lastSeatState=sig;
 
   document.querySelectorAll('#seats .seat').forEach(s=>{
-    s.classList.remove('turnActive','foldedSeat');
+    s.classList.remove('turnActive','foldedSeat','lastRaiser');
     s.querySelector('.betBadge')?.remove();
+    s.querySelector('.seatActionPop')?.remove();
   });
 
   for(const p of ps||[]){
@@ -62,16 +73,60 @@ function paintSeats(ps,turnUser){
     if(p.folded)seat.classList.add('foldedSeat');
     if(p.user_id===turnUser&&!p.folded)seat.classList.add('turnActive');
 
+    const body=seat.querySelector('.seatBody')||seat;
+    let contribution=seat.querySelector('.seatContribution');
+    if(!contribution){
+      contribution=document.createElement('div');
+      contribution.className='seatContribution';
+      const state=seat.querySelector('.seatState');
+      if(state&&state.parentNode===body)body.insertBefore(contribution,state);else body.appendChild(contribution);
+    }
+    contribution.textContent='ДАВ: '+Number(p.contributed||0)+' ◉';
+    contribution.classList.toggle('zero',Number(p.contributed||0)<=0);
+
     const state=seat.querySelector('.seatState');
     if(state)state.textContent=p.folded?'ВПАВ':'';
 
-    const badge=document.createElement('div');
-    badge.className='betBadge'+(p.folded?' folded':'');
-    const n=document.createElement('span');n.textContent=playerName(seat);
-    const v=document.createElement('b');v.textContent='ВНІС: '+Number(p.contributed||0)+' ◉';
-    badge.append(n,v);seat.appendChild(badge);
+    if(lastAction?.action==='raise'&&lastAction.user_id===p.user_id){
+      seat.classList.add('lastRaiser');
+    }
+    const actionAge=lastAction?.created_at?Date.now()-new Date(lastAction.created_at).getTime():999999;
+    if(lastAction&&lastAction.user_id===p.user_id&&(lastAction.action==='call'||lastAction.action==='raise')&&Number(lastAction.amount||0)>0&&actionAge<4500){
+      const pop=document.createElement('div');
+      pop.className='seatActionPop';
+      pop.textContent='+'+Number(lastAction.amount||0)+' ◉';
+      seat.appendChild(pop);
+      setTimeout(()=>pop.remove(),2200);
+    }
   }
 }
+
+function updateSupportUi(g,ps){
+  mountGameInfo();
+  const box=$('supportSummary');
+  const mine=(ps||[]).find(p=>p.user_id===me?.id);
+  const contributed=Number(mine?.contributed||0);
+  const currentBet=Number(g?.current_bet||0);
+  const need=Math.max(0,currentBet-contributed);
+  const myTurn=g?.status==='playing'&&g.turn_user_id===me?.id&&!mine?.folded;
+
+  if(box){
+    box.innerHTML='<span>Банк: <b>'+Number(g?.pot||0)+' ◉</b></span>'+
+      '<span>Ви дали: <b>'+contributed+' ◉</b></span>'+
+      '<span class="supportNeed '+(myTurn&&need>0?'urgent':'')+'">Мінімум підтримати: <b>'+need+' ◉</b></span>';
+  }
+
+  const call=document.querySelector('#gameActions button[data-action="call"]');
+  if(call){
+    call.textContent=need>0?'ДАВ '+need+' ◉':'ПІДТРИМАТИ';
+    call.dataset.need=String(need);
+  }
+
+  if($('bankInfo')){
+    $('bankInfo').textContent='Поточна ставка: '+currentBet+' ◉'+(myTurn?' · Вам додати: '+need+' ◉':'');
+  }
+}
+
 function paintOpenHands(rows){
   const sig=JSON.stringify((rows||[]).map(r=>[r.user_id,r.seat_no,r.cards]).sort((a,b)=>a[1]-b[1]));
   const count=document.querySelectorAll('#seats .openHand').length;
@@ -106,6 +161,7 @@ async function syncUi(){
     const seated=rp?.seat_no!=null;
     if(lastSeated!==seated){lastSeated=seated;syncStand(seated)}
     mountStand();
+    mountGameInfo();
 
     if(!currentRoom){
       timerState=null;lastSeatState='';lastOpenState='';
@@ -123,8 +179,12 @@ async function syncUi(){
       return;
     }
 
-    const {data:ps}=await sb.from('round_players').select('user_id,seat_no,contributed,folded,revealed').eq('round_id',g.id);
-    paintSeats(ps||[],g.status==='playing'?g.turn_user_id:null);
+    const [{data:ps},{data:lastAction}]=await Promise.all([
+      sb.from('round_players').select('user_id,seat_no,contributed,folded,revealed').eq('round_id',g.id),
+      sb.from('round_actions').select('id,user_id,action,amount,created_at').eq('round_id',g.id).order('created_at',{ascending:false}).limit(1).maybeSingle()
+    ]);
+    paintSeats(ps||[],g.status==='playing'?g.turn_user_id:null,lastAction||null);
+    updateSupportUi(g,ps||[]);
 
     if(g.status==='playing'){
       let nick='Гравець';
@@ -171,7 +231,7 @@ document.addEventListener('click',async e=>{
 },true);
 
 async function init(){
-  mountStand();await getMe();await syncUi();
+  mountStand();mountGameInfo();await getMe();await syncUi();
   setInterval(syncUi,850);
   setInterval(tickTimer,200);
 }
