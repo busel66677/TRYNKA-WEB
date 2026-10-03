@@ -33,3 +33,168 @@
   .ratingStatus{font-size:8px;gap:4px}
   .ratingStatus i{width:7px;height:7px}
 }
+
+
+/* XP, achievements and lobby support footer */
+.playerProgress{
+  margin:14px 0 18px;
+  padding:16px;
+  border:1px solid #2b4b39;
+  border-radius:16px;
+  background:linear-gradient(180deg,#0c1d15,#07110d);
+  box-shadow:0 12px 30px #0005;
+}
+.levelBlock{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:12px;
+  align-items:center;
+  padding-bottom:14px;
+  border-bottom:1px solid #1f382b;
+}
+.levelBadge{
+  width:58px;height:58px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 25%,#f0d36e,#ad812a 70%);
+  color:#171006;
+  box-shadow:0 0 0 4px #e6c95d1e,0 8px 20px #0007;
+}
+.levelBadge span{font-size:7px;font-weight:950;letter-spacing:1px}
+.levelBadge b{font-size:22px;line-height:1}
+.xpBlock>div:first-child{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.xpBlock b{color:#f0d36e;font-size:15px}
+.xpBlock span{color:#80968a;font-size:9px}
+.xpTrack{
+  height:9px;
+  margin-top:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#102118;
+  border:1px solid #294633;
+}
+.xpTrack i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#d7b84e,#f3df80);
+  box-shadow:0 0 14px #e5c75f55;
+}
+.achievementHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:10px;
+  margin:14px 0 10px;
+}
+.achievementHead h2{margin:2px 0 0}
+.achievementHead>b{color:#e7cb6a;font-size:13px}
+.achievementGrid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.achievementCard{
+  display:grid;
+  grid-template-columns:42px 1fr;
+  gap:9px;
+  align-items:start;
+  min-width:0;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid #233d2f;
+  background:#0a1912;
+}
+.achievementCard.locked{opacity:.58;filter:saturate(.65)}
+.achievementCard.unlocked{
+  border-color:#9f8734;
+  background:linear-gradient(180deg,#192918,#0a1811);
+  box-shadow:inset 0 0 18px #e7c65e0d;
+}
+.achievementIcon{
+  width:40px;height:40px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#142a1d;
+  border:1px solid #3a5a45;
+  font-size:20px;
+}
+.achievementCard.unlocked .achievementIcon{
+  background:#332b12;
+  border-color:#b89c42;
+}
+.achievementText{min-width:0}
+.achievementText>b{display:block;font-size:11px;color:#e3ece7}
+.achievementText>span{display:block;margin-top:2px;color:#7f958a;font-size:8px;line-height:1.25}
+.achievementText>small{display:block;margin-top:4px;color:#bfae69;font-size:7px;font-weight:900}
+.achievementProgress{
+  height:5px;
+  margin-top:7px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#14231a;
+}
+.achievementProgress i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:#d8bc56;
+}
+.lobbySupportFooter{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin:18px 0 4px;
+  padding:13px 15px;
+  border:1px solid #2c4637;
+  border-radius:14px;
+  background:#08150f;
+}
+.lobbySupportFooter>div{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.lobbySupportFooter b,
+.lobbySupportFooter small{display:block}
+.lobbySupportFooter>div b{font-size:11px;color:#dce8e1}
+.lobbySupportFooter>div small{margin-top:2px;color:#748a7e;font-size:8px}
+.supportIcon{
+  width:34px;height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#665cac;
+  color:white;
+  font-weight:950;
+  font-size:15px;
+}
+.viberAdminLink{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 12px;
+  border-radius:10px;
+  background:#6256a8;
+  color:white;
+  text-decoration:none;
+  border:1px solid #8277c3;
+}
+.viberAdminLink span{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.5px}
+.viberAdminLink b{font-size:12px;color:white}
+
+@media(max-width:800px){
+  .achievementGrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .levelBlock{grid-template-columns:52px 1fr}
+  .levelBadge{width:50px;height:50px}
+  .xpBlock>div:first-child{align-items:flex-start;flex-direction:column;gap:2px}
+  .achievementGrid{grid-template-columns:1fr}
+  .lobbySupportFooter{align-items:stretch;flex-direction:column}
+  .viberAdminLink{justify-content:center}
+}
