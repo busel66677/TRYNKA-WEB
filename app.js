@@ -21,6 +21,16 @@ window.addEventListener('trynka:deal-end',()=>{
 });
 function show(id){sections.forEach(x=>$(x)?.classList.add('hide'));$(id)?.classList.remove('hide')}
 function authView(w){$('authLogin').classList.toggle('hide',w!=='login');$('authRegister').classList.toggle('hide',w!=='register')}
+const AVATAR_ICONS={spade:'♠',cards:'🃏',hat:'🎩',shield:'🛡️',trophy:'🏆',eagle:'🦅',fire:'🔥',star:'⭐',diamond:'💎',crown:'👑'};
+function avatarIcon(key){return AVATAR_ICONS[key]||'♠'}
+async function chooseAvatar(key){
+  const {error}=await sb.rpc('set_player_avatar',{p_avatar_key:key});
+  if(error)return alert(error.message);
+  profile.avatar_key=key;
+  if($('profileAvatar'))$('profileAvatar').textContent=avatarIcon(key);
+  await renderAchievements();
+}
+
 function ensureLobbySupport(){
   const shell=document.querySelector('#lobby .lobbyShell');
   if(!shell||$('lobbySupportFooter'))return;
@@ -44,6 +54,8 @@ function ensureProgressUi(){
       '<div class="levelBadge"><span>LVL</span><b id="profileLevel">1</b></div>'+
       '<div class="xpBlock"><div><b id="profileXp">0 XP</b><span id="profileXpNext">до 2 рівня: 100 XP</span></div><div class="xpTrack"><i id="profileXpFill"></i></div></div>'+
     '</div>'+
+    '<div class="avatarRewardHead"><div><span class="eyebrow">АВАТАРИ</span><h2>Відкривай за досягнення</h2></div><small>Обраний аватар видно за столом</small></div>'+
+    '<div id="avatarPicker" class="avatarPicker"></div>'+
     '<div class="achievementHead"><div><span class="eyebrow">ДОСЯГНЕННЯ</span><h2>Колекція гравця</h2></div><b id="achievementCount">0/0</b></div>'+
     '<div id="achievementGrid" class="achievementGrid"></div>';
     statrow.after(card);
@@ -62,13 +74,26 @@ function achievementMetricValue(a,p){
 async function renderAchievements(){
   ensureProgressUi();
   const [{data:defs},{data:unlocks}]=await Promise.all([
-    sb.from('achievements').select('key,title,description,icon,metric,target,sort_order').order('sort_order'),
+    sb.from('achievements').select('key,title,description,icon,metric,target,sort_order,avatar_key,avatar_icon').order('sort_order'),
     sb.from('player_achievements').select('achievement_key,unlocked_at').eq('user_id',user.id)
   ]);
 
   const unlocked=new Map((unlocks||[]).map(x=>[x.achievement_key,x]));
   const grid=$('achievementGrid');
+  const picker=$('avatarPicker');
   if(!grid)return;
+
+  if(picker){
+    const unlockedAvatars=(defs||[]).filter(a=>unlocked.has(a.key)&&a.avatar_key);
+    const choices=[{avatar_key:'spade',avatar_icon:'♠',title:'Класика'},...unlockedAvatars];
+    picker.innerHTML=choices.map(a=>{
+      const selected=(profile.avatar_key||'spade')===a.avatar_key;
+      return '<button type="button" class="avatarChoice '+(selected?'selected':'')+'" data-avatar-key="'+esc(a.avatar_key)+'" title="'+esc(a.title||'Аватар')+'">'+
+        '<span>'+esc(a.avatar_icon||avatarIcon(a.avatar_key))+'</span><small>'+(selected?'ОБРАНО':'ВИБРАТИ')+'</small>'+
+      '</button>';
+    }).join('');
+    picker.querySelectorAll('[data-avatar-key]').forEach(b=>b.onclick=()=>chooseAvatar(b.dataset.avatarKey));
+  }
 
   grid.innerHTML=(defs||[]).map(a=>{
     const done=unlocked.has(a.key);
@@ -77,6 +102,7 @@ async function renderAchievements(){
     return '<div class="achievementCard '+(done?'unlocked':'locked')+'">'+
       '<div class="achievementIcon">'+esc(a.icon||'★')+'</div>'+
       '<div class="achievementText"><b>'+esc(a.title)+'</b><span>'+esc(a.description)+'</span>'+
+      (a.avatar_key?'<div class="achievementAvatarReward"><span>'+esc(a.avatar_icon||avatarIcon(a.avatar_key))+'</span> Аватар у нагороду</div>':'')+
       '<div class="achievementProgress"><i style="width:'+progress+'%"></i></div>'+
       '<small>'+(done?'ВІДКРИТО ✓':Math.min(val,a.target)+' / '+a.target)+'</small></div>'+
     '</div>';
@@ -149,6 +175,7 @@ async function renderProfile(){
 
   $('profileNick').textContent=profile.nickname;
   $('profileEmail').textContent=user.email||'';
+  if($('profileAvatar'))$('profileAvatar').textContent=avatarIcon(profile.avatar_key);
   $('profileChips').textContent=profile.chips??0;
   $('profileGames').textContent=profile.games_played??0;
   $('profileWins').textContent=profile.wins??0;
@@ -190,9 +217,9 @@ $('createForm').onsubmit=async e=>{e.preventDefault();const {data,error}=await s
 async function refreshLobby(){await pingOnline();const cutoff=new Date(Date.now()-70000).toISOString();const [{count:online},{data:rooms},{data:p}]=await Promise.all([sb.from('profiles').select('*',{count:'exact',head:true}).gt('online_at',cutoff),sb.from('rooms').select('*,room_players(count)').order('created_at',{ascending:false}),sb.from('profiles').select('*').eq('id',user.id).single()]);if(p)profile=p;if($('gameBalance'))$('gameBalance').textContent='Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');const n=online||0;$('onlineBadge').textContent='● '+n+' онлайн';$('onlineCount').textContent=n;$('onlineStat').textContent=n;$('myChips').textContent=profile?.chips??0;const active=(rooms||[]).filter(r=>(r.room_players?.[0]?.count||0)>0);$('tablesStat').textContent=active.length;$('rooms').innerHTML='';active.forEach(r=>{const count=r.room_players[0].count,d=document.createElement('div');d.className='roomCard';d.innerHTML='<div><div class="ownerLine"><span class="miniAvatar">♠</span><span>Відкритий стіл</span></div><h3>'+esc(r.name)+'</h3><div class="roomMeta"><span class="pill live">● Очікує</span><span class="pill">👥 '+count+'/'+r.max_players+'</span><span class="pill">◉ '+r.ante+'</span><span class="pill">⏱ '+r.turn_seconds+'с</span></div></div><button>Сісти</button>';d.querySelector('button').onclick=()=>joinRoom(r);$('rooms').appendChild(d)});if(!active.length)$('rooms').innerHTML='<p>Активних столів поки немає. Створи перший.</p>';await refreshFriends();await refreshInvites()}
 async function joinRoom(r){const {error}=await sb.rpc('secure_join_room',{p_room:r.id});if(error)return alert(error.message);await openRoom(r.id)}
 async function openRoom(id){currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';show('game');if($('gameBalance'))$('gameBalance').textContent='Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');if(channel)await sb.removeChannel(channel);channel=sb.channel('room-'+id).on('postgres_changes',{event:'*',schema:'public',table:'room_players',filter:'room_id=eq.'+id},renderRoom).on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+id},renderRoom).on('postgres_changes',{event:'*',schema:'public',table:'room_hands',filter:'room_id=eq.'+id},renderHand).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+id},p=>addMessage(p.new)).on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+id},renderRoom).subscribe();await renderRoom()}
-async function renderRoom(){if(!currentRoom)return;const roomId=currentRoom,version=++roomRenderVersion;const [{data:r},{data:ps}]=await Promise.all([sb.from('rooms').select('*').eq('id',currentRoom).single(),sb.from('room_players').select('user_id,seat_no,table_chips,profiles(nickname,chips)').eq('room_id',currentRoom)]);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(!r)return leaveRoom();$('roomTitle').textContent=r.name;const pot=(r.ante||0)*(ps||[]).filter(p=>p.seat_no!==null).length;if($('bankInfo'))$('bankInfo').textContent='Ставка: '+(r.ante||0)+' ◉';if($('potBig'))$('potBig').textContent='Банк: '+pot+' ◉';renderSeats(r,ps||[]);renderGameState(r,ps||[]);await renderRound(r,ps||[],version);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(messagesLoadedRoom!==currentRoom){const {data:ms}=await sb.from('messages').select('*,profiles(nickname)').eq('room_id',currentRoom).order('created_at').limit(50);$('messages').innerHTML='';(ms||[]).forEach(addMessage);messagesLoadedRoom=currentRoom}await renderHand(r);await renderTableHistory()}
+async function renderRoom(){if(!currentRoom)return;const roomId=currentRoom,version=++roomRenderVersion;const [{data:r},{data:ps}]=await Promise.all([sb.from('rooms').select('*').eq('id',currentRoom).single(),sb.from('room_players').select('user_id,seat_no,table_chips,profiles(nickname,chips,avatar_key)').eq('room_id',currentRoom)]);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(!r)return leaveRoom();$('roomTitle').textContent=r.name;const pot=(r.ante||0)*(ps||[]).filter(p=>p.seat_no!==null).length;if($('bankInfo'))$('bankInfo').textContent='Ставка: '+(r.ante||0)+' ◉';if($('potBig'))$('potBig').textContent='Банк: '+pot+' ◉';renderSeats(r,ps||[]);renderGameState(r,ps||[]);await renderRound(r,ps||[],version);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(messagesLoadedRoom!==currentRoom){const {data:ms}=await sb.from('messages').select('*,profiles(nickname)').eq('room_id',currentRoom).order('created_at').limit(50);$('messages').innerHTML='';(ms||[]).forEach(addMessage);messagesLoadedRoom=currentRoom}await renderHand(r);await renderTableHistory()}
 function renderSeats(r,ps){
-  const occupied=ps.filter(p=>p.seat_no!==null).map(p=>[p.seat_no,p.user_id,p.profiles?.nickname||'',Number(p.table_chips||0)]).sort((a,b)=>a[0]-b[0]);
+  const occupied=ps.filter(p=>p.seat_no!==null).map(p=>[p.seat_no,p.user_id,p.profiles?.nickname||'',Number(p.table_chips||0),p.profiles?.avatar_key||'spade']).sort((a,b)=>a[0]-b[0]);
   const sig=JSON.stringify([r.id,r.max_players,r.game_status,occupied]);
   if(sig===lastSeatSignature&&$('seats')?.children.length===r.max_players)return;
   lastSeatSignature=sig;
@@ -201,7 +228,7 @@ function renderSeats(r,ps){
   for(let i=0;i<r.max_players;i++){
     const p=bySeat.get(i),d=document.createElement('div');
     d.className='seat s'+i+(p?.user_id===user.id?' mine':!p?' free':'');
-    d.innerHTML=p?'<div class="seatAvatar">♠</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div><div class="seatStack">СТІЛ: ◉ '+Number(p.table_chips||0).toLocaleString('uk-UA')+'</div><div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
+    d.innerHTML=p?'<div class="seatAvatar">'+avatarIcon(p.profiles?.avatar_key)+'</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div><div class="seatStack">СТІЛ: ◉ '+Number(p.table_chips||0).toLocaleString('uk-UA')+'</div><div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
     if(!p&&r.game_status!=='playing')d.onclick=()=>takeSeat(i,r);
     if(p&&p.user_id!==user.id){d.title='Натисни, щоб поскаржитися';d.onclick=()=>reportPlayer(p.user_id,p.profiles?.nickname||'Гравець')}
     $('seats').appendChild(d)
