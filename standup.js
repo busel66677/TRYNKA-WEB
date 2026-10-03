@@ -68,7 +68,7 @@ function paintSeats(ps,turnUser){
     const badge=document.createElement('div');
     badge.className='betBadge'+(p.folded?' folded':'');
     const n=document.createElement('span');n.textContent=playerName(seat);
-    const v=document.createElement('b');v.textContent=Number(p.contributed||0)+' ◉';
+    const v=document.createElement('b');v.textContent='ВНІС: '+Number(p.contributed||0)+' ◉';
     badge.append(n,v);seat.appendChild(badge);
   }
 }
