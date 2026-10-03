@@ -138,3 +138,9 @@
 #game #myHand .pullCard{pointer-events:auto!important;touch-action:none!important}
 #game #myHand .cardCover{pointer-events:auto!important;touch-action:none!important;-webkit-user-drag:none!important}
 #game #myHand .cardFace{pointer-events:none!important}
+
+/* v12: robust pull interaction + lock actions while dealer is still dealing */
+#game #myHand{pointer-events:auto!important}
+#game #myHand .pullCard{pointer-events:auto!important;touch-action:none!important;cursor:ns-resize!important}
+#game #myHand .pullCard .cardCover{pointer-events:auto!important;touch-action:none!important;transition:none!important}
+#game #gameActions.dealLocked{pointer-events:none!important;opacity:.42!important}
