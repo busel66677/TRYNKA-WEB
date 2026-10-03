@@ -1,5 +1,5 @@
 /* Dedicated TRYNKA admin cabinet */
-#adminPanel.legacyAdminHidden,#contactAdmin.legacyAdminHidden{display:none!important}
+#adminPanel,#contactAdmin,#adminDialog{display:none!important}
 .adminCabinetBtn{background:linear-gradient(135deg,#e7c85d,#b88d27)!important;color:#171006!important;padding:8px 12px!important}
 .adminCabinet{max-width:1180px;margin:auto}
 .adminCabinetTop{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;margin-bottom:16px;padding:18px;border:1px solid #584a25;border-radius:18px;background:radial-gradient(circle at 70% 0,#3a3218,#11150f 55%,#090d0a)}
