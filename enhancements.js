@@ -9,6 +9,8 @@ function mount(){if(!$('v2Hub')&&$('tablesArea')){$('tablesArea').insertAdjacent
 }
 function league(xp=0){if(xp>=5000)return['Майстер','♛'];if(xp>=2500)return['Золото','◆'];if(xp>=1000)return['Срібло','◇'];if(xp>=300)return['Бронза','●'];return['Новачок','○']}
 async function loadHub(){if(!$('v2Hub')||!me)return;const cutoff=new Date(Date.now()-70000).toISOString();const [{data:rooms},{data:p},{data:achs},{data:mineA},{data:ts}]=await Promise.all([sb.from('rooms').select('id,name,max_players,ante,game_status,spectator_count,room_players(count)').order('created_at',{ascending:false}).limit(8),sb.from('profiles').select('xp,level,wins,games_played,best_win_streak').eq('id',me.id).single(),sb.from('achievements').select('*').order('title'),sb.from('player_achievements').select('achievement_key').eq('user_id',me.id),sb.from('tournaments').select('*,tournament_players(count)').order('created_at',{ascending:false}).limit(6)]);const hot=(rooms||[]).filter(r=>(r.room_players?.[0]?.count||0)>0).slice(0,5);$('hotTables').innerHTML=hot.map(r=>`<div class="hotRow"><div><b>${esc(r.name)}</b><small>${r.game_status==='playing'?'🟢 Грають':'🟡 Очікують'} · 👥 ${r.room_players?.[0]?.count||0}/${r.max_players} · 👁 ${r.spectator_count||0}</small></div><button data-watch="${r.id}">Дивитися</button></div>`).join('')||'<p class="muted">Поки немає активних столів.</p>';const [ln,icon]=league(p?.xp||0);$('leagueBox').innerHTML=`<div class="leagueHero"><span>${icon}</span><div><b>${ln}</b><small>Рівень ${p?.level||1} · ${p?.xp||0} XP</small></div></div><div class="miniStats"><span>🏆 ${p?.wins||0} перемог</span><span>🔥 серія ${p?.best_win_streak||0}</span></div>`;const unlocked=new Set((mineA||[]).map(x=>x.achievement_key));$('achievementsBox').innerHTML=(achs||[]).map(a=>`<div class="achievement ${unlocked.has(a.key)?'unlocked':''}"><span>${unlocked.has(a.key)?'★':'☆'}</span><div><b>${esc(a.title)}</b><small>${esc(a.description)}</small></div></div>`).join('')||'<p class="muted">Досягнення готуються.</p>';$('tournamentsBox').innerHTML=(ts||[]).map(t=>`<div class="tournamentRow"><div><b>${esc(t.name)}</b><small>${t.status==='registration'?'Реєстрація':'Статус: '+esc(t.status)} · ${t.tournament_players?.[0]?.count||0}/${t.max_players}</small></div>${t.status==='registration'?`<button data-tournament="${t.id}">Вступити</button>`:''}</div>`).join('')||'<p class="muted">Найближчих турнірів ще немає.</p>'}
+const ratingAvatarIcons={spade:'♠',cards:'🃏',hat:'🎩',shield:'🛡️',trophy:'🏆',eagle:'🦅',fire:'🔥',star:'⭐',diamond:'💎',crown:'👑'};
+function ratingAvatar(key){return ratingAvatarIcons[key]||'♠'}
 async function leaderboard(){
   let box=$('leaderboardBox');
   if(!box&&$('tablesArea')){
@@ -21,7 +23,7 @@ async function leaderboard(){
 
   const cutoff=Date.now()-70000;
   const {data}=await sb.from('profiles')
-    .select('id,nickname,chips,wins,games_played,online_at,is_admin')
+    .select('id,nickname,chips,wins,games_played,online_at,is_admin,avatar_key')
     .eq('is_bot',false)
     .order('chips',{ascending:false})
     .limit(50);
@@ -32,7 +34,7 @@ async function leaderboard(){
     return `<div class="ratingRow ${online?'online':''} ${you?'you':''}">
       <span class="ratingPos">${i+1}</span>
       <div class="ratingPlayer">
-        <b>${esc(p.nickname)}${p.is_admin?'<em>ADMIN</em>':''}${you?'<small>ВИ</small>':''}</b>
+        <b><span class="ratingAvatar">${ratingAvatar(p.avatar_key)}</span>${esc(p.nickname)}${p.is_admin?'<em>ADMIN</em>':''}${you?'<small>ВИ</small>':''}</b>
         <span>${p.wins||0} перемог · ${p.games_played||0} ігор</span>
       </div>
       <strong>${Number(p.chips||0).toLocaleString('uk-UA')} ◉</strong>
