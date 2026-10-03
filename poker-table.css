@@ -342,3 +342,7 @@
 
 /* reveal pair */
 #game .revealPair{display:grid;grid-template-columns:1fr 28px 1fr;gap:6px;align-items:center}#game .revealPair>div{min-width:0;text-align:center}#game .revealPair>div>b{display:block;margin-bottom:5px;color:#dce8e1;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#game .revealPair>strong{color:#e4c95e;font-size:9px;text-align:center}#game .revealPair .revealCards{display:flex;justify-content:center;gap:3px}@media(max-width:800px){#game .revealPair{grid-template-columns:1fr 20px 1fr;gap:3px}}
+
+/* v17 reveal visibility hotfix */
+#game #revealShowdown:not(.hide){display:block!important;visibility:visible!important;opacity:1!important;z-index:90!important}
+#game #revealShowdown.hide{display:none!important}
