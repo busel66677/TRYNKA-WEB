@@ -62,8 +62,8 @@ function paintSeats(ps,turnUser){
     if(p.folded)seat.classList.add('foldedSeat');
     if(p.user_id===turnUser&&!p.folded)seat.classList.add('turnActive');
 
-    const meta=seat.querySelector('.seatMeta');
-    if(meta)meta.textContent=p.folded?'ВПАВ':'';
+    const state=seat.querySelector('.seatState');
+    if(state)state.textContent=p.folded?'ВПАВ':'';
 
     const badge=document.createElement('div');
     badge.className='betBadge'+(p.folded?' folded':'');
