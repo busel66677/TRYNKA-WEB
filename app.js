@@ -21,6 +21,70 @@ window.addEventListener('trynka:deal-end',()=>{
 });
 function show(id){sections.forEach(x=>$(x)?.classList.add('hide'));$(id)?.classList.remove('hide')}
 function authView(w){$('authLogin').classList.toggle('hide',w!=='login');$('authRegister').classList.toggle('hide',w!=='register')}
+function ensureLobbySupport(){
+  const shell=document.querySelector('#lobby .lobbyShell');
+  if(!shell||$('lobbySupportFooter'))return;
+  const footer=document.createElement('div');
+  footer.id='lobbySupportFooter';
+  footer.className='lobbySupportFooter';
+  footer.innerHTML='<div><span class="supportIcon">V</span><div><b>Потрібна допомога?</b><small>Адміністратор TRYNKA</small></div></div>'+
+    '<a href="viber://chat?number=%2B380979802028" class="viberAdminLink"><span>Viber</span><b>097 980 20 28</b></a>';
+  shell.appendChild(footer);
+}
+
+function ensureProgressUi(){
+  const profileSection=$('profile');
+  const statrow=profileSection?.querySelector('.statrow');
+  if(!profileSection||!statrow)return;
+  if(!$('playerProgress')){
+    const card=document.createElement('div');
+    card.id='playerProgress';
+    card.className='playerProgress';
+    card.innerHTML='<div class="levelBlock">'+
+      '<div class="levelBadge"><span>LVL</span><b id="profileLevel">1</b></div>'+
+      '<div class="xpBlock"><div><b id="profileXp">0 XP</b><span id="profileXpNext">до 2 рівня: 100 XP</span></div><div class="xpTrack"><i id="profileXpFill"></i></div></div>'+
+    '</div>'+
+    '<div class="achievementHead"><div><span class="eyebrow">ДОСЯГНЕННЯ</span><h2>Колекція гравця</h2></div><b id="achievementCount">0/0</b></div>'+
+    '<div id="achievementGrid" class="achievementGrid"></div>';
+    statrow.after(card);
+  }
+}
+
+function achievementMetricValue(a,p){
+  if(a.metric==='games')return Number(p.games_played||0);
+  if(a.metric==='wins')return Number(p.wins||0);
+  if(a.metric==='streak')return Number(p.best_win_streak||0);
+  if(a.metric==='xp')return Number(p.xp||0);
+  if(a.metric==='level')return Number(p.level||1);
+  return 0;
+}
+
+async function renderAchievements(){
+  ensureProgressUi();
+  const [{data:defs},{data:unlocks}]=await Promise.all([
+    sb.from('achievements').select('key,title,description,icon,metric,target,sort_order').order('sort_order'),
+    sb.from('player_achievements').select('achievement_key,unlocked_at').eq('user_id',user.id)
+  ]);
+
+  const unlocked=new Map((unlocks||[]).map(x=>[x.achievement_key,x]));
+  const grid=$('achievementGrid');
+  if(!grid)return;
+
+  grid.innerHTML=(defs||[]).map(a=>{
+    const done=unlocked.has(a.key);
+    const val=achievementMetricValue(a,profile);
+    const progress=Math.min(100,Math.round((val/Math.max(1,Number(a.target||1)))*100));
+    return '<div class="achievementCard '+(done?'unlocked':'locked')+'">'+
+      '<div class="achievementIcon">'+esc(a.icon||'★')+'</div>'+
+      '<div class="achievementText"><b>'+esc(a.title)+'</b><span>'+esc(a.description)+'</span>'+
+      '<div class="achievementProgress"><i style="width:'+progress+'%"></i></div>'+
+      '<small>'+(done?'ВІДКРИТО ✓':Math.min(val,a.target)+' / '+a.target)+'</small></div>'+
+    '</div>';
+  }).join('')||'<p class="emptyHistory">Досягнення готуються.</p>';
+
+  if($('achievementCount'))$('achievementCount').textContent=unlocked.size+'/'+(defs||[]).length;
+}
+
 function ensureBuyInDialog(){
   if($('buyInDialog'))return;
   const d=document.createElement('dialog');
@@ -73,10 +137,50 @@ async function boot(){const {data}=await sb.auth.getSession();if(data.session){u
 $('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert(error.message);if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('Не вдалося увійти. Перевір email, пароль і підтвердження пошти.');user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await loadProfile()};
 $('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
-async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');await refreshLobby();await refreshAdminPanel();subscribeLobby()}
+async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await refreshAdminPanel();subscribeLobby()}
 async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
 $('profileBtn').onclick=async()=>{await renderProfile();show('profile')};document.querySelectorAll('.toLobby').forEach(b=>b.onclick=async()=>{show('lobby');await refreshLobby()});
-async function renderProfile(){$('profileNick').textContent=profile.nickname;$('profileEmail').textContent=user.email||'';$('profileChips').textContent=profile.chips??0;$('profileGames').textContent=profile.games_played??0;$('profileWins').textContent=profile.wins??0;$('profileWinRate').textContent=(profile.games_played?Math.round((profile.wins||0)*100/profile.games_played):0)+'%';const [{data:l},{data:g}]=await Promise.all([sb.from('chip_ledger').select('amount,balance_after,reason,created_at').order('created_at',{ascending:false}).limit(20),sb.from('game_history').select('room_name,result,pot,chip_change,opponents,finished_at').order('finished_at',{ascending:false}).limit(30)]);$('profileBestPot').textContent=((g||[]).filter(x=>x.result==='win').reduce((m,x)=>Math.max(m,Number(x.pot||0)),0))+' ◉';$('chipHistory').innerHTML=(l||[]).map(x=>'<div class="historyRow"><b>'+(x.amount>0?'+':'')+x.amount+' ◉</b><span>'+esc(x.reason)+' · баланс '+x.balance_after+'</span><small>'+new Date(x.created_at).toLocaleString('uk-UA')+'</small></div>').join('')||'<p class="emptyHistory">Операцій ще немає.</p>';$('gameHistory').innerHTML=(g||[]).map(x=>{const label=x.result==='win'?'ПЕРЕМОГА':x.result==='loss'?'ПОРАЗКА':x.result==='draw'?'СВАРА':'СКАСОВАНО',cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';return '<div class="gameHistoryRow"><div><span class="resultTag '+cls+'">'+label+'</span><b>'+esc(x.room_name||'TRYNKA')+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA')+'</small></div><div class="historyMoney '+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉<small>Банк '+x.pot+' ◉</small></div></div>'}).join('')||'<div class="emptyHistory">Історія поки порожня.<br><small>Завершені ігри з’являтимуться тут.</small></div>'}
+async function renderProfile(){
+  ensureLobbySupport();
+  ensureProgressUi();
+
+  const {data:fresh}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  if(fresh)profile=fresh;
+
+  $('profileNick').textContent=profile.nickname;
+  $('profileEmail').textContent=user.email||'';
+  $('profileChips').textContent=profile.chips??0;
+  $('profileGames').textContent=profile.games_played??0;
+  $('profileWins').textContent=profile.wins??0;
+  $('profileWinRate').textContent=(profile.games_played?Math.round((profile.wins||0)*100/profile.games_played):0)+'%';
+
+  const xp=Number(profile.xp||0);
+  const level=Number(profile.level||1);
+  const inLevel=xp%100;
+  if($('profileLevel'))$('profileLevel').textContent=level;
+  if($('profileXp'))$('profileXp').textContent=xp.toLocaleString('uk-UA')+' XP';
+  if($('profileXpNext'))$('profileXpNext').textContent='до '+(level+1)+' рівня: '+(100-inLevel)+' XP';
+  if($('profileXpFill'))$('profileXpFill').style.width=inLevel+'%';
+
+  const [{data:l},{data:g}]=await Promise.all([
+    sb.from('chip_ledger').select('amount,balance_after,reason,created_at').order('created_at',{ascending:false}).limit(20),
+    sb.from('game_history').select('room_name,result,pot,chip_change,opponents,finished_at').order('finished_at',{ascending:false}).limit(30)
+  ]);
+
+  $('profileBestPot').textContent=((g||[]).filter(x=>x.result==='win').reduce((m,x)=>Math.max(m,Number(x.pot||0)),0))+' ◉';
+
+  $('chipHistory').innerHTML=(l||[]).map(x=>
+    '<div class="historyRow"><b>'+(x.amount>0?'+':'')+x.amount+' ◉</b><span>'+esc(x.reason)+' · баланс '+x.balance_after+'</span><small>'+new Date(x.created_at).toLocaleString('uk-UA')+'</small></div>'
+  ).join('')||'<p class="emptyHistory">Операцій ще немає.</p>';
+
+  $('gameHistory').innerHTML=(g||[]).map(x=>{
+    const label=x.result==='win'?'ПЕРЕМОГА':x.result==='loss'?'ПОРАЗКА':x.result==='draw'?'СВАРА':'СКАСОВАНО';
+    const cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';
+    return '<div class="gameHistoryRow"><div><span class="resultTag '+cls+'">'+label+'</span><b>'+esc(x.room_name||'TRYNKA')+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA')+'</small></div><div class="historyMoney '+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉<small>Банк '+x.pot+' ◉</small></div></div>';
+  }).join('')||'<div class="emptyHistory">Історія поки порожня.<br><small>Завершені ігри з’являтимуться тут.</small></div>';
+
+  await renderAchievements();
+}
 $('newRoom').onclick=()=>show('create');
 $('browseTables').onclick=()=>document.getElementById('tablesArea')?.scrollIntoView({behavior:'smooth'});
 $('homeFriends').onclick=()=>document.getElementById('socialArea')?.scrollIntoView({behavior:'smooth'});
