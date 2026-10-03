@@ -31,7 +31,7 @@
 #game .betBadge span{font-size:10px;font-weight:800;color:#dce9e1}
 #game .betBadge b{font-size:12px;font-weight:950;color:#ffe36e}
 #game .betBadge.folded{opacity:.52}
-#game .seat.s0 .betBadge{left:50%;bottom:calc(100% + 7px);transform:translateX(-50%)}
+#game .seat.s0 .betBadge{left:auto;right:calc(100% + 12px);bottom:8px;transform:none}
 #game .seat.s3 .betBadge{left:50%;top:calc(100% + 7px);transform:translateX(-50%)}
 #game .seat.s1 .betBadge,#game .seat.s2 .betBadge,#game .seat.s6 .betBadge{left:calc(100% + 9px);top:50%;transform:translateY(-50%)}
 #game .seat.s4 .betBadge,#game .seat.s5 .betBadge,#game .seat.s7 .betBadge{right:calc(100% + 9px);top:50%;transform:translateY(-50%)}
@@ -52,7 +52,7 @@
 #game .openHand{position:absolute;z-index:50;display:flex;gap:3px;left:50%;top:calc(100% + 7px);transform:translateX(-50%);padding:4px;background:#07110ff3;border:1px solid #ffe36e;border-radius:8px;box-shadow:0 6px 16px #000a;white-space:nowrap}
 #game .openHand b{display:flex;align-items:center;justify-content:center;width:30px;height:42px;background:#fffdf5;color:#111;border:1px solid #ddd3bf;border-radius:4px;font-size:12px;font-weight:950}
 #game .openHand b.red{color:#c51f2d}
-#game .seat.s0 .openHand{top:auto;bottom:calc(100% + 48px)}
+#game .seat.s0 .openHand{left:calc(100% + 12px);right:auto;top:auto;bottom:4px;transform:none}
 #game .seat.s3 .openHand{top:calc(100% + 48px)}
 #game .seat.s1 .openHand,#game .seat.s2 .openHand,#game .seat.s6 .openHand{left:calc(100% + 98px);top:50%;transform:translateY(-50%)}
 #game .seat.s4 .openHand,#game .seat.s5 .openHand,#game .seat.s7 .openHand{left:auto;right:calc(100% + 98px);top:50%;transform:translateY(-50%)}
@@ -121,4 +121,13 @@
   #game .pullCard .cardFace{font-size:16px}
   #game .pullCard .cardCover i{font-size:18px}
   #game .pullCard .cardCover small{font-size:5px}
+}
+
+/* Keep the bottom player's info clear of the local player's hand */
+#game .seat.s0 .betBadge{max-width:150px}
+#game .seat.s0 .betBadge span{max-width:72px;overflow:hidden;text-overflow:ellipsis}
+#game .seat.s0 .openHand{max-width:110px}
+@media(max-width:800px){
+  #game .seat.s0 .betBadge{right:calc(100% + 4px);bottom:4px}
+  #game .seat.s0 .openHand{left:calc(100% + 4px);bottom:2px}
 }
