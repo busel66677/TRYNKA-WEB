@@ -144,3 +144,198 @@
 #game #myHand .pullCard{pointer-events:auto!important;touch-action:none!important;cursor:ns-resize!important}
 #game #myHand .pullCard .cardCover{pointer-events:auto!important;touch-action:none!important;transition:none!important}
 #game #gameActions.dealLocked{pointer-events:none!important;opacity:.42!important}
+
+
+/* v15 — richer game table: player stacks, clearer seats, stronger table hierarchy */
+#game .tableWrap{
+  background:
+    radial-gradient(circle at 50% 12%,#213445 0,#121c24 34%,#080d11 78%);
+  border:1px solid #22323b;
+  box-shadow:inset 0 1px 0 #ffffff0d,0 22px 55px #0008;
+}
+#game .table{
+  background:
+    radial-gradient(circle at 50% 44%,#2d9d58 0,#237c46 34%,#155f38 67%,#0a3d25 100%);
+  border-color:#3e2b1d;
+  box-shadow:
+    inset 0 0 0 3px #9b7448,
+    inset 0 0 0 7px #1a120dcc,
+    inset 0 0 80px #001b0f99,
+    0 25px 55px #000b;
+}
+#game .table:after{
+  content:'TRYNKA';
+  position:absolute;
+  left:50%;top:58%;
+  transform:translate(-50%,-50%);
+  font-size:72px;
+  font-weight:950;
+  letter-spacing:18px;
+  color:#ffffff08;
+  pointer-events:none;
+}
+#game .centerInfo{
+  width:285px;
+  padding:12px 18px 11px;
+  border:1px solid #e4ca6d5c;
+  background:linear-gradient(180deg,#07170ff2,#06110cef);
+  box-shadow:0 14px 30px #0009,inset 0 1px 0 #ffffff0b;
+}
+#game #potBig{
+  text-transform:uppercase;
+  font-size:26px!important;
+  color:#ffe171;
+}
+#game #bankInfo{
+  margin-top:2px;
+  font-size:10px!important;
+  color:#9fc2ad;
+}
+#game #countdown{
+  margin-top:6px;
+  display:inline-flex;
+  justify-content:center;
+  padding:3px 9px;
+  border-radius:999px;
+  background:#ffffff0c;
+  border:1px solid #ffffff12;
+  color:#f2f5f3;
+}
+#game .potPile{
+  height:30px;
+  transform:scale(.76);
+}
+#game .seat{
+  width:150px;
+  min-height:62px;
+  display:grid!important;
+  grid-template-columns:38px 1fr;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px!important;
+  border-radius:18px!important;
+  background:linear-gradient(180deg,#111b1af5,#09110fed)!important;
+  border:1px solid #466554!important;
+  box-shadow:0 9px 22px #000a,inset 0 1px 0 #ffffff0b!important;
+  text-align:left!important;
+}
+#game .seat.mine{
+  border-color:#d9c35f!important;
+  background:linear-gradient(180deg,#1b3025,#0c1712)!important;
+}
+#game .seat.free{
+  grid-template-columns:32px 1fr;
+  opacity:.78;
+  border-style:dashed!important;
+}
+#game .seatAvatar,#game .seatFreePlus{
+  width:36px;height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#285a40,#10271c);
+  border:1px solid #6d9a7f;
+  color:#e9d06e;
+  font-size:17px;
+  box-shadow:inset 0 0 12px #0006;
+}
+#game .seatFreePlus{font-size:20px;color:#87a999}
+#game .seatBody{min-width:0}
+#game .seatName{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+  font-size:12px!important;
+  line-height:1.1;
+  text-align:left!important;
+}
+#game .seatStack{
+  margin-top:5px;
+  color:#f0d16b;
+  font-size:10px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+#game .seatState{
+  min-height:10px;
+  margin-top:2px;
+  color:#ff8f95;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.5px;
+}
+#game .youTag{
+  display:inline-flex;
+  align-items:center;
+  padding:2px 4px;
+  border-radius:999px;
+  background:#d9c35f;
+  color:#171006;
+  font-size:6px;
+  font-weight:950;
+}
+#game .seat.turnActive{
+  border-color:#ffe36e!important;
+  box-shadow:
+    0 0 0 3px #ffe36e20,
+    0 0 28px #ffe36e9c,
+    0 10px 25px #000b!important;
+}
+#game .seat.turnActive:before{
+  content:'▶';
+  position:absolute;
+  left:-17px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#ffe36e;
+  font-size:12px;
+  filter:drop-shadow(0 0 6px #ffe36e);
+}
+#game .seat.turnActive:after{
+  content:'ХІД';
+  top:-16px;
+  padding:3px 9px;
+  font-size:8px;
+}
+#game .betBadge{
+  gap:4px;
+  border-color:#e4ca6d99;
+  background:#08150ff8;
+}
+#game .betBadge span{display:none}
+#game .betBadge b{font-size:11px}
+#game .betBadge:before{
+  content:'●';
+  color:#e8c756;
+  font-size:10px;
+}
+#game .gameActions{
+  border-color:#42554a;
+  background:#07100df7;
+  box-shadow:0 10px 25px #000a,inset 0 1px 0 #ffffff0a;
+}
+#game .actionButtons button{
+  min-height:40px;
+  letter-spacing:.25px;
+}
+#game .actionButtons button[data-action="call"]{background:linear-gradient(135deg,#29d78f,#13a86c)}
+#game .actionButtons button[data-action="raise"]{background:linear-gradient(135deg,#3da0ff,#2767c7);color:white}
+#game .actionButtons button[data-action="reveal"]{background:linear-gradient(135deg,#e8c966,#b99835);color:#171006}
+#game .actionButtons button[data-action="fold"]{background:linear-gradient(135deg,#a9444a,#762b30)}
+#game #roundTurn{
+  padding:5px 13px;
+  border-radius:999px;
+  background:#171d18;
+  border:1px solid #d9c35f55;
+}
+@media(max-width:800px){
+  #game .seat{width:112px;min-height:54px;grid-template-columns:30px 1fr;gap:5px;padding:6px!important}
+  #game .seatAvatar,#game .seatFreePlus{width:29px;height:29px;font-size:13px}
+  #game .seatName{font-size:10px!important}
+  #game .seatStack{font-size:8px}
+  #game .youTag,.adminTag{font-size:5px!important}
+  #game .centerInfo{width:205px;padding:8px 10px}
+  #game #potBig{font-size:20px!important}
+  #game .table:after{font-size:44px;letter-spacing:10px}
+}
