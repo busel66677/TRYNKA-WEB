@@ -21,6 +21,45 @@ window.addEventListener('trynka:deal-end',()=>{
 });
 function show(id){sections.forEach(x=>$(x)?.classList.add('hide'));$(id)?.classList.remove('hide')}
 function authView(w){$('authLogin').classList.toggle('hide',w!=='login');$('authRegister').classList.toggle('hide',w!=='register')}
+const LOGIN_GUARD_KEY='trynka_login_guard_v1';
+function readLoginGuard(){
+  try{
+    const s=JSON.parse(localStorage.getItem(LOGIN_GUARD_KEY)||'{}');
+    if(!s.lastFail||Date.now()-Number(s.lastFail)>15*60*1000)return {fails:0,lastFail:0,blockedUntil:0};
+    return {fails:Number(s.fails||0),lastFail:Number(s.lastFail||0),blockedUntil:Number(s.blockedUntil||0)};
+  }catch{return {fails:0,lastFail:0,blockedUntil:0}}
+}
+function loginWaitSeconds(){
+  const s=readLoginGuard();
+  return Math.max(0,Math.ceil((s.blockedUntil-Date.now())/1000));
+}
+function noteLoginFailure(){
+  const s=readLoginGuard();
+  s.fails+=1;s.lastFail=Date.now();
+  const wait=s.fails>=10?15*60:s.fails>=8?5*60:s.fails>=5?60:s.fails>=3?5:0;
+  s.blockedUntil=Date.now()+wait*1000;
+  localStorage.setItem(LOGIN_GUARD_KEY,JSON.stringify(s));
+  return wait;
+}
+function clearLoginGuard(){localStorage.removeItem(LOGIN_GUARD_KEY)}
+function strongPasswordError(password){
+  if(password.length<10)return 'Пароль має містити щонайменше 10 символів.';
+  if(!/[a-zа-яіїєґ]/i.test(password)||!/[A-ZА-ЯІЇЄҐ]/.test(password))return 'Додай до пароля великі й малі літери.';
+  if(!/\d/.test(password))return 'Додай до пароля хоча б одну цифру.';
+  const low=password.toLowerCase();
+  if(['1234567890','qwerty12345','password123','пароль12345'].some(x=>low.includes(x)))return 'Цей пароль надто простий. Вигадай інший.';
+  return '';
+}
+function ensureLoginSecurityNote(){
+  const form=$('loginForm');
+  if(!form||$('loginSecurityNote'))return;
+  const note=document.createElement('small');
+  note.id='loginSecurityNote';
+  note.className='loginSecurityNote';
+  note.textContent='Захист входу: обмеження повторних невдалих спроб.';
+  form.appendChild(note);
+}
+
 const AVATAR_ICONS={spade:'♠',cards:'🃏',hat:'🎩',shield:'🛡️',trophy:'🏆',eagle:'🦅',fire:'🔥',star:'⭐',diamond:'💎',crown:'👑'};
 function avatarIcon(key){return AVATAR_ICONS[key]||'♠'}
 async function chooseAvatar(key){
@@ -158,10 +197,10 @@ async function askBuyIn(room){
   return await new Promise(resolve=>{buyInResolve=resolve});
 }
 
-$('showRegister').onclick=()=>authView('register'); $('showLogin').onclick=()=>authView('login');
+$('showRegister').onclick=()=>authView('register'); $('showLogin').onclick=()=>authView('login');ensureLoginSecurityNote();
 async function boot(){const {data}=await sb.auth.getSession();if(data.session){user=data.session.user;await loadProfile()}else{show('login');authView('login')}}
-$('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert(error.message);if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
-$('loginForm').onsubmit=async e=>{e.preventDefault();const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('Не вдалося увійти. Перевір email, пароль і підтвердження пошти.');user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await loadProfile()};
+$('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const pwErr=strongPasswordError(password);if(pwErr)return alert(pwErr);const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert('Не вдалося створити акаунт. Перевір дані та спробуй ще раз.');if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
+$('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await loadProfile()};
 $('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
 async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await refreshAdminPanel();subscribeLobby()}
 async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
