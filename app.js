@@ -3,7 +3,7 @@ const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null;
-let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='';
+let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0];
 const $=id=>document.getElementById(id), sections=['login','lobby','profile','create','game'];
 function show(id){sections.forEach(x=>$(x)?.classList.add('hide'));$(id)?.classList.remove('hide')}
 function authView(w){$('authLogin').classList.toggle('hide',w!=='login');$('authRegister').classList.toggle('hide',w!=='register')}
@@ -53,24 +53,81 @@ document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.oncli
 async function renderHand(roomArg){
   if(!currentRoom)return;
   const r=roomArg?.id?roomArg:(await sb.from('rooms').select('*').eq('id',currentRoom).single()).data;
-  if(!r||r.game_status!=='playing'){$('myHand').innerHTML='';lastHandPaint='';clearInterval(dealTimer);return}
+  if(!r||r.game_status!=='playing'){
+    $('myHand').innerHTML='';
+    lastHandPaint='';
+    handPullKey='';
+    handPullY=[0,0,0];
+    clearInterval(dealTimer);
+    return;
+  }
+
   const {data:h}=await sb.from('room_hands').select('cards').eq('room_id',currentRoom).eq('user_id',user.id).maybeSingle();
   if(!h?.cards?.length)return;
   clearInterval(dealTimer);
-  const start=new Date(r.deal_started_at||Date.now()).getTime(),step=1100;
-  const draw=()=>{
-    const elapsed=Math.max(0,Date.now()-start),visible=Math.min(3,Math.floor(elapsed/step)+1);
-    const key=currentRoom+'|'+h.cards.join('|')+'|'+visible;
-    if(key!==lastHandPaint){
-      lastHandPaint=key;
-      $('myHand').innerHTML=h.cards.slice(0,visible).map((c,i)=>'<div class="card dealt '+(/[♠♣]/.test(c)?'black ':'')+'" style="--deal-index:'+i+'">'+esc(c)+'</div>').join('');
-    }
-    const trail=$('dealTrail');
-    if(trail){trail.classList.remove('dealing');trail.innerHTML=''}
-    if(visible>=3)clearInterval(dealTimer)
-  };
-  draw();
-  dealTimer=setInterval(draw,160)
+
+  const key=currentRoom+'|'+(r.deal_started_at||'')+'|'+h.cards.join('|');
+  if(key!==handPullKey){
+    handPullKey=key;
+    handPullY=[0,0,0];
+    lastHandPaint='';
+  }
+
+  if(lastHandPaint===key&&$('myHand')?.querySelectorAll('.pullCard').length===3)return;
+  lastHandPaint=key;
+
+  $('myHand').innerHTML=h.cards.map((c,i)=>
+    '<div class="card pullCard '+(/[♠♣]/.test(c)?'black ':'')+'" data-card-index="'+i+'">'+
+      '<span class="cardFace">'+esc(c)+'</span>'+
+      '<div class="cardCover" data-y="'+Number(handPullY[i]||0)+'"><i>♠</i><small>ТЯГНИ ВНИЗ</small></div>'+
+    '</div>'
+  ).join('');
+
+  $('myHand').querySelectorAll('.pullCard').forEach(card=>{
+    const cover=card.querySelector('.cardCover');
+    const idx=Number(card.dataset.cardIndex);
+    let dragging=false,startY=0,startOffset=Number(handPullY[idx]||0);
+
+    const apply=y=>{
+      const max=Math.max(0,card.clientHeight-14);
+      const next=Math.max(0,Math.min(max,y));
+      handPullY[idx]=next;
+      cover.dataset.y=String(next);
+      cover.style.transform='translateY('+next+'px)';
+      card.classList.toggle('peeked',next>8);
+      card.classList.toggle('mostlyOpen',next>max*.72);
+    };
+
+    apply(startOffset);
+
+    cover.addEventListener('pointerdown',e=>{
+      dragging=true;
+      startY=e.clientY;
+      startOffset=Number(handPullY[idx]||0);
+      cover.setPointerCapture?.(e.pointerId);
+      card.classList.add('pulling');
+      e.preventDefault();
+    });
+
+    cover.addEventListener('pointermove',e=>{
+      if(!dragging)return;
+      apply(startOffset+(e.clientY-startY));
+      e.preventDefault();
+    });
+
+    const end=e=>{
+      if(!dragging)return;
+      dragging=false;
+      card.classList.remove('pulling');
+      try{cover.releasePointerCapture?.(e.pointerId)}catch{}
+      e.preventDefault();
+    };
+    cover.addEventListener('pointerup',end);
+    cover.addEventListener('pointercancel',end);
+  });
+
+  const trail=$('dealTrail');
+  if(trail){trail.classList.remove('dealing');trail.innerHTML=''}
 }
 async function renderTableHistory(){if(!$('tableGameHistory')||!user)return;const {data:g}=await sb.from('game_history').select('room_name,result,pot,chip_change,finished_at').order('finished_at',{ascending:false}).limit(8);$('tableGameHistory').innerHTML=(g||[]).map(x=>{const label=x.result==='win'?'Перемога':x.result==='loss'?'Поразка':x.result==='draw'?'Свара':'Скасовано',cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';return '<div class="sideHistoryRow"><span class="resultDot '+cls+'"></span><div><b>'+label+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</small></div><strong class="'+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉</strong></div>'}).join('')||'<div class="sideHistoryEmpty">Зіграні партії<br>з’являться тут</div>'}
 async function leaveRoom(){++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null}if(channel){await sb.removeChannel(channel);channel=null}show('lobby');await refreshLobby()}
