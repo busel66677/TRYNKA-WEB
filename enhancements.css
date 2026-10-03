@@ -198,3 +198,89 @@
   .lobbySupportFooter{align-items:stretch;flex-direction:column}
   .viberAdminLink{justify-content:center}
 }
+
+
+/* Achievement avatar rewards */
+.avatarRewardHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:12px;
+  margin:14px 0 9px;
+}
+.avatarRewardHead h2{margin:2px 0 0}
+.avatarRewardHead small{color:#788f83;font-size:8px;text-align:right}
+.avatarPicker{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:2px 1px 8px;
+  scrollbar-width:thin;
+}
+.avatarChoice{
+  flex:0 0 74px;
+  min-height:82px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:5px;
+  padding:8px 6px;
+  border-radius:13px;
+  border:1px solid #2f4b3b;
+  background:#0b1a13;
+  color:#a6b7ae;
+  box-shadow:none;
+}
+.avatarChoice span{
+  width:42px;height:42px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#14291d;
+  border:1px solid #46614f;
+  font-size:23px;
+}
+.avatarChoice small{
+  font-size:7px;
+  font-weight:950;
+}
+.avatarChoice.selected{
+  border-color:#d8bc56;
+  background:#1d2816;
+  color:#f1d975;
+  box-shadow:0 0 0 2px #d8bc5618,0 0 17px #d8bc5624;
+}
+.avatarChoice.selected span{
+  border-color:#d8bc56;
+  background:#332a11;
+}
+.achievementAvatarReward{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  width:max-content;
+  max-width:100%;
+  margin-top:5px;
+  padding:3px 6px;
+  border-radius:999px;
+  background:#15251b;
+  border:1px solid #3a513f;
+  color:#c5d6cd;
+  font-size:7px;
+  font-weight:800;
+}
+.achievementAvatarReward span{font-size:12px}
+#profileAvatar{
+  display:grid;
+  place-items:center;
+  font-size:34px!important;
+}
+#game .seatAvatar{
+  font-family:"Segoe UI Emoji","Apple Color Emoji",sans-serif;
+  font-size:20px!important;
+}
+@media(max-width:560px){
+  .avatarRewardHead{align-items:flex-start;flex-direction:column;gap:3px}
+  .avatarRewardHead small{text-align:left}
+  .avatarChoice{flex-basis:68px;min-height:76px}
+}
