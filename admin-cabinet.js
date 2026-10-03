@@ -6,7 +6,7 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let me=null,isAdmin=false,players=[],selectedId=null,currentTab='players',refreshTimer=null;
+let me=null,isAdmin=false,players=[],selectedId=null,currentTab='players',refreshTimer=null,mfaResolve=null,mfaFactorId=null,mfaChallengeId=null;
 const cutoffMs=70000;
 
 function mount(){
@@ -80,6 +80,148 @@ function mount(){
     `;
     document.querySelector('main')?.appendChild(s);
   }
+
+  if(!$('adminMfaDialog')){
+    const d=document.createElement('dialog');
+    d.id='adminMfaDialog';
+    d.className='adminMfaDialog';
+    d.innerHTML=`
+      <div class="adminMfaCard">
+        <div class="adminMfaHead">
+          <div><span class="eyebrow">ADMIN SECURITY</span><h2 id="adminMfaTitle">Двофакторний захист</h2></div>
+          <button type="button" id="adminMfaClose">×</button>
+        </div>
+        <p id="adminMfaText">Для входу в адмін-кабінет потрібен одноразовий код.</p>
+        <div id="adminMfaSetup" class="adminMfaSetup hide">
+          <img id="adminMfaQr" alt="QR для 2FA">
+          <div>
+            <b>1. Відскануй QR-код</b>
+            <span>Google Authenticator, Microsoft Authenticator або інший TOTP-додаток.</span>
+            <small>Ключ: <code id="adminMfaSecret"></code></small>
+          </div>
+        </div>
+        <label class="adminMfaCodeLabel">Код із додатка
+          <input id="adminMfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">
+        </label>
+        <div id="adminMfaError" class="adminMfaError"></div>
+        <button type="button" id="adminMfaVerify" class="adminMfaVerify">Підтвердити код</button>
+        <small class="adminMfaNote">Без другого фактора зміна монет, блокування гравців та інші адмін-дії сервером заборонені.</small>
+      </div>
+    `;
+    document.body.appendChild(d);
+
+    const cancel=()=>{
+      if(mfaResolve){const done=mfaResolve;mfaResolve=null;done(false)}
+      d.close();
+    };
+    $('adminMfaClose').onclick=cancel;
+    d.addEventListener('cancel',e=>{e.preventDefault();cancel()});
+    $('adminMfaVerify').onclick=verifyAdminMfa;
+    $('adminMfaCode').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();verifyAdminMfa()}});
+  }
+}
+
+
+async function beginAdminMfa(){
+  const d=$('adminMfaDialog');
+  const err=$('adminMfaError');
+  const setup=$('adminMfaSetup');
+  const code=$('adminMfaCode');
+  if(!d)return false;
+
+  err.textContent='';
+  code.value='';
+  mfaFactorId=null;
+  mfaChallengeId=null;
+
+  const aal=await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(aal.error){
+    err.textContent=aal.error.message;
+    d.showModal();
+    return await new Promise(resolve=>{mfaResolve=resolve});
+  }
+  if(aal.data?.currentLevel==='aal2')return true;
+
+  const factors=await sb.auth.mfa.listFactors();
+  if(factors.error){
+    err.textContent=factors.error.message;
+    d.showModal();
+    return await new Promise(resolve=>{mfaResolve=resolve});
+  }
+
+  const verified=(factors.data?.totp||[]).find(x=>x.status==='verified');
+
+  if(verified){
+    $('adminMfaTitle').textContent='Підтверди вхід адміністратора';
+    $('adminMfaText').textContent='Введи 6-значний код із твого Authenticator.';
+    setup.classList.add('hide');
+    mfaFactorId=verified.id;
+
+    const challenge=await sb.auth.mfa.challenge({factorId:mfaFactorId});
+    if(challenge.error){
+      err.textContent=challenge.error.message;
+    }else{
+      mfaChallengeId=challenge.data.id;
+    }
+  }else{
+    $('adminMfaTitle').textContent='Увімкни 2FA для адміністратора';
+    $('adminMfaText').textContent='Це одноразове налаштування. Після нього адмін-дії вимагатимуть код із Authenticator.';
+    setup.classList.remove('hide');
+
+    for(const factor of (factors.data?.totp||[]).filter(x=>x.status!=='verified')){
+      try{await sb.auth.mfa.unenroll({factorId:factor.id})}catch{}
+    }
+
+    const enroll=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'TRYNKA Admin'});
+    if(enroll.error){
+      err.textContent=enroll.error.message;
+    }else{
+      mfaFactorId=enroll.data.id;
+      $('adminMfaQr').src=enroll.data.totp.qr_code;
+      $('adminMfaSecret').textContent=enroll.data.totp.secret||'';
+      const challenge=await sb.auth.mfa.challenge({factorId:mfaFactorId});
+      if(challenge.error)err.textContent=challenge.error.message;
+      else mfaChallengeId=challenge.data.id;
+    }
+  }
+
+  d.showModal();
+  setTimeout(()=>code.focus(),120);
+  return await new Promise(resolve=>{mfaResolve=resolve});
+}
+
+async function verifyAdminMfa(){
+  const err=$('adminMfaError');
+  const code=($('adminMfaCode')?.value||'').trim().replace(/\s+/g,'');
+  if(!mfaFactorId||!mfaChallengeId){
+    err.textContent='Не вдалося створити перевірку. Закрий вікно та відкрий адмін-кабінет ще раз.';
+    return;
+  }
+  if(!/^\d{6,8}$/.test(code)){
+    err.textContent='Введи код із Authenticator.';
+    return;
+  }
+
+  $('adminMfaVerify').disabled=true;
+  err.textContent='Перевіряю…';
+  const verify=await sb.auth.mfa.verify({
+    factorId:mfaFactorId,
+    challengeId:mfaChallengeId,
+    code
+  });
+  $('adminMfaVerify').disabled=false;
+
+  if(verify.error){
+    err.textContent='Невірний або прострочений код.';
+    const challenge=await sb.auth.mfa.challenge({factorId:mfaFactorId});
+    if(!challenge.error)mfaChallengeId=challenge.data.id;
+    $('adminMfaCode').select();
+    return;
+  }
+
+  err.textContent='';
+  $('adminMfaDialog').close();
+  if(mfaResolve){const done=mfaResolve;mfaResolve=null;done(true)}
 }
 
 function online(p){return !!p.online_at && Date.now()-new Date(p.online_at).getTime()<cutoffMs}
@@ -92,6 +234,8 @@ function showOnly(id){
 
 async function openAdmin(){
   if(!isAdmin)return;
+  const ok=await beginAdminMfa();
+  if(!ok)return;
   showOnly('adminCabinet');
   await refreshAll();
   clearInterval(refreshTimer);
