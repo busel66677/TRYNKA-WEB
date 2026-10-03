@@ -18,3 +18,59 @@
 .adminSecurityGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.adminSecurityRow{display:grid;gap:3px;padding:9px 0;border-bottom:1px solid #203b2e}.adminSecurityRow b{font-size:11px;color:#e4ce7a}.adminSecurityRow span{font-size:9px;color:#9aaca2;word-break:break-word}.adminSecurityRow small{font-size:8px;color:#61786c}.adminMuted{color:#70877b;text-align:center;padding:25px}
 @media(max-width:850px){.adminPlayersLayout,.adminSecurityGrid{grid-template-columns:1fr}.adminStats{grid-template-columns:1fr 1fr}.adminPlayerDetail{order:-1}.adminPlayerList{max-height:480px}}
 @media(max-width:600px){.adminCabinetTop{grid-template-columns:1fr auto}.adminCabinetTop>button:first-child{grid-column:1/-1;width:max-content}.adminCabinetTop h1{font-size:22px}.adminStats{gap:6px}.adminStats>div{padding:10px}.adminStats b{font-size:15px}.adminTabs{overflow:auto}.adminTabs button{white-space:nowrap}.adminListHead{align-items:stretch;flex-direction:column}.adminListHead input{max-width:none}.adminPlayerColumns,.adminPlayerRow{grid-template-columns:minmax(130px,1fr) 78px 70px;gap:5px}.adminPlayerColumns{font-size:7px;padding-left:5px;padding-right:5px}.adminPlayerRow{padding:8px 5px}.adminAvatar{width:27px;height:27px}.adminPlayerIdentity b{font-size:10px}.adminPlayerRow>strong{font-size:9px}.adminOnlineState{font-size:7px}.adminQuickCoins{grid-template-columns:1fr 1fr}}
+
+
+/* Admin TOTP 2FA */
+.adminMfaDialog{
+  width:min(520px,calc(100vw - 24px));
+  padding:0;
+  border:1px solid #6d5b2c;
+  border-radius:18px;
+  background:#07120d;
+  color:#edf5f0;
+  box-shadow:0 24px 80px #000e;
+}
+.adminMfaDialog::backdrop{background:#020705d6;backdrop-filter:blur(4px)}
+.adminMfaCard{padding:18px}
+.adminMfaHead{display:flex;justify-content:space-between;align-items:start;gap:14px}
+.adminMfaHead h2{margin:3px 0 0}
+#adminMfaClose{
+  width:34px;height:34px;padding:0;border-radius:50%;
+  background:#16241c;color:#a9bbb2;border:1px solid #34483c;font-size:20px
+}
+#adminMfaText{color:#8ea398;font-size:11px;line-height:1.45}
+.adminMfaSetup{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  gap:14px;
+  align-items:center;
+  margin:14px 0;
+  padding:12px;
+  border:1px solid #314a39;
+  border-radius:14px;
+  background:#0c1b13;
+}
+.adminMfaSetup img{
+  width:150px;height:150px;
+  background:#fff;border-radius:10px;padding:6px;box-sizing:border-box
+}
+.adminMfaSetup b,.adminMfaSetup span,.adminMfaSetup small{display:block}
+.adminMfaSetup span{margin-top:5px;color:#93a89c;font-size:9px;line-height:1.4}
+.adminMfaSetup small{margin-top:9px;color:#778e82;font-size:8px;word-break:break-all}
+.adminMfaSetup code{color:#ecd16f}
+.adminMfaCodeLabel{display:grid;gap:6px;margin-top:12px;color:#92a79b;font-size:10px}
+.adminMfaCodeLabel input{
+  padding:13px;text-align:center;letter-spacing:5px;font-size:22px;font-weight:900;
+  background:#06100b;color:#fff;border:1px solid #365441;border-radius:11px
+}
+.adminMfaCodeLabel input:focus{outline:none;border-color:#e2c55e;box-shadow:0 0 0 3px #e2c55e18}
+.adminMfaError{min-height:20px;margin-top:7px;color:#ff858c;font-size:9px;font-weight:800}
+.adminMfaVerify{
+  width:100%;padding:12px;margin-top:2px;
+  background:linear-gradient(135deg,#e4c861,#b99734);color:#171006;font-weight:950
+}
+.adminMfaNote{display:block;margin-top:10px;color:#6f8579;font-size:8px;line-height:1.4}
+@media(max-width:560px){
+  .adminMfaSetup{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .adminMfaSetup img{width:170px;height:170px}
+}
