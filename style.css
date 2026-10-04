@@ -842,3 +842,40 @@ body:has(#lobby:not(.hide)){
     gap:12px!important;
   }
 }
+
+
+/* v47 — richer main-menu background */
+body:has(#lobby:not(.hide)){
+  background:
+    radial-gradient(circle at 78% 13%,rgba(229,190,68,.15) 0,rgba(229,190,68,.04) 17%,transparent 34%),
+    radial-gradient(circle at 13% 22%,rgba(18,132,84,.30) 0,rgba(10,75,50,.12) 24%,transparent 42%),
+    radial-gradient(circle at 56% 78%,rgba(8,93,59,.16),transparent 36%),
+    linear-gradient(135deg,#020a07 0%,#03140e 34%,#06251a 62%,#020b08 100%)!important;
+  background-attachment:fixed!important;
+}
+#lobby:before{
+  content:""!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:-2!important;
+  pointer-events:none!important;
+  opacity:.42!important;
+  background:
+    repeating-linear-gradient(115deg,rgba(255,255,255,.012) 0 1px,transparent 1px 7px),
+    repeating-linear-gradient(25deg,rgba(242,204,93,.008) 0 1px,transparent 1px 11px),
+    radial-gradient(ellipse at center,transparent 38%,rgba(0,0,0,.44) 100%)!important;
+}
+#lobby:after{
+  content:"♠"!important;
+  position:fixed!important;
+  right:-7vw!important;
+  top:11vh!important;
+  z-index:-1!important;
+  pointer-events:none!important;
+  font-size:min(43vw,590px)!important;
+  line-height:1!important;
+  color:rgba(225,190,76,.030)!important;
+  -webkit-text-stroke:2px rgba(225,190,76,.018)!important;
+  filter:drop-shadow(0 0 80px rgba(12,154,94,.09))!important;
+  transform:rotate(9deg)!important;
+}
