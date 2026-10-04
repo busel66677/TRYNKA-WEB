@@ -20,7 +20,8 @@
 #game .streakTag{
   display:inline-flex;
   align-items:center;
-  margin-left:4px;
+  width:max-content;
+  margin:3px auto 0;
   padding:2px 5px;
   border-radius:999px;
   background:#35170d;
@@ -232,3 +233,5 @@
   .themePicker{grid-template-columns:1fr 1fr}
   .themeChoice{min-height:104px;padding:7px}
 }
+
+.adminAnalyticsBadges{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
