@@ -304,10 +304,31 @@ async function syncUi(){
         started:new Date(g.turn_started_at||g.created_at).getTime(),
         seconds:Number(r?.turn_seconds||30)
       };
+
+      // Fallback UI sync: do not rely only on Realtime for the active turn.
+      const mineRound=(ps||[]).find(p=>p.user_id===me?.id);
+      const canStillPlay=!!mineRound&&!mineRound.folded;
+      const actionBox=$('gameActions');
+      if(actionBox)actionBox.classList.toggle('hide',!canStillPlay);
+      if($('roundPot'))$('roundPot').textContent='Банк: '+Number(g.pot||0)+' ◉';
+      if($('roundBet'))$('roundBet').textContent='Ставка: '+Number(g.current_bet||r?.ante||0)+' ◉';
+      if($('tableRoundLabel'))$('tableRoundLabel').textContent='Коло '+Number(g.round_no||1);
+      if(canStillPlay){
+        const myTurn=g.turn_user_id===me?.id;
+        const maxBet=Math.max(1,Number(r?.ante||1)*100);
+        document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
+          let disabled=!myTurn;
+          if(b.dataset.action==='reveal'&&Number(g.round_no||1)<2)disabled=true;
+          if(b.dataset.action==='raise'&&Number(g.current_bet||0)>=maxBet)disabled=true;
+          b.disabled=disabled;
+        });
+      }
+
       if($('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
       if($('countdown'))$('countdown').textContent='КОЛО '+Number(g.round_no||1);
     }else{
       timerState=null;
+      $('gameActions')?.classList.add('hide');
       if($('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
     }
 
