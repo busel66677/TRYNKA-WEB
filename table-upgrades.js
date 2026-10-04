@@ -248,5 +248,5 @@ window.addEventListener('online',async()=>{
 });
 document.addEventListener('pointerdown',primeAudio,{once:true,passive:true});
 
-setInterval(poll,700);
+setInterval(poll,1800);
 poll();
