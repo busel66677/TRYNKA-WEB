@@ -167,7 +167,7 @@ async function poll(){
     await getMe();
     const [{data:room},{data:gr},{data:ps}]=await Promise.all([
       sb.from('rooms').select('id,game_status,countdown_started_at').eq('id',roomId).maybeSingle(),
-      sb.from('game_rounds').select('id,status,turn_user_id,dealer_user_id,dealer_seat,winner_id,result_note,finished_at,created_at').eq('room_id',roomId).order('id',{ascending:false}).limit(1).maybeSingle(),
+      sb.from('game_rounds').select('id,status,turn_user_id,dealer_user_id,dealer_seat,winner_id,result_note,pot,dealer_fee,finished_at,created_at').eq('room_id',roomId).order('id',{ascending:false}).limit(1).maybeSingle(),
       sb.from('room_players').select('user_id,seat_no').eq('room_id',roomId).not('seat_no','is',null)
     ]);
     if(!room)return;
@@ -211,11 +211,12 @@ async function poll(){
       const key=gr.id+':'+gr.finished_at;
       if(age<6000&&key!==lastWinnerKey){
         lastWinnerKey=key;
-        let text=gr.result_note||'Роздачу завершено';
+        let text=gr.result_note==='Свара'?'СВАРА · БАНК '+Number(gr.pot||0)+' ◉ ПЕРЕХОДИТЬ ДАЛІ':(gr.result_note||'Роздачу завершено');
         let win=false;
         if(gr.winner_id){
           const {data:w}=await sb.from('profiles').select('nickname').eq('id',gr.winner_id).maybeSingle();
-          text=gr.winner_id===me?.id?'ВИ ПЕРЕМОГЛИ!':'ПЕРЕМІГ '+String(w?.nickname||'ГРАВЕЦЬ').toUpperCase();
+          const payout=Math.max(0,Number(gr.pot||0)-Number(gr.dealer_fee||0));
+          text=(gr.winner_id===me?.id?'ВИ ПЕРЕМОГЛИ!':'ПЕРЕМІГ '+String(w?.nickname||'ГРАВЕЦЬ').toUpperCase())+' · +'+payout+' ◉';
           win=gr.winner_id===me?.id;
         }
         showOutcome(text,win);

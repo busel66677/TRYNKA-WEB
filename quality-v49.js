@@ -33,11 +33,13 @@ function mountDialogs(){
       '<label><span><b>🔊 Звуки</b><small>Карти, ставки, перемога</small></span><input id="settingSound" type="checkbox"></label>'+
       '<label><span><b>📳 Вібрація</b><small>Коли настає ваш хід</small></span><input id="settingVibrate" type="checkbox"></label>'+
       '<label><span><b>🔔 Сповіщення</b><small>Коли вкладка неактивна</small></span><input id="settingNotify" type="checkbox"></label>'+
+      '<label><span><b>🎴 Швидкість роздачі</b><small>Повільно, нормально, швидко або без анімації</small></span><select id="settingAnimSpeed"><option value="slow">Повільно</option><option value="normal">Нормально</option><option value="fast">Швидко</option><option value="off">Без анімації</option></select></label>'+
       '</div><button id="requestNotifyPermission" class="qualitySecondary">Дозволити сповіщення браузера</button><button class="qualityPrimary" data-close-settings>Готово</button>';
     document.body.appendChild(d);
     d.querySelectorAll('[data-close-settings]').forEach(b=>b.onclick=()=>d.close());
     const bind=(id,key)=>{const x=$(id);x.checked=localStorage.getItem(key)!=='off';x.onchange=()=>localStorage.setItem(key,x.checked?'on':'off')};
     bind('settingSound','trynkaSound');bind('settingVibrate','trynkaVibrate');bind('settingNotify','trynkaNotify');
+    const speed=$('settingAnimSpeed');speed.value=localStorage.getItem('trynkaAnimSpeed')||'normal';speed.onchange=()=>localStorage.setItem('trynkaAnimSpeed',speed.value);
     $('requestNotifyPermission').onclick=async()=>{
       if(!('Notification'in window))return alert('Цей браузер не підтримує сповіщення.');
       const p=await Notification.requestPermission();

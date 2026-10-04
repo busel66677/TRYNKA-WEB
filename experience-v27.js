@@ -212,8 +212,8 @@ async function updateFairBadge(gr){
     const fair=await verifyFairness(gr.id);
     b.classList.toggle('verified',fair.ok);
     b.classList.toggle('failed',!fair.ok);
-    b.textContent=fair.ok?'✓ Роздача перевірена':'⚠ Перевірка роздачі';
-    b.title=fair.commitment?'SHA-256: '+fair.commitment:fair.label;
+    b.textContent=fair.ok?'✓ Чесна роздача':'⚠ Не вдалося перевірити';
+    b.title=fair.ok?'Колоду було зафіксовано до роздачі й перевірено після завершення.':fair.label;
     b.dataset.verified=fair.ok?'1':'0';
     lastFairRound=gr.id;
     return;

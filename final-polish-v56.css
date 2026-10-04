@@ -1,0 +1,27 @@
+/* final table polish v56 */
+#game .spectatorModeBadge{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:999px;background:#173427;border:1px solid #5b8d70;color:#bfe4cf;font-size:9px;font-weight:900}
+#game.spectatorMode .gameActions,#game.spectatorMode #myHand,#game.spectatorMode #inviteBtn,#game.spectatorMode #chatForm{display:none!important}
+.spectatorNotice{margin:0 auto 8px;width:max-content;max-width:92%;padding:7px 12px;border:1px solid #355c48;border-radius:999px;background:#081710;color:#a9c5b6;font-size:10px;text-align:center}
+.roundHistoryBtn{margin-left:auto;padding:4px 8px;border-radius:8px;background:#10261b;color:#e6cf74;border:1px solid #56694f;font-size:9px}
+.roundHistoryDialog{width:min(680px,94vw);max-height:82vh;overflow:auto;background:#06120d;color:#fff;border:1px solid #8e7838;border-radius:16px;padding:16px;box-shadow:0 24px 70px #000c}
+.roundHistoryDialog::backdrop{background:#010604c7;backdrop-filter:blur(4px)}
+.historyHead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}.historyHead h2{margin:3px 0}.historyHead button{font-size:20px;padding:4px 10px;background:#11231a;color:#fff}
+.roundHistoryRow{width:100%;display:grid;grid-template-columns:1fr auto;gap:4px 12px;text-align:left;margin:6px 0;padding:10px 12px;background:#0a1c14;color:#fff;border:1px solid #294839;border-radius:11px}.roundHistoryRow b{color:#e7ca66}.roundHistoryRow small{grid-column:1/-1;color:#829c8e}
+.roundDetail{margin:-2px 6px 10px;padding:8px 10px;border-left:2px solid #c5a64a;background:#07140e}.roundDetail div{display:grid;grid-template-columns:62px 100px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid #ffffff0d;font-size:10px}.roundDetail time{color:#7e9588}.roundDetail span{color:#c4d4cb}
+#game #fairDealBadge{cursor:pointer}
+.settingRows select{width:auto;min-width:140px;background:#07130d;color:#fff;border:1px solid #315944;border-radius:9px;padding:8px}
+#game .dealerFlyingCard{transition-duration:var(--deal-duration,640ms)!important}
+@media(max-width:650px){
+  #game .tableWrap{padding-left:2px!important;padding-right:2px!important;overflow:visible!important}
+  #game .table{width:98%!important;height:590px!important}
+  #game .seat{width:82px!important;min-height:46px!important;padding:4px 5px!important}
+  #game .seatName{font-size:9px!important}
+  #game .seatStack{font-size:8px!important}
+  #game .seat.s1,#game .seat.s2,#game .seat.s6{left:-4px!important}
+  #game .seat.s4,#game .seat.s5,#game .seat.s7{right:-4px!important}
+  #game .centerInfo{width:48%!important;min-width:180px!important}
+  #game .gameActions{width:98%!important}
+  #game .gameSide{grid-template-columns:1fr!important}
+  #game .tableHistory{max-height:145px!important}
+  .roundHistoryDialog{padding:12px}.roundDetail div{grid-template-columns:52px 78px 1fr;font-size:9px}
+}
