@@ -57,6 +57,17 @@ async function touchPresence(){
 
 async function myRoom(){
   const u=await getMe();if(!u)return null;
+  try{
+    const saved=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');
+    if(saved.view==='game'&&saved.roomId){
+      const {data}=await sb.from('room_players')
+        .select('room_id,seat_no,table_chips')
+        .eq('room_id',Number(saved.roomId))
+        .eq('user_id',u.id)
+        .maybeSingle();
+      if(data)return data;
+    }
+  }catch{}
   const {data}=await sb.from('room_players').select('room_id,seat_no,table_chips').eq('user_id',u.id).order('joined_at',{ascending:false}).limit(1).maybeSingle();
   return data||null;
 }
