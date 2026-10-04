@@ -719,3 +719,112 @@
     line-height:20px!important;
   }
 }
+
+
+/* v38 — final mobile table pass: all requested points */
+@media(max-width:800px){
+  /* 1. Compact top bar */
+  #game .gameBar{
+    min-height:42px!important;
+    margin:0 7px 6px!important;
+    padding:5px 7px!important;
+    border-radius:12px!important;
+  }
+  #game .gameIdentity .eyebrow{display:none!important}
+  #game .gameIdentity h2{font-size:13px!important;line-height:1.05!important}
+  #game #leaveRoom{padding:6px 7px!important;font-size:9px!important}
+  #game .gameWallet{padding:5px 6px!important;font-size:8px!important}
+  #game .gameTopActions button{padding:6px!important;font-size:8px!important}
+
+  /* 2. Give the table almost the whole phone screen */
+  #game .tableWrap{
+    height:calc(100svh - 112px)!important;
+    min-height:540px!important;
+    padding:6px 2px 66px!important;
+    border-radius:14px!important;
+  }
+  #game .table{
+    width:calc(100% - 14px)!important;
+    height:calc(100% - 56px)!important;
+    max-height:none!important;
+    border-radius:44%/36%!important;
+  }
+
+  /* 3. Smaller, cleaner seats with no oversized panels */
+  #game .seat{
+    width:78px!important;
+    min-height:38px!important;
+    grid-template-columns:21px 1fr!important;
+    gap:3px!important;
+    padding:4px!important;
+    border-radius:11px!important;
+  }
+  #game .seat.free{width:64px!important;min-height:31px!important}
+  #game .seatAvatar,#game .seatFreePlus{width:20px!important;height:20px!important;font-size:9px!important}
+  #game .seatName{font-size:7px!important}
+  #game .seatStack{font-size:6px!important;margin-top:1px!important}
+  #game .seatContribution{font-size:5.5px!important;padding:1px 4px!important;margin-top:1px!important}
+  #game .seatState{font-size:5.5px!important;min-height:6px!important;margin-top:1px!important}
+
+  /* 4. Compact bank and dealer/deck in the centre */
+  #game .centerInfo{
+    top:25%!important;
+    width:142px!important;
+    padding:5px 7px!important;
+    border-radius:11px!important;
+  }
+  #game .centerInfo #potBig{font-size:15px!important;line-height:18px!important}
+  #game .centerInfo #bankInfo{font-size:7px!important;line-height:1.2!important}
+  #game .centerInfo #countdown{font-size:7px!important;padding:2px 5px!important;max-width:132px!important}
+  #game .centerInfo .potPile{bottom:-15px!important;transform:translateX(-50%) scale(.42)!important}
+  #game .dealerBadge{width:38px!important;height:38px!important;top:50%!important}
+  #game .deckStack{width:22px!important;height:31px!important;left:calc(50% + 35px)!important;top:51%!important}
+
+  /* 5. Cards stay low, centered and do not cover controls */
+  #game .hand{bottom:38px!important;height:62px!important}
+  #game .card{width:42px!important;height:60px!important;font-size:12px!important}
+  #game .openHand.revealHand{gap:2px!important;padding:2px!important}
+  #game .openHand.revealHand b{width:22px!important;height:31px!important;font-size:8px!important}
+
+  /* 6. Four actions always in one row */
+  #game .gameActions{
+    bottom:-61px!important;
+    width:calc(100% - 10px)!important;
+    padding:4px!important;
+    border-radius:10px!important;
+  }
+  #game .roundMeta{margin-bottom:3px!important}
+  #game .supportSummary{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:2px!important;margin-bottom:3px!important}
+  #game .supportSummary>span{min-height:24px!important;padding:2px!important;font-size:5px!important}
+  #game .supportSummary b{font-size:7px!important}
+  #game .actionButtons{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:3px!important;
+  }
+  #game .actionButtons button{
+    min-width:0!important;
+    min-height:32px!important;
+    padding:5px 1px!important;
+    font-size:7.5px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  /* 7. No side panels on phone */
+  #game .gameSide{display:none!important}
+
+  /* keep important table text visually stable */
+  #game #bankInfo,#game #potBig,#game #countdown,#game #roundTurn{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+@media(max-width:390px){
+  #game .tableWrap{min-height:505px!important}
+  #game .seat{width:73px!important}
+  #game .seat.free{width:60px!important}
+  #game .card{width:40px!important;height:57px!important}
+  #game .actionButtons button{font-size:7px!important}
+}
