@@ -57,20 +57,6 @@ function mountUtilities(){
     $('openSettings').onclick=()=>$('settingsDialog').showModal();
   }
 }
-async function mountAdminTest(){
-  if(!isAdmin)return;
-  const welcome=document.querySelector('#lobby .welcomeBar');if(!welcome||$('adminQuickTest'))return;
-  const b=document.createElement('button');b.id='adminQuickTest';b.className='adminQuickTest';b.innerHTML='🧪 <b>Швидкий тест</b><small>Ви + BOT</small>';
-  welcome.appendChild(b);
-  b.onclick=async()=>{
-    b.disabled=true;b.innerHTML='⏳ Створюємо…';
-    const {data,error}=await sb.rpc('admin_create_test_room');
-    if(error){b.disabled=false;b.innerHTML='🧪 <b>Швидкий тест</b><small>Ви + BOT</small>';return alert(error.message)}
-    const rid=Number(data||0);
-    if(rid&&window.TRYNKA_OPEN_ROOM)await window.TRYNKA_OPEN_ROOM(rid);
-    b.disabled=false;b.innerHTML='🧪 <b>Швидкий тест</b><small>Ви + BOT</small>';
-  };
-}
 function ensureStrength(){
   const table=document.querySelector('#game .table');if(!table)return null;
   let b=$('handStrengthBadge');
@@ -123,9 +109,8 @@ async function init(){
   mountDialogs();mountUtilities();mountErrorLogging();
   const {data:{user}}=await sb.auth.getUser();me=user||null;
   if(me){const {data:p}=await sb.from('profiles').select('is_admin').eq('id',me.id).maybeSingle();isAdmin=!!p?.is_admin}
-  await mountAdminTest();
   await updateStrength();await enhanceSvara();await mountAdminErrors();
-  setInterval(()=>{mountUtilities();mountAdminTest();updateStrength();enhanceSvara();mountAdminErrors()},1200);
+  setInterval(()=>{mountUtilities();updateStrength();enhanceSvara();mountAdminErrors()},1200);
   document.addEventListener('trynka:reconnected',()=>{updateStrength();enhanceSvara()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

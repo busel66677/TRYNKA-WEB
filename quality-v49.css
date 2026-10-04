@@ -7,7 +7,6 @@
 }
 .homeUtilityBar button>span{grid-row:1/3;width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#123d2b;border:1px solid #d1ad4d;color:#f0cc68;font-size:20px}
 .homeUtilityBar button b{font-size:15px}.homeUtilityBar button small{color:#91a89c;font-size:10px}
-.adminQuickTest{margin-left:auto;align-self:center;display:flex;flex-direction:column;gap:2px;min-width:135px;padding:10px 14px;background:linear-gradient(145deg,#2a2410,#111a12);border:1px solid #d5b651;color:#f3d271}
 .adminQuickTest small{font-size:9px;color:#b9aa75}
 .qualityDialog{width:min(760px,92vw);max-height:86vh;overflow:auto;padding:20px;background:linear-gradient(145deg,#071a12,#04100b);border:1px solid #c5a94a;color:#fff;box-shadow:0 30px 80px #000c}
 .qualityDialog::backdrop{background:#010705cc;backdrop-filter:blur(5px)}
@@ -20,7 +19,6 @@
 .adminClientErrorsCard{margin-bottom:12px}.adminSecurityRow.clientError{border-left:3px solid #d76a71;padding-left:10px}
 @media(max-width:650px){
   .homeUtilityBar{grid-template-columns:1fr}
-  .adminQuickTest{min-width:105px;padding:8px 10px;font-size:10px}
   .rulesGrid{grid-template-columns:1fr}.rulesWide{grid-column:auto}
   .qualityDialog{padding:14px}.qualityDialogHead h2{font-size:24px}
   #game .handStrengthBadge{bottom:178px;min-width:98px;padding:5px 8px}
