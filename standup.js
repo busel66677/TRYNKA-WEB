@@ -298,7 +298,6 @@ async function syncUi(){
         seconds:Number(r?.turn_seconds||30)
       };
       if($('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
-      if($('bankInfo'))$('bankInfo').textContent='Поточна ставка: '+Number(g.current_bet||r?.ante||0)+' ◉';
       if($('countdown'))$('countdown').textContent='КОЛО '+Number(g.round_no||1);
     }else{
       timerState=null;
