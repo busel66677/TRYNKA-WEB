@@ -36,6 +36,7 @@ function mount(){
       </div>
 
       <div id="adminStats" class="adminStats"></div>
+      <div id="adminAnalytics" class="adminAnalytics"></div>
 
       <div class="adminTabs">
         <button data-admin-tab="players" class="active">👤 Гравці</button>
@@ -425,17 +426,39 @@ async function loadSecurity(){
 }
 
 async function renderStats(){
-  if(!players.length)await loadPlayers();
-  const {data:rooms}=await sb.from('rooms').select('id,game_status');
-  const onlineCount=players.filter(online).length;
-  const chips=players.reduce((s,p)=>s+Number(p.chips||0),0);
-  const active=(rooms||[]).filter(r=>r.game_status==='playing').length;
   const box=$('adminStats');if(!box)return;
+
+  const {data:stats,error}=await sb.rpc('get_admin_dashboard_stats');
+  if(error){
+    box.innerHTML='<div><span>Статистика</span><b>—</b></div>';
+    if($('adminAnalytics'))$('adminAnalytics').innerHTML='<div class="adminPanelCard"><p class="adminMuted">Не вдалося завантажити аналітику.</p></div>';
+    return;
+  }
+
+  const s=stats||{};
   box.innerHTML=`
-    <div><span>Гравців</span><b>${players.length}</b></div>
-    <div><span>Онлайн</span><b class="green">${onlineCount}</b></div>
-    <div><span>Монет у гравців</span><b>${fmt(chips)} ◉</b></div>
-    <div><span>Активних ігор</span><b>${active}</b></div>
+    <div><span>Гравців</span><b>${fmt(s.players_total)}</b></div>
+    <div><span>Онлайн</span><b class="green">${fmt(s.online)}</b></div>
+    <div><span>Активних ігор</span><b>${fmt(s.active_games)}</b></div>
+    <div><span>Ігор сьогодні</span><b>${fmt(s.games_today)}</b></div>
+    <div><span>Середній банк</span><b>${fmt(s.avg_pot_today)} ◉</b></div>
+    <div><span>Нових сьогодні</span><b>${fmt(s.new_players_today)}</b></div>
+    <div><span>Подій безпеки</span><b>${fmt(s.security_events_today)}</b></div>
+    <div><span>Підозрілих</span><b class="${Number(s.suspicious_today||0)>0?'warn':''}">${fmt(s.suspicious_today)}</b></div>
+  `;
+
+  const top=Array.isArray(s.top_players)?s.top_players:[];
+  const analytics=$('adminAnalytics');
+  if(analytics)analytics.innerHTML=`
+    <div class="adminPanelCard adminTodayCard">
+      <div class="adminAnalyticsHead">
+        <div><span class="eyebrow">TODAY</span><h2>Найактивніші гравці</h2></div>
+        <span class="adminErrorBadge">Помилок: <b>${fmt(s.errors_today)}</b></span>
+      </div>
+      <div class="adminTopPlayers">
+        ${top.length?top.map((p,i)=>`<div><span>#${i+1}</span><b>${esc(p.nickname)}</b><small>${fmt(p.games)} ігор · ${fmt(p.wins)} перемог</small></div>`).join(''):'<p class="adminMuted">Сьогодні ще не було завершених ігор.</p>'}
+      </div>
+    </div>
   `;
 }
 
