@@ -350,7 +350,7 @@ async function refreshLobby(){
       '<div class="roomMeta">'+
         '<span class="pill '+(playing?'playing':'live')+'">'+(playing?'● Грають':'● Очікує')+'</span>'+
         '<span class="pill">👥 '+count+'/'+r.max_players+'</span>'+
-        '<span class="pill">👁 '+Number(r.spectator_count||0)+'</span>'+
+
         '<span class="pill">◉ '+r.ante+'</span>'+
         '<span class="pill">⏱ '+r.turn_seconds+'с</span>'+
       '</div></div>'+
