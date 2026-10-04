@@ -360,7 +360,8 @@ async function init(){
   document.addEventListener('pointerdown',primeTurnAudio,{once:true,passive:true});
   await syncUi();
   await touchPresence();
-  setInterval(syncUi,1200);
+  document.addEventListener('trynka:game-state',()=>syncUi());
+  setInterval(syncUi,6000);
   setInterval(tickTimer,200);
   setInterval(touchPresence,10000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)touchPresence()});
