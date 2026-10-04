@@ -4,6 +4,7 @@ const cfg=window.TRYNKA_CONFIG;
 if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
 let me=null,currentRoom=null,socialChannel=null,seatMap=new Map(),seatMapAt=0,lastThemeKey='',themeBusy=false;
 
@@ -56,8 +57,8 @@ async function showSocialEvent(ev){
   const pop=document.createElement('div');
   pop.className='socialPop '+(ev.kind==='emoji'?'emoji':'phrase');
   pop.innerHTML=ev.kind==='emoji'
-    ? '<b>'+ev.payload+'</b>'
-    : '<small>'+who.nickname+'</small><b>'+ev.payload+'</b>';
+    ? '<b>'+esc(ev.payload)+'</b>'
+    : '<small>'+esc(who.nickname)+'</small><b>'+esc(ev.payload)+'</b>';
   seat.appendChild(pop);
   requestAnimationFrame(()=>pop.classList.add('show'));
   setTimeout(()=>{pop.classList.remove('show');setTimeout(()=>pop.remove(),220)},1700);
