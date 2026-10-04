@@ -828,3 +828,47 @@
   #game .card{width:40px!important;height:57px!important}
   #game .actionButtons button{font-size:7px!important}
 }
+
+
+/* v39 — keep own cards clear of the bottom player */
+#game .hand{
+  bottom:34px!important;
+  z-index:42!important;
+}
+#game #myHand{
+  bottom:34px!important;
+}
+#game .seat.s0{
+  bottom:116px!important;
+}
+#game .seat.s0 .betBadge{
+  bottom:54px!important;
+  right:auto!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+}
+#game .seat.s0 .openHand{
+  bottom:54px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+}
+#game .handStrengthBadge{
+  bottom:132px!important;
+}
+
+@media(max-width:650px){
+  #game .hand,
+  #game #myHand{
+    bottom:28px!important;
+  }
+  #game .seat.s0{
+    bottom:126px!important;
+  }
+  #game .seat.s0 .betBadge,
+  #game .seat.s0 .openHand{
+    bottom:48px!important;
+  }
+  #game .handStrengthBadge{
+    bottom:142px!important;
+  }
+}
