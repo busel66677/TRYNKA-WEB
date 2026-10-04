@@ -5,7 +5,7 @@ const animFactor=()=>({slow:1.45,normal:1,fast:.65,off:.08}[localStorage.getItem
 const sleep=ms=>new Promise(r=>setTimeout(r,Math.max(1,Math.round(ms*animFactor()))));
 
 function targets(){
-  return [...document.querySelectorAll('#seats .seat:not(.free)')]
+  return [...document.querySelectorAll('#seats .seat.roundEligible:not(.free)')]
     .sort((a,b)=>+(a.className.match(/s(\d+)/)?.[1]||0)-+(b.className.match(/s(\d+)/)?.[1]||0));
 }
 function freshTarget(oldTarget){
