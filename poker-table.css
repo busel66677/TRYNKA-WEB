@@ -679,3 +679,43 @@
   #game .seat{width:80px!important}
   #game .seat.free{width:66px!important}
 }
+
+
+/* v33 — stable center info, bank number always visible */
+#game .centerInfo{position:absolute!important;overflow:visible!important}
+#game .centerInfo #potBig{
+  position:relative!important;
+  z-index:4!important;
+  display:block!important;
+  padding:2px 8px!important;
+  border-radius:9px!important;
+  background:#06150fe8!important;
+  white-space:nowrap!important;
+}
+#game .centerInfo .potPile{
+  position:absolute!important;
+  left:50%!important;
+  bottom:-22px!important;
+  top:auto!important;
+  transform:translateX(-50%) scale(.62)!important;
+  transform-origin:center!important;
+  margin:0!important;
+  z-index:1!important;
+  opacity:.88!important;
+  pointer-events:none!important;
+}
+#game .centerInfo #bankInfo,
+#game .centerInfo #countdown{
+  position:relative!important;
+  z-index:4!important;
+}
+@media(max-width:800px){
+  #game .centerInfo .potPile{
+    bottom:-17px!important;
+    transform:translateX(-50%) scale(.46)!important;
+  }
+  #game .centerInfo #potBig{
+    font-size:17px!important;
+    line-height:20px!important;
+  }
+}
