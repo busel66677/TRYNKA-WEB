@@ -246,7 +246,7 @@ async function experienceTick(){
   const roomId=await activeRoomId();if(!roomId)return;
 
   const {data:gr}=await sb.from('game_rounds')
-    .select('id,status,pot,dealer_fee,winner_id,result_note,finished_at,created_at')
+    .select('id,status,pot,dealer_fee,winner_id,result_note,finished_at,created_at,reveal_actor')
     .eq('room_id',roomId)
     .order('id',{ascending:false})
     .limit(1)
@@ -258,7 +258,7 @@ async function experienceTick(){
   if(gr.status==='finished'&&gr.id!==lastResultId){
     const recent=gr.finished_at&&Date.now()-new Date(gr.finished_at).getTime()<15000;
     lastResultId=gr.id;
-    if(recent)await showRoundResult(gr,roomId);
+    if(recent&&!gr.reveal_actor)await showRoundResult(gr,roomId);
   }
 }
 
