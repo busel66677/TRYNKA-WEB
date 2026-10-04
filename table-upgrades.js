@@ -181,9 +181,12 @@ async function poll(){
       sb.from('round_actions').select('id,user_id,action,amount,created_at').eq('round_id',gr.id).order('id',{ascending:false}).limit(12)
     ]);
 
+    const activeRps=(rps||[]).filter(rp=>(ps||[]).some(cur=>cur.user_id===rp.user_id&&cur.seat_no===rp.seat_no));
     clearDecor();
-    addDealerMarker(rps||[],gr.dealer_user_id);
-    paintStatuses(rps||[],gr,actions||[]);
+    if(gr.status==='playing'){
+      addDealerMarker(activeRps,gr.dealer_user_id);
+      paintStatuses(activeRps,gr,actions||[]);
+    }
 
     const newest=(actions||[])[0];
     if(lastRoundId!==gr.id){
@@ -191,7 +194,7 @@ async function poll(){
       lastActionId=newest?.id||null;
     }else if(newest?.id&&newest.id!==lastActionId){
       lastActionId=newest.id;
-      animateChip(rps||[],newest);
+      animateChip(activeRps,newest);
       playActionSound(newest.action);
     }
 

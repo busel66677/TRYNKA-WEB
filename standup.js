@@ -137,9 +137,13 @@ function paintSeats(ps,turnUser,lastAction=null,presence=[]){
   lastSeatState=sig;
 
   document.querySelectorAll('#seats .seat').forEach(s=>{
-    s.classList.remove('turnActive','foldedSeat','lastRaiser');
+    s.classList.remove('turnActive','foldedSeat','lastRaiser','revealPairSeat');
     s.querySelector('.betBadge')?.remove();
     s.querySelector('.seatActionPop')?.remove();
+    s.querySelector('.seatContribution')?.remove();
+    s.querySelector('.connectionState')?.remove();
+    const state=s.querySelector('.seatState');
+    if(state)state.textContent='';
   });
 
   for(const p of ps||[]){
@@ -278,10 +282,13 @@ async function syncUi(){
     const [{data:ps},{data:lastAction},{data:presence}]=await Promise.all([
       sb.from('round_players').select('user_id,seat_no,contributed,folded,revealed').eq('round_id',g.id),
       sb.from('round_actions').select('id,user_id,action,amount,created_at').eq('round_id',g.id).order('created_at',{ascending:false}).limit(1).maybeSingle(),
-      sb.from('room_players').select('user_id,last_seen_at,disconnected_at').eq('room_id',currentRoom).not('seat_no','is',null)
+      sb.from('room_players').select('user_id,seat_no,last_seen_at,disconnected_at').eq('room_id',currentRoom).not('seat_no','is',null)
     ]);
-    paintSeats(ps||[],g.status==='playing'?g.turn_user_id:null,lastAction||null,presence||[]);
-    updateSupportUi(g,ps||[],r,rp);
+    const activePs=g.status==='playing'
+      ?(ps||[]).filter(p=>(presence||[]).some(x=>x.user_id===p.user_id&&x.seat_no===p.seat_no))
+      :[];
+    paintSeats(activePs,g.status==='playing'?g.turn_user_id:null,g.status==='playing'?(lastAction||null):null,presence||[]);
+    updateSupportUi(g,activePs,r,rp);
 
     if(g.status==='playing'){
       notifyMyTurn(g);
