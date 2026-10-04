@@ -4,7 +4,7 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:
 const $=id=>document.getElementById(id);
 const BUILD=document.querySelector('meta[name="trynka-build"]')?.content||'unknown';
 let hiddenDisconnectTimer=null;
-let me=null,lastRankAt=0,lastAchievementAt=0;
+let me=null,lastRankAt=0,lastAchievementAt=0,lastOwnerCheckAt=0,lastOwnerRoom=null;
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function currentRoom(){try{const x=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');return x.view==='game'&&x.roomId?Number(x.roomId):null}catch{return null}}
@@ -112,8 +112,10 @@ function ensureOwnerDialog(){
   $('ownerDialogClose').onclick=()=>d.close();
   return d;
 }
-async function loadOwnerControls(){
+async function loadOwnerControls(force=false){
   const rid=currentRoom(),host=$('tableExtras');if(!rid||!host||!me||$('game')?.classList.contains('hide'))return;
+  if(!force&&lastOwnerRoom===rid&&Date.now()-lastOwnerCheckAt<5000)return;
+  lastOwnerRoom=rid;lastOwnerCheckAt=Date.now();
   const {data:r}=await sb.from('rooms').select('id,owner_id,ante,turn_seconds,join_locked,game_status').eq('id',rid).maybeSingle();
   let b=$('ownerTableBtn');
   if(!r||r.owner_id!==me.id){b?.remove();return}
@@ -163,6 +165,6 @@ async function init(){
  ensureInviteDialog();const {data:{user}}=await sb.auth.getUser();me=user||null;await handleInvite();
  bindConnectionGrace();await Promise.all([mountShare(),syncReadyButton(),updateRank(),watchAchievement(),checkVersion(),loadOwnerControls()]);
  setInterval(()=>{mountShare();syncReadyButton();loadOwnerControls()},1000);setInterval(()=>{updateRank();watchAchievement()},5000);setInterval(checkVersion,60000);
- sb.auth.onAuthStateChange(()=>setTimeout(handleInvite,300));
+ sb.auth.onAuthStateChange((event,session)=>{me=session?.user||null;setTimeout(()=>{handleInvite();loadOwnerControls(true);syncReadyButton()},300)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

@@ -383,6 +383,7 @@ async function refreshLobby(){
   active.forEach(r=>{
     const count=(r.room_players||[]).filter(p=>p.seat_no!==null).length;
     const playing=r.game_status==='playing';
+    const locked=!!r.join_locked;
     const mine=(r.room_players||[]).some(p=>p.user_id===user.id);
     const mineSeated=(r.room_players||[]).some(p=>p.user_id===user.id&&p.seat_no!==null);
     const d=document.createElement('div');
@@ -396,18 +397,18 @@ async function refreshLobby(){
     d.dataset.status=String(r.game_status||'waiting');
 
     d.innerHTML=
-      '<div><div class="ownerLine"><span class="miniAvatar">♠</span><span>Відкритий стіл</span></div>'+
+      '<div><div class="ownerLine"><span class="miniAvatar">♠</span><span>'+(locked?'🔒 Набір закрито':'Відкритий стіл')+'</span></div>'+
       '<h3>'+esc(r.name)+'</h3>'+
       '<div class="roomMeta">'+
         '<span class="pill '+(playing?'playing':'live')+'">'+(playing?'● Грають':'● Очікує')+'</span>'+
         '<span class="pill">👥 '+count+'/'+r.max_players+'</span>'+
 
         '<span class="pill">◉ '+r.ante+'</span>'+
-        '<span class="pill">⏱ '+r.turn_seconds+'с</span>'+
+        '<span class="pill">⏱ '+r.turn_seconds+'с</span>'+(locked?'<span class="pill lockedPill">🔒 Закрито</span>':'')+
       '</div></div>'+
-      '<button>'+(mine?(mineSeated?'↩ Повернутися':'Увійти'):(playing?'👁 Дивитися':'Сісти'))+'</button>';
+      '<button '+((!mine&&!playing&&locked)?'disabled':'')+'>'+(mine?(mineSeated?'↩ Повернутися':'Увійти'):(playing?'👁 Дивитися':locked?'🔒 Закрито':'Сісти'))+'</button>';
 
-    d.querySelector('button').onclick=()=>mine?openRoom(r.id):(playing?watchRoom(r):joinRoom(r));
+    d.querySelector('button').onclick=()=>mine?openRoom(r.id):(playing?watchRoom(r):(locked?null:joinRoom(r)));
     $('rooms').appendChild(d);
   });
 

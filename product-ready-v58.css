@@ -25,3 +25,6 @@
 .ownerSettings{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.ownerSettings label{display:grid;gap:5px}.ownerSettings label>span,.ownerSettings small{color:#8ea499;font-size:10px}.ownerLock{grid-column:1/-1!important;grid-template-columns:1fr auto!important;align-items:center;padding:10px 12px;border:1px solid #294839;border-radius:12px;background:#0a1912}.ownerLock span b,.ownerLock span small{display:block}.ownerLock input{width:24px;height:24px;accent-color:#2bdc96}.ownerPlayingHint{padding:8px 10px;border-radius:10px;background:#281f0d;border:1px solid #6c5724;color:#e2ca79;font-size:9px}.ownerActions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 #game .seat:not(.free){cursor:pointer}
 @media(max-width:650px){.publicProfileStats{grid-template-columns:1fr 1fr}.ownerSettings{grid-template-columns:1fr}.ownerLock{grid-column:auto!important}.ownerActions{flex-direction:column}.ownerActions button{width:100%}}
+
+.lockedPill{color:#f0c36b!important;border-color:#725b2b!important;background:#241d0f!important}
+.roomCard button:disabled{opacity:.55;cursor:not-allowed;filter:saturate(.5)}
