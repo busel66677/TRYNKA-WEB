@@ -1,0 +1,183 @@
+/* TRYNKA experience v27 */
+
+/* Achievement/profile frames */
+.playerFrame{position:relative}
+.frame-classic{border-color:#4b6757!important}
+.frame-bronze{border-color:#b87945!important;box-shadow:0 0 0 2px #b8794522,0 0 13px #b8794555!important}
+.frame-silver{border-color:#d5dde2!important;box-shadow:0 0 0 2px #d5dde222,0 0 14px #d5dde25c!important}
+.frame-gold{border-color:#f0cb53!important;box-shadow:0 0 0 2px #f0cb5327,0 0 17px #f0cb5370!important}
+.frame-fire{border-color:#ff8648!important;box-shadow:0 0 0 2px #ff713322,0 0 18px #ff71337a!important}
+.frame-emerald{border-color:#42dfa1!important;box-shadow:0 0 0 2px #42dfa122,0 0 18px #42dfa16c!important}
+.frame-royal{border-color:#c58bff!important;box-shadow:0 0 0 2px #c58bff2c,0 0 21px #a970ff88!important}
+
+.framePicker{
+  display:flex;gap:8px;overflow-x:auto;padding:2px 1px 9px;
+}
+.frameChoice{
+  flex:0 0 88px;
+  display:grid;place-items:center;gap:6px;
+  min-height:88px;padding:8px;
+  border-radius:13px;background:#0b1a13;color:#a9bbb1;
+  border:1px solid #2c4938;
+}
+.frameChoice .frameDemo{
+  width:45px;height:45px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#163021;color:#e8d075;font-size:22px;
+  border:2px solid #4b6757;
+}
+.frameChoice.frame-bronze .frameDemo{border-color:#b87945;box-shadow:0 0 12px #b8794555}
+.frameChoice.frame-silver .frameDemo{border-color:#d5dde2;box-shadow:0 0 12px #d5dde255}
+.frameChoice.frame-gold .frameDemo{border-color:#f0cb53;box-shadow:0 0 14px #f0cb5365}
+.frameChoice.frame-fire .frameDemo{border-color:#ff8648;box-shadow:0 0 15px #ff71336a}
+.frameChoice.frame-emerald .frameDemo{border-color:#42dfa1;box-shadow:0 0 15px #42dfa160}
+.frameChoice.frame-royal .frameDemo{border-color:#c58bff;box-shadow:0 0 17px #a970ff75}
+.frameChoice.selected{background:#1a2818;color:#f2d879}
+.frameRewardMini{border-color:#756129!important;background:#241e0d!important;color:#e6cf79!important}
+
+/* Player connection state */
+#game .connectionState{
+  margin-top:4px;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.15px;
+  white-space:nowrap;
+}
+#game .connectionState.on{color:#48df9c}
+#game .connectionState.reconnecting{color:#f3c65a}
+#game .connectionState.off{color:#7b8d84}
+#game .connectionState.on::first-letter{filter:drop-shadow(0 0 4px #48df9c)}
+#game .connectionState.reconnecting::first-letter{filter:drop-shadow(0 0 4px #f3c65a)}
+
+/* Table filters */
+.roomFilters{
+  display:grid;
+  grid-template-columns:minmax(170px,1fr) 150px 160px auto auto;
+  gap:7px;
+  align-items:center;
+  margin:0 0 11px;
+  padding:9px;
+  border:1px solid #284536;
+  border-radius:13px;
+  background:#09160f;
+}
+.roomFilters input,.roomFilters select{
+  width:100%;box-sizing:border-box;
+  padding:9px 10px;border-radius:9px;
+  border:1px solid #314c3c;background:#07110c;color:#dce8e1;
+  font-size:10px;
+}
+.roomSearch{display:flex;align-items:center;gap:5px}
+.freeOnly{display:flex;align-items:center;gap:6px;color:#98aa9f;font-size:9px;white-space:nowrap}
+.freeOnly input{width:auto}
+#roomFilterCount{color:#e3c965;font-size:9px;font-weight:900;white-space:nowrap}
+.roomCard.filterHidden{display:none!important}
+
+/* Seasonal rating */
+.seasonName{display:block;margin-top:3px;color:#7c9186;font-size:9px;text-transform:capitalize}
+.ratingHeader.seasonHeader,.ratingRow.seasonRow{
+  grid-template-columns:42px minmax(210px,1fr) 95px 105px 88px!important;
+}
+.seasonScore{display:flex;align-items:baseline;gap:2px;justify-content:flex-end}
+.seasonScore small,.ratingXp small{display:block;color:#6f8379;font-size:7px;font-weight:700}
+.ratingXp{color:#d5c06d;font-size:10px;font-weight:900;text-align:right}
+.ratingExplain{margin:9px 0 0;color:#6f8379;font-size:8px;text-align:center}
+.ratingAvatar.playerFrame{border-width:2px!important}
+
+/* Fair-deal badge */
+#game .fairDealBadge{
+  margin-top:5px;
+  padding:4px 7px;
+  border-radius:999px;
+  border:1px solid #486557;
+  background:#0a1a13;
+  color:#89a096;
+  font-size:7px;
+  font-weight:900;
+  box-shadow:none;
+}
+#game .fairDealBadge.verified{border-color:#42d99a;color:#55e7aa;background:#0a2117}
+#game .fairDealBadge.failed{border-color:#b75c63;color:#ff8c93;background:#281114}
+#game .turnNotifyBtn{padding:7px 9px!important;background:#14251b!important;color:#c8d8d0!important;border:1px solid #365342!important}
+
+/* Round result */
+.roundResultDialog{
+  width:min(580px,calc(100vw - 22px));
+  max-height:min(88vh,760px);
+  padding:0;
+  border:1px solid #75632e;
+  border-radius:20px;
+  background:#07120d;
+  color:#ecf4ef;
+  box-shadow:0 28px 90px #000e;
+}
+.roundResultDialog::backdrop{background:#020604c9;backdrop-filter:blur(4px)}
+.roundResultCard{position:relative;padding:18px}
+.roundResultClose{
+  position:absolute;right:12px;top:12px;z-index:2;
+  width:34px;height:34px;padding:0;border-radius:50%;
+  border:1px solid #355041;background:#15241b;color:#afc1b7;font-size:20px;
+}
+.resultHero{text-align:center;padding:6px 34px 12px}
+.resultIcon{display:block;font-size:38px;filter:drop-shadow(0 0 12px #e9c85c55)}
+.resultHero h2{margin:4px 0 12px;font-size:25px;color:#f0d574}
+.resultMoney{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.resultMoney>div{padding:9px;border-radius:11px;background:#0d2016;border:1px solid #2d4738}
+.resultMoney span{display:block;color:#81978b;font-size:8px}
+.resultMoney b{display:block;margin-top:3px;color:#efd36e;font-size:15px}
+.resultPlayers{display:grid;gap:6px}
+.resultPlayer{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:12px;border:1px solid #223e2e;background:#091911;
+}
+.resultPlayer.winner{border-color:#b59b43;background:#182215}
+.resultIdentity{display:flex;align-items:center;gap:8px;min-width:0}
+.resultAvatar{
+  width:36px;height:36px;flex:0 0 auto;
+  display:grid;place-items:center;border-radius:50%;
+  background:#153121;border:2px solid #496654;font-size:18px;
+}
+.resultIdentity b{display:block;font-size:11px}
+.resultIdentity b em{font-style:normal;margin-left:4px;padding:2px 5px;border-radius:999px;background:#e6c75b;color:#181106;font-size:6px}
+.resultIdentity small{display:block;margin-top:3px;color:#7e9388;font-size:8px}
+.resultCards{display:flex;gap:3px}
+.resultCards b{
+  width:32px;height:43px;display:grid;place-items:center;
+  background:#f3f2eb;color:#111;border-radius:6px;font-size:11px;
+  box-shadow:0 4px 10px #0006
+}
+.resultCards b.red{color:#c4232b}
+.cardsHidden{color:#60776b;font-size:8px;font-style:italic}
+.fairResult{
+  display:flex;justify-content:space-between;gap:8px;align-items:center;
+  margin-top:10px;padding:8px 10px;border-radius:10px;background:#0b1b13;border:1px solid #324a3b;
+}
+.fairResult.ok{border-color:#2f805c;color:#53dca2}
+.fairResult.bad{border-color:#755055;color:#e39aa0}
+.fairResult b{font-size:9px}
+.fairResult small{color:#778d81;font-size:7px}
+
+/* PWA install tile */
+#installAppBtn{border-color:#4a643d!important;background:linear-gradient(145deg,#173321,#0a1c13)!important}
+#installAppBtn>span{color:#64e7a7!important}
+
+/* Mobile */
+@media(max-width:800px){
+  .roomFilters{grid-template-columns:1fr 1fr}
+  .roomSearch{grid-column:1/-1}
+  #roomFilterCount{justify-self:end}
+  .ratingHeader.seasonHeader,.ratingRow.seasonRow{
+    grid-template-columns:30px minmax(145px,1fr) 65px 70px!important;
+  }
+  .seasonHeader span:last-child,.seasonRow .ratingStatus{display:none}
+  .ratingXp{font-size:8px}
+}
+@media(max-width:560px){
+  .frameChoice{flex-basis:76px;min-height:80px}
+  .resultHero h2{font-size:20px}
+  .resultPlayer{align-items:flex-start;flex-direction:column}
+  .resultCards{align-self:flex-end;margin-top:-34px}
+  .roomFilters{grid-template-columns:1fr}
+  .roomSearch{grid-column:auto}
+  #roomFilterCount{justify-self:start}
+}
