@@ -45,10 +45,7 @@ async function mountShare(){
 }
 
 async function syncReadyButton(){
- const rid=currentRoom(),btn=$('readyBtn');if(!rid||!btn||$('game')?.classList.contains('hide'))return;
- const {data}=await sb.from('room_players').select('ready,seat_no').eq('room_id',rid).eq('user_id',me?.id).maybeSingle();
- if(!data||data.seat_no===null){btn.classList.add('hide');return}
- btn.classList.remove('hide');btn.textContent=data.ready?'✓ ГОТОВИЙ':'○ Я ГОТОВИЙ';btn.classList.toggle('readyOn',!!data.ready);
+ const btn=$('readyBtn');if(btn)btn.remove();
 }
 
 async function updateRank(){
@@ -163,8 +160,8 @@ function bindConnectionGrace(){
 
 async function init(){
  ensureInviteDialog();const {data:{user}}=await sb.auth.getUser();me=user||null;await handleInvite();
- bindConnectionGrace();await Promise.all([mountShare(),syncReadyButton(),updateRank(),watchAchievement(),checkVersion(),loadOwnerControls()]);
- setInterval(()=>{mountShare();syncReadyButton();loadOwnerControls()},1000);setInterval(()=>{updateRank();watchAchievement()},5000);setInterval(checkVersion,60000);
- sb.auth.onAuthStateChange((event,session)=>{me=session?.user||null;setTimeout(()=>{handleInvite();loadOwnerControls(true);syncReadyButton()},300)});
+ bindConnectionGrace();await Promise.all([mountShare(),updateRank(),watchAchievement(),checkVersion(),loadOwnerControls()]);
+ setInterval(()=>{mountShare();loadOwnerControls()},1000);setInterval(()=>{updateRank();watchAchievement()},5000);setInterval(checkVersion,60000);
+ sb.auth.onAuthStateChange((event,session)=>{me=session?.user||null;setTimeout(()=>{handleInvite();loadOwnerControls(true)},300)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

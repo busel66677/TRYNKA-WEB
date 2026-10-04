@@ -28,3 +28,8 @@
 
 .lockedPill{color:#f0c36b!important;border-color:#725b2b!important;background:#241d0f!important}
 .roomCard button:disabled{opacity:.55;cursor:not-allowed;filter:saturate(.5)}
+
+/* v62 — ready system removed */
+#readyBtn,.readySeatBadge{display:none!important}
+#game .seat.waitingReady{opacity:1!important}
+#game .seat.waitingReady:after{display:none!important}
