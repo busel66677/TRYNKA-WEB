@@ -120,12 +120,14 @@ async function decorateRoomCards(force=false){
     card.classList.toggle('favoriteRoom',favoriteIds.has(rid));
   }
 
-  const sorted=[...rooms.querySelectorAll('.roomCard')].sort((a,b)=>{
+  const current=[...rooms.querySelectorAll('.roomCard')];
+  const sorted=[...current].sort((a,b)=>{
     const af=favoriteIds.has(Number(a.dataset.roomId||0))?1:0;
     const bf=favoriteIds.has(Number(b.dataset.roomId||0))?1:0;
     return bf-af;
   });
-  sorted.forEach(x=>rooms.appendChild(x));
+  const changed=current.some((x,i)=>x!==sorted[i]);
+  if(changed)sorted.forEach(x=>rooms.appendChild(x));
 }
 
 function actionLabel(a){
@@ -168,7 +170,6 @@ async function syncActions(){
 
   const list=actions||[];
   const sig=list.slice(0,10).map(x=>x.id).join(',');
-  if(sig===lastActionsSig)return;
   lastActionsSig=sig;
 
   const meaningful=list.filter(a=>a.action!=='ante').slice(0,7);
@@ -213,7 +214,6 @@ async function syncSeatMeta(){
     .not('seat_no','is',null);
 
   const sig=JSON.stringify((players||[]).map(p=>[p.user_id,p.seat_no,p.profiles?.xp,p.profiles?.wins,p.profiles?.games_played,p.profiles?.level]));
-  if(sig===lastSeatMetaSig)return;
   lastSeatMetaSig=sig;
 
   for(const p of players||[]){
@@ -392,7 +392,7 @@ async function start(){
   await tick();
   setInterval(tick,1400);
   const rooms=$('rooms');
-  if(rooms)new MutationObserver(()=>decorateRoomCards(true)).observe(rooms,{childList:true});
+  if(rooms)new MutationObserver(()=>decorateRoomCards(false)).observe(rooms,{childList:true});
 }
 
 sb.auth.onAuthStateChange((_e,session)=>{
