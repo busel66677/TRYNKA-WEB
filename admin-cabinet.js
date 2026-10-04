@@ -417,8 +417,8 @@ async function loadSecurity(){
 
   const ebox=$('adminCabinetEvents');
   if(ebox)ebox.innerHTML=(events||[]).map(e=>`
-    <div class="adminSecurityRow">
-      <b>${esc(e.event_type)}</b>
+    <div class="adminSecurityRow ${e.event_type==='collusion_signal'?'collusion':''}">
+      <b>${e.event_type==='collusion_signal'?'⚠ МОЖЛИВА ЗМОВА':esc(e.event_type)}</b>
       <span>${esc(e.detail||'')}</span>
       <small>${new Date(e.created_at).toLocaleString('uk-UA')}</small>
     </div>
@@ -445,6 +445,7 @@ async function renderStats(){
     <div><span>Нових сьогодні</span><b>${fmt(s.new_players_today)}</b></div>
     <div><span>Подій безпеки</span><b>${fmt(s.security_events_today)}</b></div>
     <div><span>Підозрілих</span><b class="${Number(s.suspicious_today||0)>0?'warn':''}">${fmt(s.suspicious_today)}</b></div>
+    <div><span>Сигнали змови</span><b class="${Number(s.collusion_today||0)>0?'warn':''}">${fmt(s.collusion_today)}</b></div>
   `;
 
   const top=Array.isArray(s.top_players)?s.top_players:[];
@@ -453,7 +454,7 @@ async function renderStats(){
     <div class="adminPanelCard adminTodayCard">
       <div class="adminAnalyticsHead">
         <div><span class="eyebrow">TODAY</span><h2>Найактивніші гравці</h2></div>
-        <span class="adminErrorBadge">Помилок: <b>${fmt(s.errors_today)}</b></span>
+        <div class="adminAnalyticsBadges"><span class="adminErrorBadge">Помилок: <b>${fmt(s.errors_today)}</b></span><span class="adminCollusionBadge">Змова: <b>${fmt(s.collusion_today)}</b></span></div>
       </div>
       <div class="adminTopPlayers">
         ${top.length?top.map((p,i)=>`<div><span>#${i+1}</span><b>${esc(p.nickname)}</b><small>${fmt(p.games)} ігор · ${fmt(p.wins)} перемог</small></div>`).join(''):'<p class="adminMuted">Сьогодні ще не було завершених ігор.</p>'}
