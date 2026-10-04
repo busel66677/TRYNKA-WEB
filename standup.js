@@ -43,8 +43,8 @@ function notifyMyTurn(g){
   if(key===lastTurnNoticeKey)return;
   lastTurnNoticeKey=key;
   beepTurn();
-  try{navigator.vibrate?.([140,70,140])}catch{}
-  if(document.hidden&&'Notification'in window&&Notification.permission==='granted'){
+  if(localStorage.getItem('trynkaVibrate')!=='off'){try{navigator.vibrate?.([140,70,140])}catch{}}
+  if(localStorage.getItem('trynkaNotify')!=='off'&&document.hidden&&'Notification'in window&&Notification.permission==='granted'){
     try{new Notification('TRYNKA — ваш хід',{body:'Час зробити хід за столом.',tag:'trynka-turn',renotify:true})}catch{}
   }
   document.title='● ВАШ ХІД — TRYNKA';
