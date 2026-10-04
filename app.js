@@ -3,7 +3,7 @@ const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}});
 let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null,spectatorMode=false;
-let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null;
+let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null,gameActionBusy=false;
 const $=id=>document.getElementById(id), sections=['login','lobby','profile','create','game'];
 window.addEventListener('trynka:deal-start',()=>{
   ownDealActive=true;ownDealtCount=0;lastHandPaint='';handPullY=[0,0,0];
@@ -376,13 +376,15 @@ async function refreshLobby(){
   $('onlineStat').textContent=n;
   $('myChips').textContent=profile?.chips??0;
 
-  const active=(rooms||[]).filter(r=>!r.is_private&&(r.room_players||[]).some(p=>p.seat_no!==null));
+  const active=(rooms||[]).filter(r=>!r.is_private);
   $('tablesStat').textContent=active.length;
   $('rooms').innerHTML='';
 
   active.forEach(r=>{
     const count=(r.room_players||[]).filter(p=>p.seat_no!==null).length;
     const playing=r.game_status==='playing';
+    const mine=(r.room_players||[]).some(p=>p.user_id===user.id);
+    const mineSeated=(r.room_players||[]).some(p=>p.user_id===user.id&&p.seat_no!==null);
     const d=document.createElement('div');
     d.className='roomCard';
     d.dataset.roomId=String(r.id);
@@ -403,9 +405,9 @@ async function refreshLobby(){
         '<span class="pill">◉ '+r.ante+'</span>'+
         '<span class="pill">⏱ '+r.turn_seconds+'с</span>'+
       '</div></div>'+
-      '<button>'+(playing?'👁 Дивитися':'Сісти')+'</button>';
+      '<button>'+(mine?(mineSeated?'↩ Повернутися':'Увійти'):(playing?'👁 Дивитися':'Сісти'))+'</button>';
 
-    d.querySelector('button').onclick=()=>playing?watchRoom(r):joinRoom(r);
+    d.querySelector('button').onclick=()=>mine?openRoom(r.id):(playing?watchRoom(r):joinRoom(r));
     $('rooms').appendChild(d);
   });
 
@@ -492,7 +494,7 @@ function renderRevealShowdown(gr,ps){
 }
 async function renderActionLog(roundId,ps){if(!$('tableActionLog'))return;const {data:a}=await sb.from('round_actions').select('id,user_id,action,amount,created_at,profiles(nickname)').eq('round_id',roundId).order('created_at',{ascending:false}).limit(12);const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'не зробив хід — автоматично впав'};$('tableActionLog').innerHTML=(a||[]).map(x=>'<div class="actionLogRow"><b>'+esc(x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';const x=(a||[])[0],flash=$('lastActionFlash');if(x&&flash&&x.action!=='ante'){const paid=x.action==='call'||x.action==='raise';flash.innerHTML='<b>'+esc(x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';flash.classList.remove('hide');if(lastActionId!==x.id){lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop')}}}
 async function doGameAction(action){
-  if(!currentRoom||spectatorMode)return;
+  if(!currentRoom||spectatorMode||gameActionBusy)return;
   let raiseTo=null;
 
   if(action==='raise'){
@@ -507,9 +509,15 @@ async function doGameAction(action){
     if(raiseTo>maxBet)return alert('Максимальна ставка за цим столом: '+maxBet+' ◉');
   }
 
-  const {error}=await sb.rpc('play_round_action',{p_room:currentRoom,p_action:action,p_raise_to:raiseTo});
-  if(error)return alert(error.message);
-  await renderRoom();
+  gameActionBusy=true;
+  document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.disabled=true);
+  try{
+    const {error}=await sb.rpc('play_round_action',{p_room:currentRoom,p_action:action,p_raise_to:raiseTo});
+    if(error)alert(error.message);
+  }finally{
+    gameActionBusy=false;
+    await renderRoom();
+  }
 }
 document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.onclick=()=>doGameAction(b.dataset.action));
 async function renderHand(roomArg){
