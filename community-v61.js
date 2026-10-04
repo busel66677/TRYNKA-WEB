@@ -116,7 +116,7 @@ async function init(){
   const {data:{user}}=await sb.auth.getUser();me=user||null;
   if(!me)return;
   await loadBlocks();wrapProfile();mountRulesAtTable();await mountTemplates();await renderProfileExtras();await handleSeatInvite();await roundRecap();
-  setInterval(()=>{wrapProfile();mountRulesAtTable();mountTemplates();renderProfileExtras();roundRecap()},1800);
+  setInterval(()=>{wrapProfile();mountRulesAtTable();mountTemplates();renderProfileExtras();roundRecap()},3500);
   sb.auth.onAuthStateChange((_,session)=>{me=session?.user||null;if(me)setTimeout(()=>{loadBlocks();handleSeatInvite()},250)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
