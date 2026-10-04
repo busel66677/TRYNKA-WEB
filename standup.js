@@ -52,6 +52,8 @@ function notifyMyTurn(g){
 }
 async function touchPresence(){
   if(!currentRoom||$('game')?.classList.contains('hide'))return;
+  const rp=await myRoom();
+  if(rp?.spectator)return;
   try{await sb.rpc('touch_room_presence',{p_room:currentRoom})}catch{}
 }
 
@@ -60,12 +62,21 @@ async function myRoom(){
   try{
     const saved=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');
     if(saved.view==='game'&&saved.roomId){
-      const {data}=await sb.from('room_players')
-        .select('room_id,seat_no,table_chips')
-        .eq('room_id',Number(saved.roomId))
-        .eq('user_id',u.id)
-        .maybeSingle();
+      const roomId=Number(saved.roomId);
+      const [{data},{data:watcher}]=await Promise.all([
+        sb.from('room_players')
+          .select('room_id,seat_no,table_chips')
+          .eq('room_id',roomId)
+          .eq('user_id',u.id)
+          .maybeSingle(),
+        sb.from('room_spectators')
+          .select('room_id')
+          .eq('room_id',roomId)
+          .eq('user_id',u.id)
+          .maybeSingle()
+      ]);
       if(data)return data;
+      if(watcher)return {room_id:roomId,seat_no:null,table_chips:0,spectator:true};
     }
   }catch{}
   const {data}=await sb.from('room_players').select('room_id,seat_no,table_chips').eq('user_id',u.id).order('joined_at',{ascending:false}).limit(1).maybeSingle();
