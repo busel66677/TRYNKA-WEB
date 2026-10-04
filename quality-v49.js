@@ -58,19 +58,13 @@ function mountUtilities(){
   }
 }
 function ensureStrength(){
-  const table=document.querySelector('#game .table');if(!table)return null;
-  let b=$('handStrengthBadge');
-  if(!b){b=document.createElement('div');b.id='handStrengthBadge';b.className='handStrengthBadge hide';table.appendChild(b)}
-  return b;
+  const old=document.getElementById('handStrengthBadge');
+  if(old)old.remove();
+  return null;
 }
 async function updateStrength(){
-  if($('game')?.classList.contains('hide'))return;
-  const room=currentRoomId(),badge=ensureStrength();if(!room||!badge)return;
-  const {data,error}=await sb.rpc('get_my_hand_strength',{p_room:room});
-  if(error||!data?.length){badge.classList.add('hide');return}
-  const row=data[0],key=room+':'+row.label+':'+row.score;
-  if(key!==lastStrengthKey){lastStrengthKey=key;badge.innerHTML='<small>ОЧКИ</small><b>'+esc(row.label)+'</b>'}
-  badge.classList.remove('hide');
+  const old=document.getElementById('handStrengthBadge');
+  if(old)old.remove();
 }
 async function enhanceSvara(){
   if($('game')?.classList.contains('hide'))return;
