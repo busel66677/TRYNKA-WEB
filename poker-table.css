@@ -608,3 +608,74 @@
 @media(max-width:800px){
   #game .supportSummary{grid-template-columns:1fr 1fr}
 }
+
+
+/* v23 — mobile-first premium table rebuild */
+@media(max-width:800px){
+  #game{margin:0 -8px}
+  #game .gameBar{margin:0 8px 8px;padding:7px 9px;border-radius:14px;display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center}
+  #game .gameIdentity{text-align:center;min-width:0}
+  #game .gameIdentity .eyebrow{font-size:7px;letter-spacing:1.2px}
+  #game .gameIdentity h2{font-size:14px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #game #leaveRoom{padding:7px 9px;font-size:10px;border-radius:9px}
+  #game .gameTopActions{gap:5px}
+  #game .gameWallet{font-size:9px;padding:6px 8px}
+  #game .gameTopActions button{padding:7px 8px!important;font-size:9px!important;border-radius:9px!important}
+  #game .gamegrid{display:block}
+  #game .tableWrap{min-height:0;height:calc(100svh - 145px);padding:12px 5px 74px;border-radius:16px;background:radial-gradient(circle at 50% 34%,#162a25 0,#07110f 70%);overflow:hidden}
+  #game .table{width:calc(100% - 28px);height:min(68svh,560px);max-height:560px;border-width:8px;border-radius:46%/38%;box-shadow:inset 0 0 0 2px #a67c49,inset 0 0 0 5px #1b130d,inset 0 0 55px #00190eaa,0 18px 36px #000c}
+  #game .table:before{inset:7px}
+  #game .table:after{top:56%;font-size:30px;letter-spacing:7px}
+  #game .centerInfo{top:24%;width:154px;padding:6px 8px;border-radius:12px;background:#06140edb;box-shadow:0 8px 20px #0008}
+  #game .potPile{height:20px;transform:scale(.52);margin-bottom:-7px}
+  #game #potBig{font-size:16px!important;line-height:20px;margin:0}
+  #game #bankInfo{font-size:8px!important;white-space:nowrap}
+  #game #countdown{font-size:8px;padding:2px 6px;margin-top:3px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #game #lastActionFlash{top:calc(100% + 5px);min-width:110px;max-width:150px;padding:4px 7px;font-size:8px}
+  #game .dealerBadge{width:43px;height:43px;top:50%}
+  #game .dealerBadge span{font-size:12px}
+  #game .dealerBadge small{font-size:5px;margin-top:13px}
+  #game .dealerBadge b{font-size:5px}
+  #game .deckStack{left:calc(50% + 40px);top:51%;width:25px;height:35px}
+  #game .seat{width:86px!important;min-height:42px!important;grid-template-columns:24px 1fr!important;gap:4px!important;padding:5px!important;border-radius:13px!important;box-shadow:0 5px 13px #0009!important}
+  #game .seat.free{width:72px!important;min-height:34px!important;grid-template-columns:20px 1fr!important;opacity:.62;background:#07110dbb!important}
+  #game .seatAvatar,#game .seatFreePlus{width:23px;height:23px;font-size:10px}
+  #game .seatFreePlus{font-size:14px}
+  #game .seatName{font-size:8px!important}
+  #game .seatStack{font-size:7px;margin-top:2px}
+  #game .seatContribution{font-size:6px;padding:2px 4px;margin-top:2px}
+  #game .seatState{font-size:6px;margin-top:2px!important;min-height:7px}
+  #game .seat.s0{bottom:-14px}
+  #game .seat.s3{top:-14px}
+  #game .seat.s1{bottom:13%;left:-12px}
+  #game .seat.s2{top:15%;left:-12px}
+  #game .seat.s4{top:15%;right:-12px}
+  #game .seat.s5{bottom:13%;right:-12px}
+  #game .seat.s6{top:47%;left:-14px}
+  #game .seat.s7{top:47%;right:-14px}
+  #game .seat.turnActive:after{top:-12px;font-size:6px;padding:2px 5px}
+  #game .seat.turnActive:before{display:none}
+  #game .hand{bottom:42px;height:70px}
+  #game .card{width:46px;height:66px;font-size:13px;border-radius:6px}
+  #game .pullCard .cardFace{font-size:13px}
+  #game .pullCard .cardCover i{font-size:15px}
+  #game .gameActions{position:absolute;bottom:-70px;width:calc(100% - 14px);padding:5px;border-radius:12px;background:#06100df7}
+  #game .roundMeta{margin-bottom:4px}
+  #game #roundTurn{min-width:0;width:100%;padding:3px 7px;font-size:9px}
+  #game .supportSummary{grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:4px}
+  #game .supportSummary>span{min-height:27px;padding:2px;font-size:5px;border-radius:6px}
+  #game .supportSummary b{font-size:8px;margin-top:1px}
+  #game .supportSummary .supportNeed small{font-size:5px}
+  #game .actionButtons{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+  #game .actionButtons button{min-height:34px;padding:6px 2px!important;font-size:8px!important;border-radius:8px!important}
+  #game .actionButtons button[data-action="call"]{font-size:9px!important}
+  #game .gameSide{display:none}
+  #game .openHand.revealHand b{width:24px!important;height:34px!important;font-size:9px!important}
+}
+@media(max-width:390px){
+  #game .gameTopActions button{padding:6px!important;font-size:8px!important}
+  #game .gameWallet{font-size:8px;padding:5px 6px}
+  #game .table{width:calc(100% - 22px)}
+  #game .seat{width:80px!important}
+  #game .seat.free{width:66px!important}
+}
