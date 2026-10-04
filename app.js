@@ -307,7 +307,59 @@ $('homeFriends').onclick=()=>document.getElementById('socialArea')?.scrollIntoVi
 $('homeCabinet').onclick=async()=>{await renderProfile();show('profile')};
 $('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(count)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>(r.room_players?.[0]?.count||0)>0&&(r.room_players?.[0]?.count||0)<r.max_players&&r.game_status!=='playing');if(open)return joinRoom(open);show('create')};
 $('createForm').onsubmit=async e=>{e.preventDefault();const {data,error}=await sb.rpc('create_secure_room',{p_name:$('roomName').value.trim()||'Мій стіл',p_max_players:+$('maxPlayers').value,p_turn_seconds:+$('turnTime').value,p_ante:+$('ante').value});if(error)return alert(error.message);await openRoom(data)}
-async function refreshLobby(){await pingOnline();const cutoff=new Date(Date.now()-70000).toISOString();const [{count:online},{data:rooms},{data:p}]=await Promise.all([sb.from('profiles').select('*',{count:'exact',head:true}).gt('online_at',cutoff),sb.from('rooms').select('*,room_players(count)').order('created_at',{ascending:false}),sb.from('profiles').select('*').eq('id',user.id).single()]);if(p)profile=p;if($('gameBalance'))$('gameBalance').textContent='Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');const n=online||0;$('onlineBadge').textContent='● '+n+' онлайн';$('onlineCount').textContent=n;$('onlineStat').textContent=n;$('myChips').textContent=profile?.chips??0;const active=(rooms||[]).filter(r=>(r.room_players?.[0]?.count||0)>0);$('tablesStat').textContent=active.length;$('rooms').innerHTML='';active.forEach(r=>{const count=r.room_players[0].count,d=document.createElement('div');d.className='roomCard';d.dataset.name=String(r.name||'').toLowerCase();d.dataset.ante=String(r.ante||0);d.dataset.turn=String(r.turn_seconds||0);d.dataset.players=String(count);d.dataset.max=String(r.max_players||0);d.dataset.status=String(r.game_status||'waiting');d.innerHTML='<div><div class="ownerLine"><span class="miniAvatar">♠</span><span>Відкритий стіл</span></div><h3>'+esc(r.name)+'</h3><div class="roomMeta"><span class="pill live">● Очікує</span><span class="pill">👥 '+count+'/'+r.max_players+'</span><span class="pill">◉ '+r.ante+'</span><span class="pill">⏱ '+r.turn_seconds+'с</span></div></div><button>Сісти</button>';d.querySelector('button').onclick=()=>joinRoom(r);$('rooms').appendChild(d)});if(!active.length)$('rooms').innerHTML='<p>Активних столів поки немає. Створи перший.</p>';await refreshFriends();await refreshInvites()}
+async function refreshLobby(){
+  await pingOnline();
+  const cutoff=new Date(Date.now()-70000).toISOString();
+  const [{count:online},{data:rooms},{data:p}]=await Promise.all([
+    sb.from('profiles').select('*',{count:'exact',head:true}).gt('online_at',cutoff),
+    sb.from('rooms').select('*,room_players(count)').order('created_at',{ascending:false}),
+    sb.from('profiles').select('*').eq('id',user.id).single()
+  ]);
+
+  if(p)profile=p;
+  if($('gameBalance'))$('gameBalance').textContent='Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');
+
+  const n=online||0;
+  $('onlineBadge').textContent='● '+n+' онлайн';
+  $('onlineCount').textContent=n;
+  $('onlineStat').textContent=n;
+  $('myChips').textContent=profile?.chips??0;
+
+  const active=(rooms||[]).filter(r=>(r.room_players?.[0]?.count||0)>0);
+  $('tablesStat').textContent=active.length;
+  $('rooms').innerHTML='';
+
+  active.forEach(r=>{
+    const count=r.room_players?.[0]?.count||0;
+    const playing=r.game_status==='playing';
+    const d=document.createElement('div');
+    d.className='roomCard';
+    d.dataset.name=String(r.name||'').toLowerCase();
+    d.dataset.ante=String(r.ante||0);
+    d.dataset.turn=String(r.turn_seconds||0);
+    d.dataset.players=String(count);
+    d.dataset.max=String(r.max_players||0);
+    d.dataset.status=String(r.game_status||'waiting');
+
+    d.innerHTML=
+      '<div><div class="ownerLine"><span class="miniAvatar">♠</span><span>Відкритий стіл</span></div>'+
+      '<h3>'+esc(r.name)+'</h3>'+
+      '<div class="roomMeta">'+
+        '<span class="pill '+(playing?'playing':'live')+'">'+(playing?'● Грають':'● Очікує')+'</span>'+
+        '<span class="pill">👥 '+count+'/'+r.max_players+'</span>'+
+        '<span class="pill">◉ '+r.ante+'</span>'+
+        '<span class="pill">⏱ '+r.turn_seconds+'с</span>'+
+      '</div></div>'+
+      '<button '+(playing?'disabled':'')+'>'+(playing?'Йде гра':'Сісти')+'</button>';
+
+    if(!playing)d.querySelector('button').onclick=()=>joinRoom(r);
+    $('rooms').appendChild(d);
+  });
+
+  if(!active.length)$('rooms').innerHTML='<p>Активних столів поки немає. Створи перший.</p>';
+  await refreshFriends();
+  await refreshInvites();
+}
 async function joinRoom(r){const {error}=await sb.rpc('secure_join_room',{p_room:r.id});if(error)return alert(error.message);await openRoom(r.id)}
 async function openRoom(id){currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';show('game');if($('gameBalance'))$('gameBalance').textContent='Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');if(channel)await sb.removeChannel(channel);channel=sb.channel('room-'+id).on('postgres_changes',{event:'*',schema:'public',table:'room_players',filter:'room_id=eq.'+id},renderRoom).on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+id},renderRoom).on('postgres_changes',{event:'*',schema:'public',table:'room_hands',filter:'room_id=eq.'+id},renderHand).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+id},p=>addMessage(p.new)).on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+id},renderRoom).subscribe();await renderRoom()}
 async function renderRoom(){if(!currentRoom)return;const roomId=currentRoom,version=++roomRenderVersion;const [{data:r},{data:ps}]=await Promise.all([sb.from('rooms').select('*').eq('id',currentRoom).single(),sb.from('room_players').select('user_id,seat_no,table_chips,last_seen_at,disconnected_at,profiles(nickname,chips,avatar_key,frame_key)').eq('room_id',currentRoom)]);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(!r)return leaveRoom();$('roomTitle').textContent=r.name;const pot=(r.ante||0)*(ps||[]).filter(p=>p.seat_no!==null).length;if($('bankInfo'))$('bankInfo').textContent='Ставка: '+(r.ante||0)+' ◉';if($('potBig'))$('potBig').textContent='Банк: '+pot+' ◉';renderSeats(r,ps||[]);renderGameState(r,ps||[]);await renderRound(r,ps||[],version);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(messagesLoadedRoom!==currentRoom){const {data:ms}=await sb.from('messages').select('*,profiles(nickname)').eq('room_id',currentRoom).order('created_at').limit(50);$('messages').innerHTML='';(ms||[]).forEach(addMessage);messagesLoadedRoom=currentRoom}await renderHand(r);await renderTableHistory()}
