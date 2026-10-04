@@ -1,0 +1,120 @@
+/* TRYNKA live table upgrades */
+#game .seat{position:absolute}
+#game .dealerSeat{
+  box-shadow:0 0 0 2px #e6c75f55,0 0 24px #e6c75f20,0 7px 18px #0008!important;
+}
+#game .dealerSeatMarker{
+  position:absolute;
+  left:-9px;
+  top:-9px;
+  width:25px;height:25px;
+  border-radius:50%;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#fff5bf,#d2a936);
+  color:#201707;
+  border:2px solid #8e6c17;
+  box-shadow:0 4px 10px #0008;
+  font-size:11px;
+  font-weight:950;
+  z-index:80;
+}
+#game .liveSeatStatus{
+  position:absolute;
+  left:50%;
+  top:-23px;
+  transform:translateX(-50%);
+  z-index:75;
+  white-space:nowrap;
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid #47745c;
+  background:#07150ff2;
+  color:#dce9e2;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.55px;
+  box-shadow:0 3px 9px #0007;
+}
+#game .liveSeatStatus.turn{color:#1a1305;background:#ffe36e;border-color:#ffe36e;box-shadow:0 0 16px #ffe36e77}
+#game .liveSeatStatus.raise{color:#ffe36e;border-color:#d8b852}
+#game .liveSeatStatus.reveal{color:#fff0ad;border-color:#e6c45f;background:#352c10f0}
+#game .liveSeatStatus.folded,#game .liveSeatStatus.fold,#game .liveSeatStatus.timeout{color:#ffb0b5;border-color:#8d464c;background:#281013f2}
+
+#game .flyingBetChip{
+  position:absolute;
+  z-index:100;
+  width:28px;height:28px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  font-style:normal;
+  color:#302005;
+  background:radial-gradient(circle,#ffe58a 0 44%,#bd8f20 45% 58%,#f6d463 59% 70%,#765815 71%);
+  border:1px solid #fff0ad;
+  box-shadow:0 6px 14px #0009;
+  pointer-events:none;
+  opacity:1;
+  transform:translate3d(0,0,0) scale(1);
+  transition:transform .68s cubic-bezier(.18,.72,.22,1),opacity .68s ease;
+}
+#game .flyingBetChip.fly{
+  transform:translate3d(var(--chip-x),var(--chip-y),0) scale(.72) rotate(360deg);
+  opacity:.18;
+}
+
+#game .roundOutcomeToast{
+  position:absolute;
+  left:50%;
+  top:52%;
+  transform:translate(-50%,-50%);
+  z-index:130;
+  min-width:270px;
+  max-width:70%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px 18px;
+  border-radius:16px;
+  background:#05130ded;
+  border:1px solid #d7b852;
+  box-shadow:0 16px 42px #000b,0 0 26px #e5c2571d;
+  color:#f4df91;
+  text-align:center;
+  pointer-events:none;
+  animation:roundOutcomeIn .22s ease-out;
+}
+#game .roundOutcomeToast span{font-size:20px}
+#game .roundOutcomeToast b{font-size:17px;letter-spacing:.4px}
+#game .roundOutcomeToast.win{
+  background:linear-gradient(145deg,#123923f0,#07170ff0);
+  border-color:#54e39b;
+  color:#baf5d5;
+  box-shadow:0 16px 42px #000b,0 0 30px #44e69b2b;
+}
+@keyframes roundOutcomeIn{from{opacity:0;transform:translate(-50%,-44%) scale(.88)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
+.networkToast{
+  position:fixed;
+  left:50%;
+  top:16px;
+  transform:translateX(-50%);
+  z-index:9999;
+  padding:10px 16px;
+  border-radius:999px;
+  background:#10281df2;
+  color:#dff5e9;
+  border:1px solid #3f8e68;
+  box-shadow:0 8px 24px #0008;
+  font-size:12px;
+  font-weight:850;
+}
+.networkToast.bad{background:#34161af2;color:#ffd2d5;border-color:#99464f}
+.networkToast.hide{display:none!important}
+
+#game .actionLogRow.compact{padding:6px 1px;font-size:10px}
+@media(max-width:650px){
+  #game .liveSeatStatus{top:-18px;font-size:7px;padding:2px 5px}
+  #game .dealerSeatMarker{width:20px;height:20px;left:-6px;top:-6px;font-size:9px}
+  #game .roundOutcomeToast{min-width:210px;max-width:82%;padding:9px 12px}
+  #game .roundOutcomeToast b{font-size:13px}
+}
