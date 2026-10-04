@@ -1,7 +1,7 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
-const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}});
 let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null,spectatorMode=false;
 let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null;
 const $=id=>document.getElementById(id), sections=['login','lobby','profile','create','game'];
@@ -255,7 +255,36 @@ async function askBuyIn(room){
 }
 
 $('showRegister').onclick=()=>authView('register'); $('showLogin').onclick=()=>authView('login');ensureLoginSecurityNote();
-async function boot(){const {data}=await sb.auth.getSession();if(data.session){user=data.session.user;await loadProfile();await restoreNavState()}else{clearNavState();show('login');authView('login')}}
+let authRestoring=false,lastAuthUserId=null;
+async function acceptSession(session,{restore=true}={}){
+  if(!session?.user)return false;
+  if(authRestoring)return true;
+  authRestoring=true;
+  try{
+    user=session.user;
+    lastAuthUserId=user.id;
+    await loadProfile();
+    if(restore)await restoreNavState();
+    return true;
+  }finally{authRestoring=false}
+}
+async function boot(){
+  const {data,error}=await sb.auth.getSession();
+  if(!error&&data?.session){await acceptSession(data.session,{restore:true});return}
+  // Do not erase navigation state here: INITIAL_SESSION can arrive just after page load.
+  show('login');authView('login');
+}
+sb.auth.onAuthStateChange((event,session)=>{
+  if(session?.user&&(event==='INITIAL_SESSION'||event==='SIGNED_IN'||event==='TOKEN_REFRESHED')){
+    setTimeout(()=>acceptSession(session,{restore:true}),0);
+    return;
+  }
+  if(event==='SIGNED_OUT'&&!session){
+    lastAuthUserId=null;user=null;profile=null;
+    $('logoutBtn')?.classList.add('hide');$('profileBtn')?.classList.add('hide');
+    $('me').textContent='Гість';show('login');authView('login');
+  }
+});
 $('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const pwErr=strongPasswordError(password);if(pwErr)return alert(pwErr);const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert('Не вдалося створити акаунт. Перевір дані та спробуй ще раз.');if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await loadProfile()};
 $('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
