@@ -327,7 +327,7 @@ $('newRoom').onclick=()=>show('create');
 $('browseTables').onclick=()=>document.getElementById('tablesArea')?.scrollIntoView({behavior:'smooth'});
 $('homeFriends').onclick=()=>document.getElementById('socialArea')?.scrollIntoView({behavior:'smooth'});
 $('homeCabinet').onclick=async()=>{await renderProfile();show('profile')};
-$('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>{const seated=(r.room_players||[]).filter(p=>p.seat_no!==null).length;return seated>0&&seated<r.max_players&&r.game_status!=='playing'});if(open)return joinRoom(open);show('create')};
+$('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>{const seated=(r.room_players||[]).filter(p=>p.seat_no!==null).length;return !r.is_private&&seated>0&&seated<r.max_players&&r.game_status!=='playing'});if(open)return joinRoom(open);show('create')};
 $('createForm').onsubmit=async e=>{e.preventDefault();const isPrivate=!!$('privateRoomToggle')?.checked;const {data,error}=await sb.rpc('create_secure_room_v2',{p_name:$('roomName').value.trim()||'Мій стіл',p_max_players:+$('maxPlayers').value,p_turn_seconds:+$('turnTime').value,p_ante:+$('ante').value,p_private:isPrivate});if(error)return alert(error.message);const rid=Number(data?.room_id||0);if(isPrivate&&data?.invite_code)alert('Приватний стіл створено. Код для друга: '+data.invite_code);if(rid)await openRoom(rid)}
 async function refreshLobby(){
   await pingOnline();
