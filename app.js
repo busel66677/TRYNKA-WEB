@@ -261,7 +261,26 @@ $('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds
 $('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
 async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await refreshAdminPanel();subscribeLobby()}
 async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
-$('profileBtn').onclick=async()=>{await renderProfile();show('profile')};document.querySelectorAll('.toLobby').forEach(b=>b.onclick=async()=>{show('lobby');await refreshLobby()});
+$('profileBtn').onclick=async()=>{await renderProfile();show('profile')};document.querySelectorAll('.toLobby').forEach(b=>b.onclick=async()=>{
+  const {data:activeSeat}=await sb.from('room_players')
+    .select('room_id,seat_no')
+    .eq('user_id',user.id)
+    .not('seat_no','is',null)
+    .limit(1)
+    .maybeSingle();
+
+  if(activeSeat?.room_id){
+    const {error}=await sb.rpc('stand_up_from_table',{p_room:activeSeat.room_id});
+    if(error){
+      alert('Ви ще граєте за столом. Спочатку завершіть роздачу або впадіть.');
+      await openRoom(activeSeat.room_id);
+      return;
+    }
+  }
+
+  show('lobby');
+  await refreshLobby();
+});
 async function renderProfile(){
   ensureLobbySupport();
   ensureProgressUi();
@@ -308,14 +327,14 @@ $('newRoom').onclick=()=>show('create');
 $('browseTables').onclick=()=>document.getElementById('tablesArea')?.scrollIntoView({behavior:'smooth'});
 $('homeFriends').onclick=()=>document.getElementById('socialArea')?.scrollIntoView({behavior:'smooth'});
 $('homeCabinet').onclick=async()=>{await renderProfile();show('profile')};
-$('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(count)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>(r.room_players?.[0]?.count||0)>0&&(r.room_players?.[0]?.count||0)<r.max_players&&r.game_status!=='playing');if(open)return joinRoom(open);show('create')};
+$('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>{const seated=(r.room_players||[]).filter(p=>p.seat_no!==null).length;return seated>0&&seated<r.max_players&&r.game_status!=='playing'});if(open)return joinRoom(open);show('create')};
 $('createForm').onsubmit=async e=>{e.preventDefault();const {data,error}=await sb.rpc('create_secure_room',{p_name:$('roomName').value.trim()||'Мій стіл',p_max_players:+$('maxPlayers').value,p_turn_seconds:+$('turnTime').value,p_ante:+$('ante').value});if(error)return alert(error.message);await openRoom(data)}
 async function refreshLobby(){
   await pingOnline();
   const cutoff=new Date(Date.now()-70000).toISOString();
   const [{count:online},{data:rooms},{data:p}]=await Promise.all([
     sb.from('profiles').select('*',{count:'exact',head:true}).gt('online_at',cutoff),
-    sb.from('rooms').select('*,room_players(count)').order('created_at',{ascending:false}),
+    sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:false}),
     sb.from('profiles').select('*').eq('id',user.id).single()
   ]);
 
@@ -328,12 +347,12 @@ async function refreshLobby(){
   $('onlineStat').textContent=n;
   $('myChips').textContent=profile?.chips??0;
 
-  const active=(rooms||[]).filter(r=>(r.room_players?.[0]?.count||0)>0);
+  const active=(rooms||[]).filter(r=>(r.room_players||[]).some(p=>p.seat_no!==null));
   $('tablesStat').textContent=active.length;
   $('rooms').innerHTML='';
 
   active.forEach(r=>{
-    const count=r.room_players?.[0]?.count||0;
+    const count=(r.room_players||[]).filter(p=>p.seat_no!==null).length;
     const playing=r.game_status==='playing';
     const d=document.createElement('div');
     d.className='roomCard';
