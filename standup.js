@@ -4,7 +4,7 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
 
 let me=null,busy=false,standing=false,currentRoom=null;
-let timerState=null,lastSeatState='',lastOpenState='',lastTimerText='',lastSeated=null;
+let timerState=null,lastSeatState='',lastOpenState='',lastTimerText='',lastSeated=null,lastTurnNoticeKey='',audioCtx=null;
 
 async function getMe(){
   if(me)return me;
@@ -12,6 +12,49 @@ async function getMe(){
   me=data.session?.user||null;
   return me;
 }
+function primeTurnAudio(){
+  try{
+    const A=window.AudioContext||window.webkitAudioContext;
+    if(!A)return;
+    if(!audioCtx)audioCtx=new A();
+    if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+  }catch{}
+}
+function beepTurn(){
+  if(localStorage.getItem('trynkaSound')==='off')return;
+  try{
+    primeTurnAudio();
+    if(!audioCtx)return;
+    const now=audioCtx.currentTime;
+    [720,940].forEach((f,i)=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.frequency.value=f;o.type='sine';
+      g.gain.setValueAtTime(.0001,now+i*.11);
+      g.gain.exponentialRampToValueAtTime(.05,now+i*.11+.015);
+      g.gain.exponentialRampToValueAtTime(.0001,now+i*.11+.1);
+      o.connect(g);g.connect(audioCtx.destination);
+      o.start(now+i*.11);o.stop(now+i*.11+.11);
+    });
+  }catch{}
+}
+function notifyMyTurn(g){
+  if(!g||g.status!=='playing'||g.turn_user_id!==me?.id)return;
+  const key=g.id+':'+String(g.turn_started_at||'');
+  if(key===lastTurnNoticeKey)return;
+  lastTurnNoticeKey=key;
+  beepTurn();
+  try{navigator.vibrate?.([140,70,140])}catch{}
+  if(document.hidden&&'Notification'in window&&Notification.permission==='granted'){
+    try{new Notification('TRYNKA — ваш хід',{body:'Час зробити хід за столом.',tag:'trynka-turn',renotify:true})}catch{}
+  }
+  document.title='● ВАШ ХІД — TRYNKA';
+  setTimeout(()=>{if(document.title.includes('ВАШ ХІД'))document.title='TRYNKA ONLINE'},3500);
+}
+async function touchPresence(){
+  if(!currentRoom||$('game')?.classList.contains('hide'))return;
+  try{await sb.rpc('touch_room_presence',{p_room:currentRoom})}catch{}
+}
+
 async function myRoom(){
   const u=await getMe();if(!u)return null;
   const {data}=await sb.from('room_players').select('room_id,seat_no,table_chips').eq('user_id',u.id).order('joined_at',{ascending:false}).limit(1).maybeSingle();
@@ -55,9 +98,19 @@ function syncStand(seated){
 function playerName(seat){
   return (seat?.querySelector('.seatName')?.textContent||'Гравець').replace('★','').replace('ADMIN','').trim();
 }
-function paintSeats(ps,turnUser,lastAction=null){
+function paintSeats(ps,turnUser,lastAction=null,presence=[]){
   const actionSig=lastAction?[lastAction.id,lastAction.user_id,lastAction.action,Number(lastAction.amount||0)]:[];
-  const sig=JSON.stringify((ps||[]).map(p=>[p.user_id,p.seat_no,Number(p.contributed||0),!!p.folded]).sort((a,b)=>a[1]-b[1]))+'|'+(turnUser||'')+'|'+JSON.stringify(actionSig);
+  const now=Date.now();
+  const pmap=new Map((presence||[]).map(x=>[x.user_id,x]));
+  const statusOf=userId=>{
+    const x=pmap.get(userId);
+    if(!x?.last_seen_at)return 'off';
+    const age=now-new Date(x.last_seen_at).getTime();
+    if(age<=22000)return 'on';
+    if(age<=55000)return 'reconnecting';
+    return 'off';
+  };
+  const sig=JSON.stringify((ps||[]).map(p=>[p.user_id,p.seat_no,Number(p.contributed||0),!!p.folded,statusOf(p.user_id)]).sort((a,b)=>a[1]-b[1]))+'|'+(turnUser||'')+'|'+JSON.stringify(actionSig);
   if(sig===lastSeatState)return;
   lastSeatState=sig;
 
@@ -83,6 +136,16 @@ function paintSeats(ps,turnUser,lastAction=null){
     }
     contribution.textContent='ДАВ: '+Number(p.contributed||0)+' ◉';
     contribution.classList.toggle('zero',Number(p.contributed||0)<=0);
+
+    let connection=seat.querySelector('.connectionState');
+    if(!connection){
+      connection=document.createElement('div');
+      connection.className='connectionState';
+      body.appendChild(connection);
+    }
+    const cs=statusOf(p.user_id);
+    connection.className='connectionState '+cs;
+    connection.textContent=cs==='on'?'● онлайн':cs==='reconnecting'?'◐ перепідключення':'○ офлайн';
 
     const state=seat.querySelector('.seatState');
     if(state)state.textContent=p.folded?'ВПАВ':'';
@@ -189,14 +252,16 @@ async function syncUi(){
       return;
     }
 
-    const [{data:ps},{data:lastAction}]=await Promise.all([
+    const [{data:ps},{data:lastAction},{data:presence}]=await Promise.all([
       sb.from('round_players').select('user_id,seat_no,contributed,folded,revealed').eq('round_id',g.id),
-      sb.from('round_actions').select('id,user_id,action,amount,created_at').eq('round_id',g.id).order('created_at',{ascending:false}).limit(1).maybeSingle()
+      sb.from('round_actions').select('id,user_id,action,amount,created_at').eq('round_id',g.id).order('created_at',{ascending:false}).limit(1).maybeSingle(),
+      sb.from('room_players').select('user_id,last_seen_at,disconnected_at').eq('room_id',currentRoom).not('seat_no','is',null)
     ]);
-    paintSeats(ps||[],g.status==='playing'?g.turn_user_id:null,lastAction||null);
+    paintSeats(ps||[],g.status==='playing'?g.turn_user_id:null,lastAction||null,presence||[]);
     updateSupportUi(g,ps||[],r,rp);
 
     if(g.status==='playing'){
+      notifyMyTurn(g);
       let nick='Гравець';
       if(g.turn_user_id===me?.id)nick='Ви';
       else{
@@ -241,8 +306,13 @@ document.addEventListener('click',async e=>{
 },true);
 
 async function init(){
-  mountStand();mountGameInfo();await getMe();await syncUi();
+  mountStand();mountGameInfo();await getMe();
+  document.addEventListener('pointerdown',primeTurnAudio,{once:true,passive:true});
+  await syncUi();
+  await touchPresence();
   setInterval(syncUi,850);
   setInterval(tickTimer,200);
+  setInterval(touchPresence,10000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)touchPresence()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
