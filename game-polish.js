@@ -19,7 +19,7 @@ async function throwCard(target,index){
   const tr=table.getBoundingClientRect(),dr=deck.getBoundingClientRect(),rr=target.getBoundingClientRect();
   const c=document.createElement('div');
   c.className='dealerFlyingCard';c.innerHTML='<i></i>';
-  c.style.setProperty('--deal-duration',Math.max(40,Math.round(640*animFactor()))+'ms');
+  c.style.setProperty('--deal-duration',Math.max(40,Math.round(300*animFactor()))+'ms');
   const sx=dr.left-tr.left+dr.width/2-22,sy=dr.top-tr.top+dr.height/2-31;
   const ex=rr.left-tr.left+rr.width/2-22,ey=rr.top-tr.top+rr.height/2-31;
   c.style.left=sx+'px';c.style.top=sy+'px';
