@@ -21,23 +21,27 @@ async function leaderboard(){
   }
   if(!box)return;
 
+  const {data,error}=await sb.rpc('get_season_leaderboard',{p_limit:50});
+  if(error){
+    box.innerHTML='<p class="muted">Рейтинг тимчасово недоступний.</p>';
+    return;
+  }
+
   const cutoff=Date.now()-70000;
-  const {data}=await sb.from('profiles')
-    .select('id,nickname,chips,wins,games_played,online_at,is_admin,avatar_key')
-    .eq('is_bot',false)
-    .order('chips',{ascending:false})
-    .limit(50);
+  const month=new Intl.DateTimeFormat('uk-UA',{month:'long',year:'numeric'}).format(new Date());
 
   const rows=(data||[]).map((p,i)=>{
     const online=p.online_at&&new Date(p.online_at).getTime()>cutoff;
-    const you=p.id===me?.id;
-    return `<div class="ratingRow ${online?'online':''} ${you?'you':''}">
+    const you=p.user_id===me?.id;
+    const games=Number(p.season_games||0),wins=Number(p.season_wins||0);
+    return `<div class="ratingRow seasonRow ${online?'online':''} ${you?'you':''}">
       <span class="ratingPos">${i+1}</span>
       <div class="ratingPlayer">
-        <b><span class="ratingAvatar">${ratingAvatar(p.avatar_key)}</span>${esc(p.nickname)}${p.is_admin?'<em>ADMIN</em>':''}${you?'<small>ВИ</small>':''}</b>
-        <span>${p.wins||0} перемог · ${p.games_played||0} ігор</span>
+        <b><span class="ratingAvatar playerFrame frame-${esc(p.frame_key||'classic')}">${ratingAvatar(p.avatar_key)}</span>${esc(p.nickname)}${you?'<small>ВИ</small>':''}</b>
+        <span>Сезон: ${wins} перемог / ${games} ігор · ${Number(p.win_rate||0)}%</span>
       </div>
-      <strong>${Number(p.chips||0).toLocaleString('uk-UA')} ◉</strong>
+      <strong class="seasonScore">${Number(p.score||0).toLocaleString('uk-UA')}<small> очок</small></strong>
+      <span class="ratingXp">${Number(p.xp||0).toLocaleString('uk-UA')} XP<small>LVL ${p.level||1}</small></span>
       <span class="ratingStatus"><i></i>${online?'ОНЛАЙН':'ОФЛАЙН'}</span>
     </div>`;
   }).join('');
@@ -45,11 +49,12 @@ async function leaderboard(){
   const onlineCount=(data||[]).filter(p=>p.online_at&&new Date(p.online_at).getTime()>cutoff).length;
 
   box.innerHTML=`<div class="rankHead">
-    <div><span class="eyebrow">RATING</span><h2>🏆 Рейтинг гравців</h2></div>
+    <div><span class="eyebrow">SEASON RATING</span><h2>🏆 Сезонний рейтинг</h2><small class="seasonName">${esc(month)}</small></div>
     <span><b>${onlineCount}</b> онлайн</span>
   </div>
-  <div class="ratingHeader"><span>№</span><span>Гравець</span><span>Монети</span><span>Статус</span></div>
-  <div class="ratingTable">${rows||'<p class="muted">Гравців ще немає.</p>'}</div>`;
+  <div class="ratingHeader seasonHeader"><span>№</span><span>Гравець</span><span>Очки</span><span>XP</span><span>Статус</span></div>
+  <div class="ratingTable">${rows||'<p class="muted">Гравців ще немає.</p>'}</div>
+  <p class="ratingExplain">Очки сезону: ігри + перемоги + відсоток перемог. XP і рівень показуються окремо.</p>`;
 }
 async function currentRoom(){const title=$('roomTitle')?.textContent;if(!me||!title)return null;const {data}=await sb.from('room_players').select('room_id,ready').eq('user_id',me.id).order('joined_at',{ascending:false}).limit(1).maybeSingle();return data}
 async function watch(id){if(!me)return alert('Спочатку увійди');const {error}=await sb.rpc('join_as_spectator',{p_room:+id});if(error)return alert(error.message);const {data:r}=await sb.from('rooms').select('name').eq('id',id).single();alert(`Ви спостерігаєте за столом «${r?.name||id}». Карти гравців приховані.`)}
