@@ -1,0 +1,317 @@
+/* TRYNKA gameplay quality v35 */
+
+/* private rooms */
+.privateRoomToggleRow{
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:12px!important;
+  border:1px solid #304a3b;
+  border-radius:12px;
+  background:#0b1912;
+}
+.privateRoomToggleRow span{display:block}
+.privateRoomToggleRow b,.privateRoomToggleRow small{display:block}
+.privateRoomToggleRow small{margin-top:3px;color:#788f83;font-size:8px}
+.privateRoomToggleRow input{width:20px!important;height:20px!important}
+.privateJoinBar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin:10px 0;
+  padding:11px 13px;
+  border-radius:13px;
+  border:1px solid #3c4a39;
+  background:linear-gradient(145deg,#101a13,#07110c);
+}
+.privateJoinBar b,.privateJoinBar small{display:block}
+.privateJoinBar b{font-size:12px}
+.privateJoinBar small{margin-top:2px;color:#788f83;font-size:8px}
+.privateCodeEntry{display:flex;gap:6px}
+.privateCodeEntry input{
+  width:105px;
+  padding:9px 10px;
+  text-align:center;
+  letter-spacing:2px;
+  font-weight:950;
+  text-transform:uppercase;
+  border-radius:9px;
+  border:1px solid #425a4b;
+  background:#06110c;
+  color:#f1da7a;
+}
+.privateCodeEntry button{padding:9px 12px}
+.privateRoomCodeBadge{
+  display:inline-flex;
+  width:max-content;
+  margin-top:4px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid #8d7530;
+  background:#2a220b;
+  color:#f2d66b;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.8px;
+  box-shadow:none;
+}
+
+/* favorite tables */
+.roomCard{position:relative}
+.favoriteRoomBtn{
+  position:absolute!important;
+  right:9px!important;
+  top:9px!important;
+  z-index:3;
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  padding:0!important;
+  border-radius:50%!important;
+  background:#101a15!important;
+  color:#65776e!important;
+  border:1px solid #30443a!important;
+  font-size:16px!important;
+  line-height:1!important;
+  box-shadow:none!important;
+}
+.favoriteRoomBtn.on{
+  color:#f1d366!important;
+  border-color:#c6a842!important;
+  background:#29220d!important;
+  box-shadow:0 0 12px #d7b94d33!important;
+}
+.roomCard.favoriteRoom{border-color:#9c8434!important}
+
+/* action history + persistent player action */
+.v35ActionStrip{
+  width:min(100%,940px);
+  box-sizing:border-box;
+  margin:7px auto 0;
+  padding:8px 9px;
+  border:1px solid #294438;
+  border-radius:12px;
+  background:#07120df2;
+}
+.v35ActionHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:5px;
+}
+.v35ActionHead b{font-size:9px;color:#d7e4dd}
+.v35ActionHead span{font-size:7px;color:#6d8276}
+#v35ActionRows{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
+.v35ActionRow{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 7px;
+  border-radius:8px;
+  border:1px solid #294337;
+  background:#0d1c14;
+  font-size:7px;
+  white-space:nowrap;
+}
+.v35ActionRow b{font-size:8px}
+.v35ActionRow span{color:#94a89e}
+.v35ActionRow.raise{border-color:#356d9f}.v35ActionRow.raise span{color:#79bff5}
+.v35ActionRow.reveal{border-color:#8b7733}.v35ActionRow.reveal span{color:#e5cb68}
+.v35ActionRow.fold,.v35ActionRow.timeout{border-color:#6c393d}.v35ActionRow.fold span,.v35ActionRow.timeout span{color:#e98c92}
+.v35ActionRow.call{border-color:#2f6e51}.v35ActionRow.call span{color:#6cdda3}
+.v35NoActions{color:#677c70;font-size:8px}
+#game .lastActionTag{
+  width:max-content;
+  max-width:122px;
+  margin:3px auto 0;
+  padding:2px 5px;
+  border-radius:999px;
+  border:1px solid #40554a;
+  background:#0b1711;
+  color:#a7b8af;
+  font-size:6px;
+  font-weight:950;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#game .lastActionTag.raise{border-color:#3973a9;color:#87c7f8}
+#game .lastActionTag.reveal{border-color:#8f7b37;color:#edd36f}
+#game .lastActionTag.fold,#game .lastActionTag.timeout{border-color:#7a4145;color:#ef949a}
+#game .lastActionTag.call{border-color:#347856;color:#73e2aa}
+
+/* player titles */
+.playerTitleBadge{
+  width:max-content;
+  max-width:100%;
+  margin:3px 0 0;
+  padding:2px 5px;
+  border-radius:999px;
+  font-size:6px;
+  font-weight:950;
+  letter-spacing:.35px;
+  white-space:nowrap;
+}
+.playerTitleBadge.veteran{background:#16241d;border:1px solid #496256;color:#afc3b8}
+.playerTitleBadge.champion{background:#30280d;border:1px solid #b79b3e;color:#edd46e}
+.playerTitleBadge.legend{background:#281836;border:1px solid #9b6ec2;color:#dab0ff}
+.playerTitleBadge.admin{background:#3a2e0a;border:1px solid #d5b447;color:#f5d875}
+
+/* clickable public profile */
+#game .seatAvatar{cursor:pointer!important}
+.playerCardDialog{
+  width:min(470px,calc(100vw - 22px));
+  padding:0;
+  border:1px solid #66572b;
+  border-radius:18px;
+  background:#07120d;
+  color:#ecf4ef;
+  box-shadow:0 25px 80px #000e;
+}
+.playerCardDialog::backdrop{background:#020604d0;backdrop-filter:blur(4px)}
+.playerCardBox{position:relative;padding:17px}
+.playerCardClose{
+  position:absolute;right:10px;top:10px;
+  width:34px;height:34px;padding:0;border-radius:50%;
+  border:1px solid #355044;background:#15231c;color:#b0c0b8;font-size:20px
+}
+.playerCardHero{display:flex;align-items:center;gap:12px;padding-right:38px}
+.playerCardAvatar{
+  width:62px;height:62px;flex:0 0 auto;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#153020;
+  border:3px solid #567362;
+  font-size:30px;
+}
+.playerCardHero h2{margin:3px 0 0}
+.publicBadge{
+  display:inline-flex;margin-top:5px;padding:3px 7px;border-radius:999px;
+  background:#2d250c;border:1px solid #9c8333;color:#e9cf6c;font-size:7px
+}
+.playerCardStats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin-top:14px;
+}
+.playerCardStats>div{
+  padding:9px 7px;border-radius:10px;background:#0d1e16;border:1px solid #294337;text-align:center
+}
+.playerCardStats b,.playerCardStats span{display:block}
+.playerCardStats b{color:#ead16d;font-size:14px}
+.playerCardStats span{margin-top:2px;color:#788f83;font-size:7px}
+.playerRecordsMini{
+  display:grid;gap:5px;margin-top:9px
+}
+.playerRecordsMini span{
+  display:flex;justify-content:space-between;gap:10px;padding:7px 9px;border-radius:9px;background:#0a1811;border:1px solid #223b2e;color:#83998d;font-size:8px
+}
+.playerRecordsMini b{color:#d9e4de}
+
+/* settings */
+.gameSettingsV35{margin:14px 0!important}
+.settingsHead h2,.extrasHead h2{margin:2px 0 0}
+.settingsGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:10px;
+}
+.settingsGrid label{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 11px;
+  border-radius:11px;
+  border:1px solid #294336;
+  background:#0a1912;
+}
+.settingsGrid label span{font-size:9px;font-weight:850;color:#d3ded8}
+.settingsGrid label small{display:block;margin-top:3px;color:#73897d;font-size:7px;font-weight:500}
+.settingsGrid input{width:19px;height:19px}
+.settingsGrid select{max-width:120px;padding:7px;border-radius:8px;border:1px solid #3b5445;background:#07110c;color:#dfe9e4;font-size:9px}
+
+/* records + quests */
+.profileExtrasV35{
+  display:grid;
+  grid-template-columns:.9fr 1.4fr;
+  gap:12px;
+  margin:14px 0;
+}
+.profileExtrasV35 .panel{margin:0}
+.extrasHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:10px;
+  margin-bottom:10px;
+}
+.extrasHead>span{color:#7b9185;font-size:8px}
+.recordGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.recordGrid>div{
+  display:grid;
+  place-items:center;
+  align-content:center;
+  min-height:76px;
+  padding:8px;
+  border-radius:11px;
+  border:1px solid #294237;
+  background:#0a1912;
+  text-align:center;
+}
+.recordGrid>div>span{font-size:18px}
+.recordGrid b{margin-top:3px;color:#e9d06e;font-size:13px}
+.recordGrid small{margin-top:2px;color:#768c80;font-size:7px}
+.questGrid{display:grid;gap:6px}
+.questCard{
+  display:grid;
+  grid-template-columns:minmax(120px,1fr) 100px 48px auto;
+  gap:8px;
+  align-items:center;
+  padding:8px 9px;
+  border-radius:10px;
+  border:1px solid #294237;
+  background:#0a1912;
+}
+.questCard>div:first-child b,.questCard>div:first-child small{display:block}
+.questCard>div:first-child b{font-size:9px}
+.questCard>div:first-child small{margin-top:2px;color:#788f83;font-size:7px}
+.questProgress{height:6px;overflow:hidden;border-radius:999px;background:#16241c}
+.questProgress i{display:block;height:100%;border-radius:inherit;background:#d6ba54}
+.questCard>span{font-size:8px;color:#91a69a;text-align:right}
+.questCard button{padding:6px 8px;font-size:7px;background:#ccb04b;color:#171006}
+.questCard em{font-style:normal;color:#56d99e;font-size:7px;font-weight:950}
+.questCard.ready{border-color:#a68b36}
+.questCard.claimed{opacity:.65}
+
+/* UI scaling */
+body.trynkaCompact #game .seat{transform:scale(.9)}
+body.trynkaCompact #game .gameSide{font-size:90%}
+body.trynkaCompact .roomCard{padding-top:9px!important;padding-bottom:9px!important}
+body.trynkaLarge #game .seat{transform:scale(1.06)}
+body.trynkaLarge #game .actionButtons button{font-size:13px!important;min-height:45px!important}
+body.trynkaLarge #game .centerInfo{transform:translate(-50%,-50%) scale(1.06)!important}
+
+@media(max-width:800px){
+  .privateJoinBar{align-items:stretch;flex-direction:column}
+  .privateCodeEntry{display:grid;grid-template-columns:1fr auto}
+  .privateCodeEntry input{width:auto}
+  .settingsGrid{grid-template-columns:1fr}
+  .profileExtrasV35{grid-template-columns:1fr}
+  .questCard{grid-template-columns:1fr 70px 42px}
+  .questCard button,.questCard em{grid-column:1/-1}
+}
+@media(max-width:520px){
+  .playerCardStats{grid-template-columns:1fr 1fr}
+  .recordGrid{grid-template-columns:1fr 1fr}
+  #game .lastActionTag{max-width:92px;font-size:5px}
+}
