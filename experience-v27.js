@@ -31,6 +31,13 @@ function mountFilters(){
       <option value="500">до 500 ◉</option>
       <option value="500+">500+ ◉</option>
     </select>
+    <select id="roomFilterPlayers">
+      <option value="all">Будь-яка кількість</option>
+      <option value="1">1 гравець</option>
+      <option value="2">2 гравці</option>
+      <option value="3-4">3–4 гравці</option>
+      <option value="5+">5+ гравців</option>
+    </select>
     <select id="roomFilterTurn">
       <option value="all">Будь-який таймер</option>
       <option value="15">15 секунд</option>
@@ -43,7 +50,7 @@ function mountFilters(){
   `;
   rooms.before(filters);
 
-  ['roomFilterSearch','roomFilterAnte','roomFilterTurn','roomFilterFree'].forEach(id=>{
+  ['roomFilterSearch','roomFilterAnte','roomFilterPlayers','roomFilterTurn','roomFilterFree'].forEach(id=>{
     $(id)?.addEventListener(id==='roomFilterSearch'?'input':'change',applyFilters);
   });
 
@@ -55,6 +62,7 @@ function applyFilters(){
   const rooms=$('rooms');if(!rooms)return;
   const search=($('roomFilterSearch')?.value||'').trim().toLowerCase();
   const ante=String($('roomFilterAnte')?.value||'all');
+  const playersFilter=String($('roomFilterPlayers')?.value||'all');
   const turn=String($('roomFilterTurn')?.value||'all');
   const free=!!$('roomFilterFree')?.checked;
   let shown=0,total=0;
@@ -67,6 +75,12 @@ function applyFilters(){
     const players=Number(card.dataset.players||0),max=Number(card.dataset.max||0);
     let ok=!search||name.includes(search);
     if(ante!=='all')ok=ok&&(ante==='500+'?a>=500:a<=Number(ante));
+    if(playersFilter!=='all'){
+      if(playersFilter==='1')ok=ok&&players===1;
+      else if(playersFilter==='2')ok=ok&&players===2;
+      else if(playersFilter==='3-4')ok=ok&&players>=3&&players<=4;
+      else if(playersFilter==='5+')ok=ok&&players>=5;
+    }
     if(turn!=='all')ok=ok&&t===turn;
     if(free)ok=ok&&players<max;
     card.classList.toggle('filterHidden',!ok);
