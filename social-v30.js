@@ -6,7 +6,7 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
-let me=null,currentRoom=null,socialChannel=null,seatMap=new Map(),seatMapAt=0,lastThemeKey='',themeBusy=false;
+let me=null,currentRoom=null,socialChannel=null,seatMap=new Map(),seatMapAt=0,lastThemeKey='',themeBusy=false,tickTimer=null,themeTimer=null;
 
 async function getMe(){
   if(me)return me;
@@ -214,13 +214,32 @@ async function tick(){
   if(!$('profile')?.classList.contains('hide'))await mountThemePicker();
 }
 
-async function init(){
-  await getMe();
+async function startForUser(){
   if(!me)return;
+  clearInterval(tickTimer);
+  clearInterval(themeTimer);
   await refreshThemeFromProfile();
   await tick();
-  setInterval(tick,1200);
-  setInterval(refreshThemeFromProfile,12000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
+  tickTimer=setInterval(tick,1200);
+  themeTimer=setInterval(refreshThemeFromProfile,12000);
+}
+async function init(){
+  const {data}=await sb.auth.getSession();
+  me=data.session?.user||null;
+  if(me)await startForUser();
+
+  sb.auth.onAuthStateChange((_event,session)=>{
+    me=session?.user||null;
+    if(me){
+      setTimeout(startForUser,0);
+    }else{
+      clearInterval(tickTimer);clearInterval(themeTimer);
+      tickTimer=themeTimer=null;
+      currentRoom=null;seatMap.clear();
+      if(socialChannel){sb.removeChannel(socialChannel).catch(()=>{});socialChannel=null}
+    }
+  });
+
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&me)tick()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
