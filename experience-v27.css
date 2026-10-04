@@ -181,3 +181,6 @@
   .roomSearch{grid-column:auto}
   #roomFilterCount{justify-self:start}
 }
+
+.roomCard .pill.playing{border-color:#4f744f!important;color:#7be2a4!important;background:#0d2117!important}
+.roomCard button:disabled{opacity:.48;cursor:not-allowed;filter:saturate(.5)}
