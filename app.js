@@ -457,6 +457,7 @@ async function openRoom(id){
   await renderRoom();
 }
 async function renderRoom(){if(!currentRoom)return;const roomId=currentRoom,version=++roomRenderVersion;const [{data:r},{data:ps}]=await Promise.all([sb.from('rooms').select('*').eq('id',currentRoom).single(),sb.from('room_players').select('user_id,seat_no,table_chips,ready,last_seen_at,disconnected_at,profiles(nickname,chips,avatar_key,frame_key,win_streak,is_bot)').eq('room_id',currentRoom)]);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(!r)return leaveRoom();$('roomTitle').textContent=r.name;const pot=(r.ante||0)*(ps||[]).filter(p=>p.seat_no!==null).length;renderSeats(r,ps||[]);renderGameState(r,ps||[]);await renderRound(r,ps||[],version);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(messagesLoadedRoom!==currentRoom){const {data:ms}=await sb.from('messages').select('*,profiles(nickname)').eq('room_id',currentRoom).order('created_at').limit(50);$('messages').innerHTML='';(ms||[]).forEach(addMessage);messagesLoadedRoom=currentRoom}await renderHand(r);await renderTableHistory()}
+window.TRYNKA_FORCE_RENDER=renderRoom;
 function positionOwnHandNearSeat(){
   const table=document.querySelector('#game .table');
   const seat=document.querySelector('#seats .seat.mine');
@@ -555,12 +556,21 @@ async function doGameAction(action){
   }
 
   gameActionBusy=true;
-  document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.disabled=true);
+  const actionStarted=Date.now();
+  document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{b.disabled=true;b.classList.add('actionLocked')});
   try{
     const actionNonce=crypto.randomUUID();const {error}=await sb.rpc('play_round_action_safe',{p_room:currentRoom,p_action:action,p_raise_to:raiseTo,p_nonce:actionNonce});
-    if(error)alert(error.message);
+    if(error){
+      try{await sb.rpc('log_client_error',{p_message:error.message||String(error),p_context:'round='+(currentRound?.id||'?')+' action='+action,p_room:currentRoom})}catch{}
+      alert(error.message);
+    }
+  }catch(e){
+    try{await sb.rpc('log_client_error',{p_message:e?.message||String(e),p_context:'round='+(currentRound?.id||'?')+' action='+action+' exception',p_room:currentRoom})}catch{}
+    throw e;
   }finally{
+    const wait=Math.max(0,450-(Date.now()-actionStarted));if(wait)await new Promise(r=>setTimeout(r,wait));
     gameActionBusy=false;
+    document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.classList.remove('actionLocked'));
     await renderRoom();
   }
 }
