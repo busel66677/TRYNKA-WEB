@@ -83,7 +83,7 @@ async function updateStrength(){
   const {data,error}=await sb.rpc('get_my_hand_strength',{p_room:room});
   if(error||!data?.length){badge.classList.add('hide');return}
   const row=data[0],key=room+':'+row.label+':'+row.score;
-  if(key!==lastStrengthKey){lastStrengthKey=key;badge.innerHTML='<small>ВАША КОМБІНАЦІЯ</small><b>'+esc(row.label)+'</b>'}
+  if(key!==lastStrengthKey){lastStrengthKey=key;badge.innerHTML='<small>ОЧКИ</small><b>'+esc(row.label)+'</b>'}
   badge.classList.remove('hide');
 }
 async function enhanceSvara(){
