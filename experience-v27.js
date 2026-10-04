@@ -82,7 +82,7 @@ function applyFilters(){
       else if(playersFilter==='5+')ok=ok&&players>=5;
     }
     if(turn!=='all')ok=ok&&t===turn;
-    if(free)ok=ok&&players<max;
+    if(free)ok=ok&&players<max&&String(card.dataset.status||'waiting')!=='playing';
     card.classList.toggle('filterHidden',!ok);
     if(ok)shown++;
   });
