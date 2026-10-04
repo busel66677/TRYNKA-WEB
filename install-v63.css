@@ -1,0 +1,8 @@
+/* install tile v63 */
+#lobby .menuTiles{grid-template-columns:repeat(5,minmax(0,1fr))}
+#installAppBtn.installAppTile{position:relative;overflow:hidden;border-color:#8b7432;background:linear-gradient(145deg,#182317,#0a1710)}
+#installAppBtn.installAppTile>span{color:#f0d36c}
+#installAppBtn.installAppTile:after{content:"APP";position:absolute;right:10px;top:10px;padding:2px 6px;border-radius:999px;background:#e7c75e;color:#171006;font-size:7px;font-weight:950;letter-spacing:.8px}
+#installAppBtn.installAppTile.installed{opacity:.7}
+#installAppBtn.installAppTile.installed:after{content:"✓"}
+@media(max-width:800px){#lobby .menuTiles{grid-template-columns:1fr 1fr}#installAppBtn.installAppTile{grid-column:1/-1;min-height:86px}}

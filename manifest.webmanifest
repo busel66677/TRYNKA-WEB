@@ -3,12 +3,15 @@
   "short_name": "TRYNKA",
   "description": "Онлайн карткова гра TRYNKA",
   "lang": "uk",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#07120d",
   "theme_color": "#07120d",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "categories": ["games", "entertainment"],
   "icons": [
     {
       "src": "./icon.svg",
