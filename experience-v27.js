@@ -241,6 +241,8 @@ async function activeRoomId(){
 }
 
 async function experienceTick(){
+  const staleResult=$('roundResultDialog');
+  if(staleResult?.open)staleResult.close();
   if(!$('game')||$('game').classList.contains('hide'))return;
   const u=await getMe();if(!u)return;
   const roomId=await activeRoomId();if(!roomId)return;
@@ -256,9 +258,7 @@ async function experienceTick(){
   await updateFairBadge(gr);
 
   if(gr.status==='finished'&&gr.id!==lastResultId){
-    const recent=gr.finished_at&&Date.now()-new Date(gr.finished_at).getTime()<15000;
     lastResultId=gr.id;
-    if(recent&&!gr.reveal_actor)await showRoundResult(gr,roomId);
   }
 }
 
