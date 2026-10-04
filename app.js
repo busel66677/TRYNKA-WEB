@@ -19,7 +19,29 @@ window.addEventListener('trynka:deal-end',()=>{
   $('gameActions')?.classList.remove('dealLocked');
   renderHand();
 });
-function show(id){sections.forEach(x=>$(x)?.classList.add('hide'));$(id)?.classList.remove('hide')}
+const NAV_STATE_KEY='trynka_nav_state_v1';
+function saveNavState(id){
+  if(!user||!['lobby','profile','create','game'].includes(id))return;
+  const state={view:id};
+  if(id==='game'&&currentRoom)state.roomId=currentRoom;
+  sessionStorage.setItem(NAV_STATE_KEY,JSON.stringify(state));
+}
+function clearNavState(){sessionStorage.removeItem(NAV_STATE_KEY)}
+function readNavState(){
+  try{return JSON.parse(sessionStorage.getItem(NAV_STATE_KEY)||'{}')||{}}
+  catch{return {}}
+}
+function show(id){sections.forEach(x=>$(x)?.classList.add('hide'));$(id)?.classList.remove('hide');saveNavState(id)}
+async function restoreNavState(){
+  const state=readNavState();
+  if(state.view==='game'&&state.roomId){
+    const {data:member}=await sb.from('room_players').select('room_id').eq('room_id',state.roomId).eq('user_id',user.id).maybeSingle();
+    if(member){await openRoom(Number(state.roomId));return}
+  }
+  if(state.view==='profile'){await renderProfile();show('profile');return}
+  if(state.view==='create'){show('create');return}
+  show('lobby');
+}
 function authView(w){$('authLogin').classList.toggle('hide',w!=='login');$('authRegister').classList.toggle('hide',w!=='register')}
 const LOGIN_GUARD_KEY='trynka_login_guard_v1';
 function readLoginGuard(){
@@ -198,10 +220,10 @@ async function askBuyIn(room){
 }
 
 $('showRegister').onclick=()=>authView('register'); $('showLogin').onclick=()=>authView('login');ensureLoginSecurityNote();
-async function boot(){const {data}=await sb.auth.getSession();if(data.session){user=data.session.user;await loadProfile()}else{show('login');authView('login')}}
+async function boot(){const {data}=await sb.auth.getSession();if(data.session){user=data.session.user;await loadProfile();await restoreNavState()}else{clearNavState();show('login');authView('login')}}
 $('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const pwErr=strongPasswordError(password);if(pwErr)return alert(pwErr);const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert('Не вдалося створити акаунт. Перевір дані та спробуй ще раз.');if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await loadProfile()};
-$('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
+$('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
 async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await refreshAdminPanel();subscribeLobby()}
 async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
 $('profileBtn').onclick=async()=>{await renderProfile();show('profile')};document.querySelectorAll('.toLobby').forEach(b=>b.onclick=async()=>{show('lobby');await refreshLobby()});
