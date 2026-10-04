@@ -457,6 +457,12 @@ async function openRoom(id){
 }
 async function renderRoom(){if(!currentRoom)return;const roomId=currentRoom,version=++roomRenderVersion;const [{data:r},{data:ps}]=await Promise.all([sb.from('rooms').select('*').eq('id',currentRoom).single(),sb.from('room_players').select('user_id,seat_no,table_chips,last_seen_at,disconnected_at,profiles(nickname,chips,avatar_key,frame_key,win_streak)').eq('room_id',currentRoom)]);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(!r)return leaveRoom();$('roomTitle').textContent=r.name;const pot=(r.ante||0)*(ps||[]).filter(p=>p.seat_no!==null).length;renderSeats(r,ps||[]);renderGameState(r,ps||[]);await renderRound(r,ps||[],version);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(messagesLoadedRoom!==currentRoom){const {data:ms}=await sb.from('messages').select('*,profiles(nickname)').eq('room_id',currentRoom).order('created_at').limit(50);$('messages').innerHTML='';(ms||[]).forEach(addMessage);messagesLoadedRoom=currentRoom}await renderHand(r);await renderTableHistory()}
 function renderSeats(r,ps){
+  const mine=ps.find(p=>p.user_id===user.id&&p.seat_no!==null);
+  const hand=$('myHand');
+  if(hand){
+    [...hand.classList].filter(c=>/^handSeat\d$/.test(c)).forEach(c=>hand.classList.remove(c));
+    if(mine)hand.classList.add('handSeat'+mine.seat_no);
+  }
   const occupied=ps.filter(p=>p.seat_no!==null).map(p=>[p.seat_no,p.user_id,p.profiles?.nickname||'',Number(p.table_chips||0),p.profiles?.avatar_key||'spade',p.profiles?.frame_key||'classic',Number(p.profiles?.win_streak||0)]).sort((a,b)=>a[0]-b[0]);
   const sig=JSON.stringify([r.id,r.max_players,r.game_status,occupied]);
   if(sig===lastSeatSignature&&$('seats')?.children.length===r.max_players)return;

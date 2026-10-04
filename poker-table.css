@@ -872,3 +872,101 @@
     bottom:142px!important;
   }
 }
+
+
+/* v40 — own hand follows the seat the player chose */
+#game #myHand{
+  position:absolute!important;
+  z-index:46!important;
+  display:flex!important;
+  gap:4px!important;
+  width:max-content!important;
+  height:auto!important;
+  margin:0!important;
+  transform:none!important;
+  left:auto!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  align-items:flex-end!important;
+}
+
+/* bottom centre */
+#game #myHand.handSeat0{
+  left:50%!important;
+  bottom:22px!important;
+  transform:translateX(-50%)!important;
+}
+/* lower left */
+#game #myHand.handSeat1{
+  left:150px!important;
+  bottom:105px!important;
+}
+/* upper left */
+#game #myHand.handSeat2{
+  left:150px!important;
+  top:105px!important;
+}
+/* top centre */
+#game #myHand.handSeat3{
+  left:50%!important;
+  top:92px!important;
+  transform:translateX(-50%)!important;
+}
+/* upper right */
+#game #myHand.handSeat4{
+  right:150px!important;
+  top:105px!important;
+}
+/* lower right */
+#game #myHand.handSeat5{
+  right:150px!important;
+  bottom:105px!important;
+}
+/* middle left */
+#game #myHand.handSeat6{
+  left:150px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+/* middle right */
+#game #myHand.handSeat7{
+  right:150px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+
+/* Keep cards tucked closer together when positioned near side seats */
+#game #myHand.handSeat1 .card,
+#game #myHand.handSeat2 .card,
+#game #myHand.handSeat4 .card,
+#game #myHand.handSeat5 .card,
+#game #myHand.handSeat6 .card,
+#game #myHand.handSeat7 .card{
+  width:60px!important;
+  height:88px!important;
+  margin-left:-10px!important;
+}
+#game #myHand .card:first-child{margin-left:0!important}
+
+@media(max-width:650px){
+  #game #myHand.handSeat0{bottom:20px!important}
+  #game #myHand.handSeat3{top:76px!important}
+  #game #myHand.handSeat1{left:96px!important;bottom:106px!important}
+  #game #myHand.handSeat2{left:96px!important;top:96px!important}
+  #game #myHand.handSeat4{right:96px!important;top:96px!important}
+  #game #myHand.handSeat5{right:96px!important;bottom:106px!important}
+  #game #myHand.handSeat6{left:96px!important}
+  #game #myHand.handSeat7{right:96px!important}
+  #game #myHand.handSeat1 .card,
+  #game #myHand.handSeat2 .card,
+  #game #myHand.handSeat4 .card,
+  #game #myHand.handSeat5 .card,
+  #game #myHand.handSeat6 .card,
+  #game #myHand.handSeat7 .card{
+    width:48px!important;
+    height:70px!important;
+    font-size:13px!important;
+    margin-left:-9px!important;
+  }
+}
