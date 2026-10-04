@@ -970,3 +970,21 @@
     margin-left:-9px!important;
   }
 }
+
+
+/* v41 — restore bottom seat and let JS place own hand by real seat geometry */
+#game .seat.s0{
+  bottom:-23px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+}
+#game #myHand{
+  margin:0!important;
+  z-index:46!important;
+  pointer-events:auto!important;
+}
+@media(max-width:800px){
+  #game .seat.s0{
+    bottom:-14px!important;
+  }
+}

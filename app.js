@@ -456,6 +456,35 @@ async function openRoom(id){
   await renderRoom();
 }
 async function renderRoom(){if(!currentRoom)return;const roomId=currentRoom,version=++roomRenderVersion;const [{data:r},{data:ps}]=await Promise.all([sb.from('rooms').select('*').eq('id',currentRoom).single(),sb.from('room_players').select('user_id,seat_no,table_chips,last_seen_at,disconnected_at,profiles(nickname,chips,avatar_key,frame_key,win_streak)').eq('room_id',currentRoom)]);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(!r)return leaveRoom();$('roomTitle').textContent=r.name;const pot=(r.ante||0)*(ps||[]).filter(p=>p.seat_no!==null).length;renderSeats(r,ps||[]);renderGameState(r,ps||[]);await renderRound(r,ps||[],version);if(version!==roomRenderVersion||currentRoom!==roomId)return;if(messagesLoadedRoom!==currentRoom){const {data:ms}=await sb.from('messages').select('*,profiles(nickname)').eq('room_id',currentRoom).order('created_at').limit(50);$('messages').innerHTML='';(ms||[]).forEach(addMessage);messagesLoadedRoom=currentRoom}await renderHand(r);await renderTableHistory()}
+function positionOwnHandNearSeat(){
+  const table=document.querySelector('#game .table');
+  const seat=document.querySelector('#seats .seat.mine');
+  const hand=$('myHand');
+  if(!table||!seat||!hand)return;
+
+  const tr=table.getBoundingClientRect();
+  const sr=seat.getBoundingClientRect();
+  if(!tr.width||!tr.height||!sr.width||!sr.height)return;
+
+  const tableCx=tr.left+tr.width/2;
+  const tableCy=tr.top+tr.height/2;
+  const seatCx=sr.left+sr.width/2;
+  const seatCy=sr.top+sr.height/2;
+
+  let dx=seatCx-tableCx,dy=seatCy-tableCy;
+  const len=Math.hypot(dx,dy)||1;
+  dx/=len;dy/=len;
+
+  const inward=Math.min(120,Math.max(82,Math.min(tr.width,tr.height)*0.18));
+  const x=seatCx-tr.left-dx*inward;
+  const y=seatCy-tr.top-dy*inward;
+
+  hand.style.setProperty('left',x+'px','important');
+  hand.style.setProperty('top',y+'px','important');
+  hand.style.setProperty('right','auto','important');
+  hand.style.setProperty('bottom','auto','important');
+  hand.style.setProperty('transform','translate(-50%,-50%)','important');
+}
 function renderSeats(r,ps){
   const mine=ps.find(p=>p.user_id===user.id&&p.seat_no!==null);
   const hand=$('myHand');
@@ -477,6 +506,7 @@ function renderSeats(r,ps){
     if(p&&p.user_id!==user.id){d.title='Натисни, щоб поскаржитися';d.onclick=()=>reportPlayer(p.user_id,p.profiles?.nickname||'Гравець')}
     $('seats').appendChild(d)
   }
+  requestAnimationFrame(positionOwnHandNearSeat);
 }
 async function takeSeat(i,r){
   const buyin=await askBuyIn(r);
@@ -566,6 +596,7 @@ async function renderHand(roomArg){
     '</div>'
   ).join('');
 
+  requestAnimationFrame(positionOwnHandNearSeat);
   $('myHand').querySelectorAll('.pullCard').forEach(card=>{
     const cover=card.querySelector('.cardCover');
     const idx=Number(card.dataset.cardIndex);
