@@ -1,4 +1,4 @@
-const CACHE='trynka-v36';
+const CACHE='trynka-v37';
 const SHELL=[
   './',
   './index.html',
