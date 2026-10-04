@@ -6,7 +6,7 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let me=null,lastResultId=null,lastFairRound=null,installPrompt=null,resultTimer=null;
+let me=null,lastResultId=null,lastFairRound=null,lastCommitRound=null,installPrompt=null,resultTimer=null;
 
 async function getMe(){
   if(me)return me;
@@ -205,12 +205,14 @@ async function updateFairBadge(gr){
     return;
   }
 
+  if(lastCommitRound===gr.id)return;
   const {data,error}=await sb.rpc('get_round_commitment',{p_round:gr.id});
   if(!error&&data){
     b.classList.remove('verified','failed');
     b.dataset.verified='0';
     b.textContent='🔒 Чесна роздача · '+String(data).slice(0,8);
     b.title='Хеш колоди зафіксований до гри: '+data;
+    lastCommitRound=gr.id;
   }
 }
 
@@ -240,8 +242,9 @@ async function experienceTick(){
   await updateFairBadge(gr);
 
   if(gr.status==='finished'&&gr.id!==lastResultId){
+    const recent=gr.finished_at&&Date.now()-new Date(gr.finished_at).getTime()<15000;
     lastResultId=gr.id;
-    await showRoundResult(gr,roomId);
+    if(recent)await showRoundResult(gr,roomId);
   }
 }
 
