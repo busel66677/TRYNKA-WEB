@@ -500,10 +500,10 @@ function renderSeats(r,ps){
   $('seats').innerHTML='';
   for(let i=0;i<r.max_players;i++){
     const p=bySeat.get(i),d=document.createElement('div');
-    d.className='seat s'+i+(p?.user_id===user.id?' mine':!p?' free':'')+(p&&(p.ready||p.profiles?.is_bot)?' roundEligible':' waitingReady');
+    d.className='seat s'+i+(p?.user_id===user.id?' mine':!p?' free':'')+(p&&(p.ready||p.profiles?.is_bot)?' roundEligible':' waitingReady');if(p)d.dataset.userId=p.user_id;
     d.innerHTML=p?'<div class="seatAvatar playerFrame '+frameClass(p.profiles?.frame_key||'classic')+'">'+avatarIcon(p.profiles?.avatar_key)+'</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div>'+(Number(p.profiles?.win_streak||0)>=2?'<div class="streakTag">🔥 ×'+Number(p.profiles.win_streak)+'</div>':'')+'<div class="seatStack">СТІЛ: ◉ '+Number(p.table_chips||0).toLocaleString('uk-UA')+'</div>'+(p.profiles?.is_bot?'':'<div class="readySeatBadge '+(p.ready?'on':'off')+'">'+(p.ready?'ГОТОВИЙ':'ЧЕКАЄ')+'</div>')+'<div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
     if(!p&&r.game_status!=='playing'&&!spectatorMode)d.onclick=()=>takeSeat(i,r);
-    if(p&&p.user_id!==user.id){d.title='Натисни, щоб поскаржитися';d.onclick=()=>reportPlayer(p.user_id,p.profiles?.nickname||'Гравець')}
+    if(p){d.title='Відкрити профіль гравця';d.onclick=()=>{if(window.TRYNKA_OPEN_PLAYER_PROFILE)window.TRYNKA_OPEN_PLAYER_PROFILE(p.user_id);else if(p.user_id!==user.id)reportPlayer(p.user_id,p.profiles?.nickname||'Гравець')}}
     $('seats').appendChild(d)
   }
   requestAnimationFrame(positionOwnHandNearSeat);
