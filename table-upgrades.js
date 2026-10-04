@@ -248,5 +248,6 @@ window.addEventListener('online',async()=>{
 });
 document.addEventListener('pointerdown',primeAudio,{once:true,passive:true});
 
-setInterval(poll,1800);
+document.addEventListener('trynka:game-state',()=>poll());
+setInterval(poll,6000);
 poll();
