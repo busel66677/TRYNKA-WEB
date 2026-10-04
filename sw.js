@@ -25,6 +25,11 @@ self.addEventListener('fetch',event=>{
   const url=new URL(req.url);
   if(url.origin!==self.location.origin)return;
 
+  if(url.pathname.endsWith('/version.json')){
+    event.respondWith(fetch(req,{cache:'no-store'}));
+    return;
+  }
+
   if(req.mode==='navigate'){
     event.respondWith(
       fetch(req)
