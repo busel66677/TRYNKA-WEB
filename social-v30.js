@@ -220,7 +220,7 @@ async function startForUser(){
   clearInterval(themeTimer);
   await refreshThemeFromProfile();
   await tick();
-  tickTimer=setInterval(tick,1200);
+  tickTimer=setInterval(tick,2500);
   themeTimer=setInterval(refreshThemeFromProfile,12000);
 }
 async function init(){
