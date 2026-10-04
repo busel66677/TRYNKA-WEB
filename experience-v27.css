@@ -52,7 +52,7 @@
 /* Table filters */
 .roomFilters{
   display:grid;
-  grid-template-columns:minmax(170px,1fr) 150px 160px auto auto;
+  grid-template-columns:minmax(170px,1fr) 145px 145px 150px auto auto;
   gap:7px;
   align-items:center;
   margin:0 0 11px;
