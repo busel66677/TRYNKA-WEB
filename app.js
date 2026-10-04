@@ -512,7 +512,7 @@ async function doGameAction(action){
   gameActionBusy=true;
   document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.disabled=true);
   try{
-    const {error}=await sb.rpc('play_round_action',{p_room:currentRoom,p_action:action,p_raise_to:raiseTo});
+    const actionNonce=crypto.randomUUID();const {error}=await sb.rpc('play_round_action_safe',{p_room:currentRoom,p_action:action,p_raise_to:raiseTo,p_nonce:actionNonce});
     if(error)alert(error.message);
   }finally{
     gameActionBusy=false;
@@ -655,3 +655,4 @@ $('openSecurityLog').onclick=async()=>{const {data:e}=await sb.from('security_ev
 $('closeSecurityLog').onclick=()=>$('securityLogDialog').close();
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 boot();
+window.TRYNKA_OPEN_ROOM=openRoom;

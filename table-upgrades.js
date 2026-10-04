@@ -228,12 +228,19 @@ window.addEventListener('offline',()=>{
   offlineAt=Date.now();
   showNet('Немає з’єднання. Повертаємо вас у гру…','bad');
 });
-window.addEventListener('online',()=>{
+window.addEventListener('online',async()=>{
   if(!offlineAt)return;
-  showNet('З’єднання відновлено. Перепідключаємось…','ok');
-  const shouldRestore=!$('game')?.classList.contains('hide')&&currentRoomId();
+  showNet('З’єднання відновлено. Повертаємось у гру…','ok');
   offlineAt=0;
-  if(shouldRestore)setTimeout(()=>location.reload(),700);
+  try{
+    await sb.auth.refreshSession();
+    await poll();
+    document.dispatchEvent(new CustomEvent('trynka:reconnected'));
+  }catch(e){
+    console.warn('Reconnect refresh failed',e);
+    showNet('З’єднання є. Оновлюємо стан столу…','ok');
+    setTimeout(poll,800);
+  }
 });
 document.addEventListener('pointerdown',primeAudio,{once:true,passive:true});
 

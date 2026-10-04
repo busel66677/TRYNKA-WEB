@@ -1,0 +1,32 @@
+/* Quality pack v49 */
+.homeUtilityBar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.homeUtilityBar button{
+  min-height:74px;display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;
+  align-items:center;text-align:left;column-gap:12px;padding:12px 16px;
+  border:1px solid #315f47;border-radius:17px;background:linear-gradient(145deg,#0a2419,#06150f);color:#fff
+}
+.homeUtilityBar button>span{grid-row:1/3;width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#123d2b;border:1px solid #d1ad4d;color:#f0cc68;font-size:20px}
+.homeUtilityBar button b{font-size:15px}.homeUtilityBar button small{color:#91a89c;font-size:10px}
+.adminQuickTest{margin-left:auto;align-self:center;display:flex;flex-direction:column;gap:2px;min-width:135px;padding:10px 14px;background:linear-gradient(145deg,#2a2410,#111a12);border:1px solid #d5b651;color:#f3d271}
+.adminQuickTest small{font-size:9px;color:#b9aa75}
+.qualityDialog{width:min(760px,92vw);max-height:86vh;overflow:auto;padding:20px;background:linear-gradient(145deg,#071a12,#04100b);border:1px solid #c5a94a;color:#fff;box-shadow:0 30px 80px #000c}
+.qualityDialog::backdrop{background:#010705cc;backdrop-filter:blur(5px)}
+.qualityDialogHead{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.qualityDialogHead h2{font-size:30px;margin:4px 0}.qualityDialogHead>button{background:#14281d;color:#dbe8e0;border:1px solid #375844;font-size:22px;padding:4px 11px}
+.rulesGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rulesGrid section{padding:14px;border:1px solid #294a38;border-radius:14px;background:#0a1d14}.rulesGrid h3{margin:0 0 7px;color:#e7ca68;font-size:15px}.rulesGrid p{margin:0;color:#c0d0c7;line-height:1.55;font-size:13px}.rulesWide{grid-column:1/-1}
+.qualityPrimary,.qualitySecondary{width:100%;margin-top:12px}.qualitySecondary{background:#13271d;color:#dce9e1;border:1px solid #3c6950}
+.settingRows{display:grid;gap:10px}.settingRows label{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 14px;border-radius:14px;background:#0a1d14;border:1px solid #294a38}.settingRows label span{display:grid;gap:3px}.settingRows label small{color:#839b8e}.settingRows input{width:22px;height:22px;accent-color:#25d890}
+#game .handStrengthBadge{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);z-index:70;min-width:118px;padding:6px 10px;text-align:center;border-radius:12px;border:1px solid #d8b852;background:#06130de8;box-shadow:0 7px 20px #0008;pointer-events:none}
+#game .handStrengthBadge small{display:block;color:#91a69b;font-size:7px;letter-spacing:.7px}#game .handStrengthBadge b{display:block;color:#f1d36d;font-size:17px;margin-top:2px}
+.adminClientErrorsCard{margin-bottom:12px}.adminSecurityRow.clientError{border-left:3px solid #d76a71;padding-left:10px}
+@media(max-width:650px){
+  .homeUtilityBar{grid-template-columns:1fr}
+  .adminQuickTest{min-width:105px;padding:8px 10px;font-size:10px}
+  .rulesGrid{grid-template-columns:1fr}.rulesWide{grid-column:auto}
+  .qualityDialog{padding:14px}.qualityDialogHead h2{font-size:24px}
+  #game .handStrengthBadge{bottom:178px;min-width:98px;padding:5px 8px}
+  #game .handStrengthBadge b{font-size:14px}
+  #game .gameSide{gap:8px}
+  #game .tableHistory{max-height:155px}
+  #game .chat #messages{max-height:150px!important;min-height:110px!important}
+  #game .gameBar{position:sticky;top:0;z-index:150;background:#07110df5}
+}
