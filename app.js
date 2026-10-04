@@ -328,7 +328,7 @@ $('browseTables').onclick=()=>document.getElementById('tablesArea')?.scrollIntoV
 $('homeFriends').onclick=()=>document.getElementById('socialArea')?.scrollIntoView({behavior:'smooth'});
 $('homeCabinet').onclick=async()=>{await renderProfile();show('profile')};
 $('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>{const seated=(r.room_players||[]).filter(p=>p.seat_no!==null).length;return seated>0&&seated<r.max_players&&r.game_status!=='playing'});if(open)return joinRoom(open);show('create')};
-$('createForm').onsubmit=async e=>{e.preventDefault();const {data,error}=await sb.rpc('create_secure_room',{p_name:$('roomName').value.trim()||'Мій стіл',p_max_players:+$('maxPlayers').value,p_turn_seconds:+$('turnTime').value,p_ante:+$('ante').value});if(error)return alert(error.message);await openRoom(data)}
+$('createForm').onsubmit=async e=>{e.preventDefault();const isPrivate=!!$('privateRoomToggle')?.checked;const {data,error}=await sb.rpc('create_secure_room_v2',{p_name:$('roomName').value.trim()||'Мій стіл',p_max_players:+$('maxPlayers').value,p_turn_seconds:+$('turnTime').value,p_ante:+$('ante').value,p_private:isPrivate});if(error)return alert(error.message);const rid=Number(data?.room_id||0);if(isPrivate&&data?.invite_code)alert('Приватний стіл створено. Код для друга: '+data.invite_code);if(rid)await openRoom(rid)}
 async function refreshLobby(){
   await pingOnline();
   const cutoff=new Date(Date.now()-70000).toISOString();
@@ -347,7 +347,7 @@ async function refreshLobby(){
   $('onlineStat').textContent=n;
   $('myChips').textContent=profile?.chips??0;
 
-  const active=(rooms||[]).filter(r=>(r.room_players||[]).some(p=>p.seat_no!==null));
+  const active=(rooms||[]).filter(r=>!r.is_private&&(r.room_players||[]).some(p=>p.seat_no!==null));
   $('tablesStat').textContent=active.length;
   $('rooms').innerHTML='';
 
@@ -356,6 +356,7 @@ async function refreshLobby(){
     const playing=r.game_status==='playing';
     const d=document.createElement('div');
     d.className='roomCard';
+    d.dataset.roomId=String(r.id);
     d.dataset.name=String(r.name||'').toLowerCase();
     d.dataset.ante=String(r.ante||0);
     d.dataset.turn=String(r.turn_seconds||0);
