@@ -218,7 +218,8 @@ function updateSupportUi(g,ps,r,mySeat){
   }
 
   if($('bankInfo')){
-    $('bankInfo').textContent='Поточна ставка: '+currentBet+' ◉ · максимум: '+maxBet+' ◉'+(myTurn?' · Вам додати: '+need+' ◉':'');
+    // Keep this line stable between realtime renders; turn-specific amount is already shown below.
+    $('bankInfo').textContent='Ставка: '+currentBet+' ◉ · Макс: '+maxBet+' ◉';
   }
 }
 
