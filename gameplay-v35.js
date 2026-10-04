@@ -390,7 +390,7 @@ async function start(){
   mountPrivateControls();
   mountPlayerDialog();
   await tick();
-  setInterval(tick,2500);
+  setInterval(tick,5000);
   const rooms=$('rooms');
   if(rooms)new MutationObserver(()=>decorateRoomCards(false)).observe(rooms,{childList:true});
 }
