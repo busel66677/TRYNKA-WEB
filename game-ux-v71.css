@@ -51,3 +51,54 @@
  #game .uxRoundResult{top:47%;max-width:66%}
  #game .svaraJoinBar{transform:scale(.92);transform-origin:center top}
 }
+/* v73 reconnect + mobile table hardening */
+#game .reconnectShield{position:absolute;inset:0;z-index:220;display:grid;place-content:center;justify-items:center;gap:5px;text-align:center;background:#03100bd8;backdrop-filter:blur(3px);pointer-events:auto}
+#game .reconnectShield.hide{display:none!important}
+#game .reconnectShield b{font-size:14px;color:#ffe27a}
+#game .reconnectShield span{font-size:9px;color:#a9b9b0}
+body.gameReconnecting #gameActions{filter:saturate(.55);opacity:.72}
+body.gameReconnecting #gameActions button{pointer-events:none}
+#game .roundDetail .svaraHistory{border-left:2px solid #e59a44;padding-left:7px}
+@media(max-width:650px){
+  #game .tableWrap{width:100%;overflow:visible}
+  #game .table{width:calc(100% - 8px)!important;height:640px!important;max-height:none!important;border-radius:22px!important;border-width:7px!important;margin:0 auto!important;overflow:hidden!important}
+  #game .table:before{border-radius:14px!important}
+  #game .dealerBadge{top:12px!important;width:48px!important;height:48px!important}
+  #game .deckStack{top:70px!important;transform:translateX(-50%) scale(.64)!important}
+  #game .centerInfo{top:31%!important;width:54%!important;max-width:220px!important;padding:6px 7px!important}
+  #game .centerInfo #countdown{font-size:12px!important}
+  #game .centerInfo #turnStatus,#game .centerInfo #bankInfo{font-size:8px!important}
+  #game #potBig{font-size:15px!important}
+  #game .potPile{transform:scale(.68)!important;height:31px!important}
+  #game .seat{width:78px!important;min-height:39px!important;grid-template-columns:21px 1fr!important;gap:3px!important;padding:4px!important;border-radius:11px!important;font-size:9px!important}
+  #game .seatName{font-size:9px!important}
+  #game .seatMeta,#game .connectionState{font-size:7px!important}
+  #game .seatContribution{font-size:7px!important}
+  #game .seat.s0{left:50%!important;right:auto!important;top:auto!important;bottom:218px!important;transform:translateX(-50%)!important}
+  #game .seat.s1{left:2px!important;right:auto!important;top:auto!important;bottom:224px!important;transform:none!important}
+  #game .seat.s2{left:2px!important;right:auto!important;top:108px!important;bottom:auto!important;transform:none!important}
+  #game .seat.s3{left:50%!important;right:auto!important;top:92px!important;bottom:auto!important;transform:translateX(-50%)!important}
+  #game .seat.s4{left:auto!important;right:2px!important;top:108px!important;bottom:auto!important;transform:none!important}
+  #game .seat.s5{left:auto!important;right:2px!important;top:auto!important;bottom:224px!important;transform:none!important}
+  #game .seat.s6{left:2px!important;right:auto!important;top:47%!important;bottom:auto!important;transform:none!important}
+  #game .seat.s7{left:auto!important;right:2px!important;top:47%!important;bottom:auto!important;transform:none!important}
+  #game .hand{bottom:123px!important;gap:4px!important}
+  #game .card{width:49px!important;height:70px!important;font-size:13px!important}
+  #game .gameActions{width:calc(100% - 10px)!important;bottom:4px!important;padding:5px!important}
+  #game .actionButtons{grid-template-columns:repeat(4,1fr)!important;gap:3px!important}
+  #game .actionButtons button{min-height:32px!important;padding:4px 2px!important;font-size:8px!important}
+  #game .roundMeta{font-size:8px!important;gap:5px!important;margin-bottom:4px!important}
+  #game .supportSummary{font-size:7px!important;gap:3px!important}
+  #game .svaraJoinBar{min-width:0!important;width:100%!important;max-width:210px!important;padding:6px!important}
+  #game .svaraJoinBar>button{font-size:7px!important;padding:6px!important}
+  #game .uxRevealHand b{width:22px!important;height:31px!important;font-size:8px!important}
+  #game .uxRevealHand{z-index:190!important}
+}
+@media(max-width:390px){
+  #game .table{height:620px!important}
+  #game .seat{width:71px!important}
+  #game .seatName{font-size:8px!important}
+  #game .centerInfo{width:51%!important}
+  #game .actionButtons button{font-size:7px!important}
+  #game .card{width:46px!important;height:66px!important}
+}
