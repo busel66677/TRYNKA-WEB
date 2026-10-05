@@ -151,8 +151,6 @@ async function bindRealtime(rid){
   if(channel)await sb.removeChannel(channel);
   channel=sb.channel('central-'+rid)
     .on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+rid},()=>sync(true))
-    .on('postgres_changes',{event:'*',schema:'public',table:'round_players'},()=>sync(false))
-    .on('postgres_changes',{event:'*',schema:'public',table:'round_actions'},()=>sync(false))
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+rid},()=>sync(true))
     .subscribe();
 }
