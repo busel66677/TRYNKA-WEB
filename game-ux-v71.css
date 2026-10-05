@@ -65,7 +65,7 @@ body.gameReconnecting #gameActions button{pointer-events:none}
   #game .table:before{border-radius:14px!important}
   #game .dealerBadge{top:12px!important;width:48px!important;height:48px!important}
   #game .deckStack{top:70px!important;transform:translateX(-50%) scale(.64)!important}
-  #game .centerInfo{top:31%!important;width:54%!important;max-width:220px!important;padding:6px 7px!important}
+  #game .centerInfo{top:31%!important;width:50%!important;max-width:196px!important;padding:5px 6px!important}
   #game .centerInfo #countdown{font-size:12px!important}
   #game .centerInfo #turnStatus,#game .centerInfo #bankInfo{font-size:8px!important}
   #game #potBig{font-size:15px!important}
@@ -74,6 +74,7 @@ body.gameReconnecting #gameActions button{pointer-events:none}
   #game .seatName{font-size:9px!important}
   #game .seatMeta,#game .connectionState{font-size:7px!important}
   #game .seatContribution{font-size:7px!important}
+  #game .inviteSeatMini{display:none!important}
   #game .seat.s0{left:50%!important;right:auto!important;top:auto!important;bottom:218px!important;transform:translateX(-50%)!important}
   #game .seat.s1{left:2px!important;right:auto!important;top:auto!important;bottom:224px!important;transform:none!important}
   #game .seat.s2{left:2px!important;right:auto!important;top:108px!important;bottom:auto!important;transform:none!important}
