@@ -346,6 +346,45 @@ function tickTimer(){
   const text=(timerState.turnUser===me?.id?'ВАШ ХІД':'ХІД: '+timerState.nick.toUpperCase())+' · '+left+'с';
   if(text!==lastTimerText||el.textContent!==text){lastTimerText=text;el.textContent=text}
 }
+function applyCentralState(state){
+  const r=state?.room,g=state?.round;
+  if(!r)return;
+  currentRoom=Number(r.id);
+  mountStand();mountGameInfo();
+
+  const presence=state.players||[];
+  const ps=state.round_players||[];
+  const mySeat=presence.find(x=>x.user_id===me?.id);
+  const seated=mySeat?.seat_no!=null;
+  if(lastSeated!==seated){lastSeated=seated;syncStand(seated)}
+
+  if(!g){
+    timerState=null;
+    return;
+  }
+
+  const lastAction=(state.latest_actions||[])[0]||null;
+  const tablePs=g.status==='playing'?ps:[];
+  paintSeats(tablePs,g.status==='playing'?g.turn_user_id:null,lastAction,presence);
+  updateSupportUi(g,ps,r,mySeat);
+
+  if(g.status==='playing'){
+    notifyMyTurn(g);
+    const turnP=presence.find(x=>x.user_id===g.turn_user_id);
+    timerState={
+      turnUser:g.turn_user_id,
+      nick:g.turn_user_id===me?.id?'Ви':(turnP?.nickname||'Гравець'),
+      started:new Date(g.turn_started_at||g.created_at).getTime(),
+      seconds:Number(r.turn_seconds||30)
+    };
+  }else{
+    timerState=null;
+  }
+
+  const mine=ps.find(p=>p.user_id===me?.id);
+  $('myHand')?.classList.toggle('handRevealed',!!mine?.revealed);
+}
+
 document.addEventListener('click',async e=>{
   const b=e.target.closest('#leaveRoom');if(!b)return;
   const rp=await myRoom();
@@ -360,8 +399,8 @@ async function init(){
   document.addEventListener('pointerdown',primeTurnAudio,{once:true,passive:true});
   await syncUi();
   await touchPresence();
-  document.addEventListener('trynka:game-state',()=>syncUi());
-  setInterval(syncUi,6000);
+  document.addEventListener('trynka:game-state',e=>applyCentralState(e.detail));
+  setInterval(syncUi,15000);
   setInterval(tickTimer,200);
   setInterval(touchPresence,10000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)touchPresence()});
