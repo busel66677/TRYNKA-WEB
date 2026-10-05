@@ -240,26 +240,16 @@ async function activeRoomId(){
   return data?.room_id||null;
 }
 
-async function experienceTick(){
+async function experienceTick(state=null){
   const staleResult=$('roundResultDialog');
   if(staleResult?.open)staleResult.close();
   if(!$('game')||$('game').classList.contains('hide'))return;
   const u=await getMe();if(!u)return;
-  const roomId=await activeRoomId();if(!roomId)return;
-
-  const {data:gr}=await sb.from('game_rounds')
-    .select('id,status,pot,dealer_fee,winner_id,result_note,finished_at,created_at,reveal_actor')
-    .eq('room_id',roomId)
-    .order('id',{ascending:false})
-    .limit(1)
-    .maybeSingle();
-
+  const snap=state||window.TRYNKA_GAME_STATE;
+  const gr=snap?.round;
   if(!gr)return;
   await updateFairBadge(gr);
-
-  if(gr.status==='finished'&&gr.id!==lastResultId){
-    lastResultId=gr.id;
-  }
+  if(gr.status==='finished'&&gr.id!==lastResultId)lastResultId=gr.id;
 }
 
 function mountNotifyButton(){
@@ -316,7 +306,8 @@ async function init(){
   mountFairBadge();
   mountNotifyButton();
   setupPwa();
-  setInterval(()=>{mountFilters();mountFairBadge();mountNotifyButton();experienceTick()},1000);
+  document.addEventListener('trynka:game-state',e=>experienceTick(e.detail));
+  setInterval(()=>{mountFilters();mountFairBadge();mountNotifyButton();experienceTick()},10000);
   experienceTick();
 }
 
