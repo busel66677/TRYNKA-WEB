@@ -3,7 +3,7 @@ const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}});
 const $=id=>document.getElementById(id);
 window.TRYNKA_STABLE_TURN_UI=true;
-let me=null,lastRoom=null,lastSig='',mismatch=0,channel=null,lastHeartbeat=0,lastForced=0,busy=false,lastSuccessAt=0,reconnecting=false;
+let me=null,lastRoom=null,lastSig='',mismatch=0,channel=null,lastHeartbeat=0,lastForced=0,busy=false,lastSuccessAt=0,reconnecting=false,syncQueued=false,consecutiveErrors=0;
 
 function roomId(){try{const s=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');return s.view==='game'&&s.roomId?Number(s.roomId):null}catch{return null}}
 function mount(){
@@ -17,13 +17,13 @@ function mount(){
     table.appendChild(x);
   }
 }
-function setConnectionState(ok,label=''){
+function setConnectionState(ok,label='',blocking=false){
   const shield=$('reconnectShield'),was=reconnecting;
   reconnecting=!ok;
   document.body.classList.toggle('gameReconnecting',!ok);
   if(shield){
-    shield.classList.toggle('hide',ok);
     if(!ok&&label)shield.querySelector('b').textContent=label;
+    shield.classList.toggle('hide',ok||!blocking);
   }
   if(!ok){
     document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.disabled=true);
@@ -117,14 +117,21 @@ function patchCritical(s){
 }
 function sig(s){const g=s?.round||{},sv=s?.svara||{};return [g.id,g.status,g.turn_user_id,g.turn_started_at,g.round_no,g.current_bet,g.pot,g.is_svara,s?.room?.game_status,s?.room?.carried_pot,sv.source_round_id,sv.entry_fee,sv.closes_at,sv.joined,(sv.members||[]).length].join('|')}
 async function sync(force=false){
-  if(busy||$('game')?.classList.contains('hide'))return;
+  if($('game')?.classList.contains('hide'))return;
+  if(busy){if(force)syncQueued=true;return}
   const rid=roomId();if(!rid||!me)return;
   busy=true;
   const t=performance.now();
   try{
-    const {data,error}=await sb.rpc('get_room_game_snapshot',{p_room:rid});
+    let timeoutId;
+    const timeout=new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('snapshot timeout')),7000)});
+    const result=await Promise.race([sb.rpc('get_room_game_snapshot',{p_room:rid}),timeout]);
+    clearTimeout(timeoutId);
+    const {data,error}=result||{};
     const ms=performance.now()-t;renderLatency(ms);
     if(error)throw error;
+    if(roomId()!==rid)return;
+    consecutiveErrors=0;
     lastSuccessAt=Date.now();
     setConnectionState(true);
     patchCritical(data);
@@ -145,10 +152,17 @@ async function sync(force=false){
     }
     await maybeDiagButton(rid);
   }catch(e){
+    consecutiveErrors++;
     renderLatency(9999);
-    setConnectionState(false,navigator.onLine?'↻ Відновлюємо гру…':'⚠ Немає з’єднання');
+    const offline=!navigator.onLine;
+    const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:Infinity;
+    const blocking=offline||consecutiveErrors>=2||staleFor>10000;
+    setConnectionState(false,offline?'⚠ Немає з’єднання':'↻ Відновлюємо гру…',blocking);
     try{await sb.rpc('log_client_error',{p_message:e?.message||String(e),p_context:'central-sync',p_room:rid})}catch{}
-  }finally{busy=false}
+  }finally{
+    busy=false;
+    if(syncQueued){syncQueued=false;setTimeout(()=>sync(true),0)}
+  }
 }
 async function maybeDiagButton(rid){
   const b=$('diagTableBtn');if(!b||b.dataset.room===String(rid))return;
@@ -181,17 +195,21 @@ async function tick(){
   mount();
   const rid=roomId();
   if(rid){
-    if(lastSuccessAt&&Date.now()-lastSuccessAt>5000&&!busy)setConnectionState(false,'↻ Відновлюємо гру…');
+    const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:0;
+    if(staleFor>9000&&!busy)setConnectionState(false,'↻ Відновлюємо гру…',staleFor>14000);
     await bindRealtime(rid);
     await sync(false);
+  }else if(reconnecting){
+    setConnectionState(true);
   }
 }
 async function init(){
   const {data:{user}}=await sb.auth.getUser();me=user||null;if(!me)return;
   mount();await tick();setInterval(tick,1200);
-  window.addEventListener('offline',()=>setConnectionState(false,'⚠ Немає з’єднання'));
-  window.addEventListener('online',()=>{setConnectionState(false,'↻ Відновлюємо гру…');sync(true)});
+  window.addEventListener('offline',()=>setConnectionState(false,'⚠ Немає з’єднання',true));
+  window.addEventListener('online',()=>{setConnectionState(false,'↻ Відновлюємо гру…',false);sync(true)});
   document.addEventListener('trynka:reconnected',()=>sync(true));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){setConnectionState(false,'↻ Оновлюємо стіл…');sync(true)}});
+  document.addEventListener('trynka:room-render-error',()=>sync(true));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(true)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
