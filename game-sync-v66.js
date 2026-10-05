@@ -2,6 +2,7 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
 const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}});
 const $=id=>document.getElementById(id);
+window.TRYNKA_STABLE_TURN_UI=true;
 let me=null,lastRoom=null,lastSig='',mismatch=0,channel=null,lastHeartbeat=0,lastForced=0,busy=false;
 
 function roomId(){try{const s=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');return s.view==='game'&&s.roomId?Number(s.roomId):null}catch{return null}}
@@ -90,7 +91,6 @@ function patchCritical(s){
       b.disabled=dis;
     });
   }
-  const turn=$('roundTurn');if(turn)turn.textContent=expectedTurnText(s);
   if(s.balance_check&&s.balance_check.ok===false){
     document.body.classList.add('chipBalanceWarning');
   }else document.body.classList.remove('chipBalanceWarning');
