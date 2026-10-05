@@ -3,13 +3,33 @@ const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}});
 const $=id=>document.getElementById(id);
 window.TRYNKA_STABLE_TURN_UI=true;
-let me=null,lastRoom=null,lastSig='',mismatch=0,channel=null,lastHeartbeat=0,lastForced=0,busy=false;
+let me=null,lastRoom=null,lastSig='',mismatch=0,channel=null,lastHeartbeat=0,lastForced=0,busy=false,lastSuccessAt=0,reconnecting=false;
 
 function roomId(){try{const s=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');return s.view==='game'&&s.roomId?Number(s.roomId):null}catch{return null}}
 function mount(){
   const host=document.querySelector('#game .gameTopActions');if(!host)return;
   if(!$('netQualityBadge')){const x=document.createElement('span');x.id='netQualityBadge';x.className='netQualityBadge';x.textContent='● sync';host.prepend(x)}
   if(!$('diagTableBtn')){const b=document.createElement('button');b.id='diagTableBtn';b.className='diagTableBtn hide';b.textContent='🩺 Діагностика';host.prepend(b);b.onclick=openDiag}
+  const table=document.querySelector('#game .table');
+  if(table&&!$('reconnectShield')){
+    const x=document.createElement('div');x.id='reconnectShield';x.className='reconnectShield hide';
+    x.innerHTML='<b>↻ Відновлюємо гру…</b><span>Стан столу синхронізується із сервером</span>';
+    table.appendChild(x);
+  }
+}
+function setConnectionState(ok,label=''){
+  const shield=$('reconnectShield'),was=reconnecting;
+  reconnecting=!ok;
+  document.body.classList.toggle('gameReconnecting',!ok);
+  if(shield){
+    shield.classList.toggle('hide',ok);
+    if(!ok&&label)shield.querySelector('b').textContent=label;
+  }
+  if(!ok){
+    document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.disabled=true);
+  }else if(was){
+    document.dispatchEvent(new CustomEvent('trynka:reconnected'));
+  }
 }
 function renderLatency(ms){
   const b=$('netQualityBadge');if(!b)return;
@@ -105,6 +125,8 @@ async function sync(force=false){
     const {data,error}=await sb.rpc('get_room_game_snapshot',{p_room:rid});
     const ms=performance.now()-t;renderLatency(ms);
     if(error)throw error;
+    lastSuccessAt=Date.now();
+    setConnectionState(true);
     patchCritical(data);
     window.TRYNKA_GAME_STATE=data;
     const s=sig(data);
@@ -124,6 +146,7 @@ async function sync(force=false){
     await maybeDiagButton(rid);
   }catch(e){
     renderLatency(9999);
+    setConnectionState(false,navigator.onLine?'↻ Відновлюємо гру…':'⚠ Немає з’єднання');
     try{await sb.rpc('log_client_error',{p_message:e?.message||String(e),p_context:'central-sync',p_room:rid})}catch{}
   }finally{busy=false}
 }
@@ -154,6 +177,21 @@ async function bindRealtime(rid){
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+rid},()=>sync(true))
     .subscribe();
 }
-async function tick(){mount();const rid=roomId();if(rid){await bindRealtime(rid);await sync(false)}}
-async function init(){const {data:{user}}=await sb.auth.getUser();me=user||null;if(!me)return;mount();await tick();setInterval(tick,1200);window.addEventListener('online',()=>sync(true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(true)})}
+async function tick(){
+  mount();
+  const rid=roomId();
+  if(rid){
+    if(lastSuccessAt&&Date.now()-lastSuccessAt>5000&&!busy)setConnectionState(false,'↻ Відновлюємо гру…');
+    await bindRealtime(rid);
+    await sync(false);
+  }
+}
+async function init(){
+  const {data:{user}}=await sb.auth.getUser();me=user||null;if(!me)return;
+  mount();await tick();setInterval(tick,1200);
+  window.addEventListener('offline',()=>setConnectionState(false,'⚠ Немає з’єднання'));
+  window.addEventListener('online',()=>{setConnectionState(false,'↻ Відновлюємо гру…');sync(true)});
+  document.addEventListener('trynka:reconnected',()=>sync(true));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){setConnectionState(false,'↻ Оновлюємо стіл…');sync(true)}});
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
