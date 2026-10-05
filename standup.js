@@ -332,9 +332,6 @@ async function syncUi(){
       if($('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
     }
 
-    const {data:opened,error}=await sb.rpc('get_revealed_hands',{p_room:currentRoom});
-    if(!error)paintOpenHands(opened||[]);
-
     const mine=(ps||[]).find(p=>p.user_id===me?.id);
     $('myHand')?.classList.toggle('handRevealed',!!mine?.revealed);
   }finally{busy=false}
