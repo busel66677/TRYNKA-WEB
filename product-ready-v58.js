@@ -161,7 +161,7 @@ function bindConnectionGrace(){
 async function init(){
  ensureInviteDialog();const {data:{user}}=await sb.auth.getUser();me=user||null;await handleInvite();
  bindConnectionGrace();await Promise.all([mountShare(),updateRank(),watchAchievement(),checkVersion(),loadOwnerControls()]);
- setInterval(()=>{mountShare();loadOwnerControls()},1000);setInterval(()=>{updateRank();watchAchievement()},5000);setInterval(checkVersion,60000);
+ setInterval(()=>{mountShare();loadOwnerControls()},5000);setInterval(()=>{updateRank();watchAchievement()},8000);setInterval(checkVersion,60000);
  sb.auth.onAuthStateChange((event,session)=>{me=session?.user||null;setTimeout(()=>{handleInvite();loadOwnerControls(true)},300)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
