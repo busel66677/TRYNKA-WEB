@@ -68,15 +68,7 @@ async function updateStrength(){
   const old=document.getElementById('handStrengthBadge');
   if(old)old.remove();
 }
-async function enhanceSvara(){
-  if($('game')?.classList.contains('hide'))return;
-  const room=currentRoomId();if(!room)return;
-  const {data:g}=await sb.from('game_rounds').select('id,status,result_note,pot').eq('room_id',room).order('id',{ascending:false}).limit(1).maybeSingle();
-  if(g?.status==='finished'&&g.result_note==='Свара'){
-    if($('countdown')&&!String($('countdown').textContent).startsWith('Старт через'))$('countdown').textContent='СВАРА — БАНК '+Number(g.pot||0)+' ◉ ПЕРЕХОДИТЬ ДАЛІ';
-    if($('turnStatus'))$('turnStatus').textContent='Наступна роздача через 5 секунд';
-  }
-}
+async function enhanceSvara(){return}
 async function logClientError(message,context='window'){
   const now=Date.now(),msg=String(message||'unknown').slice(0,450);
   if(msg===lastLoggedError&&now-lastErrorAt<15000)return;
