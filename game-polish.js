@@ -65,3 +65,5 @@ function onState(state){
   setTimeout(()=>playDeal(state),80);
 }
 document.addEventListener('trynka:game-state',e=>onState(e.detail));
+
+setTimeout(()=>{if(window.TRYNKA_GAME_STATE)onState(window.TRYNKA_GAME_STATE)},0);
