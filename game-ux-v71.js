@@ -154,5 +154,6 @@ async function init(){
   const {data:{user}}=await sb.auth.getUser();me=user||null;
   window.TRYNKA_STABLE_TURN_UI=true;
   document.addEventListener('trynka:game-state',e=>renderState(e.detail));
+  if(window.TRYNKA_GAME_STATE)await renderState(window.TRYNKA_GAME_STATE);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
