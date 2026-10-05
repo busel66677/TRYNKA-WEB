@@ -524,7 +524,7 @@ function positionOwnHandNearSeat(){
   const len=Math.hypot(dx,dy)||1;
   dx/=len;dy/=len;
 
-  const inward=Math.min(120,Math.max(82,Math.min(tr.width,tr.height)*0.18));
+  const inward=window.innerWidth<=650?48:Math.min(120,Math.max(82,Math.min(tr.width,tr.height)*0.18));
   const x=seatCx-tr.left-dx*inward;
   const y=seatCy-tr.top-dy*inward;
 
@@ -534,23 +534,41 @@ function positionOwnHandNearSeat(){
   hand.style.setProperty('bottom','auto','important');
   hand.style.setProperty('transform','translate(-50%,-50%)','important');
 }
+function visualSeatSlot(seatNo,maxPlayers,mineSeat=null){
+  const max=Math.max(2,Math.min(8,Number(maxPlayers)||8));
+  const maps={
+    2:[0,4],
+    3:[0,3,5],
+    4:[0,2,4,6],
+    5:[0,1,3,5,7],
+    6:[0,1,3,4,5,7],
+    7:[0,1,2,3,5,6,7],
+    8:[0,1,2,3,4,5,6,7]
+  };
+  const rel=mineSeat===null?Number(seatNo):(Number(seatNo)-Number(mineSeat)+max)%max;
+  return (maps[max]||maps[8])[rel]??rel;
+}
 function renderSeats(r,ps){
   const mine=ps.find(p=>p.user_id===user.id&&p.seat_no!==null);
+  const mineSeat=mine?.seat_no??null;
   const canChooseSeat=!spectatorMode&&!mine&&r.game_status!=='playing';
   const hand=$('myHand');
   if(hand){
     [...hand.classList].filter(c=>/^handSeat\d$/.test(c)).forEach(c=>hand.classList.remove(c));
-    if(mine)hand.classList.add('handSeat'+mine.seat_no);
+    if(mine)hand.classList.add('handSeat'+visualSeatSlot(mine.seat_no,r.max_players,mineSeat));
   }
   const occupied=ps.filter(p=>p.seat_no!==null).map(p=>[p.seat_no,p.user_id,p.profiles?.nickname||'',Number(p.table_chips||0),p.profiles?.avatar_key||'spade',p.profiles?.frame_key||'classic',Number(p.profiles?.win_streak||0),!!p.ready,!!p.profiles?.is_bot]).sort((a,b)=>a[0]-b[0]);
-  const sig=JSON.stringify([r.id,r.max_players,r.game_status,!!spectatorMode,user?.id||'',occupied]);
+  const sig=JSON.stringify([r.id,r.max_players,r.game_status,!!spectatorMode,user?.id||'',mineSeat,occupied]);
   if(sig===lastSeatSignature&&$('seats')?.children.length===r.max_players)return;
   lastSeatSignature=sig;
   const bySeat=new Map(ps.filter(p=>p.seat_no!==null).map(p=>[p.seat_no,p]));
   $('seats').innerHTML='';
   for(let i=0;i<r.max_players;i++){
     const p=bySeat.get(i),d=document.createElement('div');
-    d.className='seat s'+i+(p?.user_id===user.id?' mine':!p?' free':'')+(p?' roundEligible':'');if(p)d.dataset.userId=p.user_id;
+    const visualSlot=visualSeatSlot(i,r.max_players,mineSeat);
+    d.className='seat s'+visualSlot+' p'+visualSlot+(p?.user_id===user.id?' mine':!p?' free':'')+(p?' roundEligible':'');
+    d.dataset.seatNo=String(i);
+    if(p)d.dataset.userId=p.user_id;
     d.innerHTML=p?'<div class="seatAvatar playerFrame '+frameClass(p.profiles?.frame_key||'classic')+'">'+avatarIcon(p.profiles?.avatar_key)+'</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div>'+(Number(p.profiles?.win_streak||0)>=2?'<div class="streakTag">🔥 ×'+Number(p.profiles.win_streak)+'</div>':'')+'<div class="seatStack">СТІЛ: ◉ '+Number(p.table_chips||0).toLocaleString('uk-UA')+'</div><div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
     if(p&&p.disconnected_at){
       const away=document.createElement('span');away.className='awayBadge';away.textContent='ВІДІЙШОВ';d.appendChild(away);
