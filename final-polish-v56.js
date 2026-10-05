@@ -19,17 +19,22 @@ async function openRoundHistory(){
   const rid=roomId();if(!rid)return;
   const d=ensureHistoryDialog(),box=$('roundHistoryList');
   box.innerHTML='<p class="historyLoading">Завантаження…</p>';d.showModal();
-  const {data:rounds}=await sb.from('game_rounds').select('id,status,pot,dealer_fee,winner_id,result_note,created_at,finished_at').eq('room_id',rid).order('id',{ascending:false}).limit(10);
+  const {data:rounds}=await sb.from('game_rounds').select('id,status,pot,dealer_fee,winner_id,result_note,is_svara,created_at,finished_at').eq('room_id',rid).order('id',{ascending:false}).limit(10);
   if(!rounds?.length){box.innerHTML='<p>Роздач ще немає.</p>';return}
-  box.innerHTML=rounds.map((r,i)=>'<button class="roundHistoryRow" data-round="'+r.id+'"><span>#'+r.id+' · '+new Date(r.created_at).toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'})+'</span><b>'+(r.status==='playing'?'Гра триває':esc(r.result_note||'Завершено'))+'</b><small>Банк '+Number(r.pot||0)+' ◉</small></button><div id="roundDetail'+r.id+'" class="roundDetail hide"></div>').join('');
+  box.innerHTML=rounds.map((r,i)=>'<button class="roundHistoryRow" data-round="'+r.id+'"><span>#'+r.id+' · '+new Date(r.created_at).toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'})+'</span><b>'+(r.status==='playing'?(r.is_svara?'🔥 Свара триває':'Гра триває'):(r.is_svara?'🔥 ':'')+esc(r.result_note||'Завершено'))+'</b><small>Банк '+Number(r.pot||0)+' ◉</small></button><div id="roundDetail'+r.id+'" class="roundDetail hide"></div>').join('');
   box.querySelectorAll('[data-round]').forEach(x=>x.onclick=()=>loadRound(Number(x.dataset.round)));
 }
 async function loadRound(id){
   const box=$('roundDetail'+id);if(!box)return;
   if(!box.classList.contains('hide')){box.classList.add('hide');return}
-  const {data:a}=await sb.from('round_actions').select('action,amount,created_at,profiles(nickname)').eq('round_id',id).order('created_at',{ascending:true});
+  const [{data:a},{data:rp}]=await Promise.all([
+    sb.from('round_actions').select('action,amount,created_at,profiles(nickname)').eq('round_id',id).order('created_at',{ascending:true}),
+    sb.from('round_players').select('svara_entry_paid,profiles(nickname)').eq('round_id',id).gt('svara_entry_paid',0)
+  ]);
   const labels={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',timeout:'час вийшов',dark:'гра в темну',boil:'запропонував сварити'};
-  box.innerHTML=(a||[]).map(x=>'<div><time>'+new Date(x.created_at).toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</time><b>'+esc(x.profiles?.nickname||'Гравець')+'</b><span>'+esc(labels[x.action]||x.action)+(Number(x.amount||0)>0?' · '+Number(x.amount)+' ◉':'')+'</span></div>').join('')||'<p>Дій немає.</p>';
+  const joined=(rp||[]).map(x=>'<div class="svaraHistory"><time>🔥</time><b>'+esc(x.profiles?.nickname||'Гравець')+'</b><span>увійшов у свару · '+Number(x.svara_entry_paid||0)+' ◉</span></div>').join('');
+  const actions=(a||[]).map(x=>'<div><time>'+new Date(x.created_at).toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</time><b>'+esc(x.profiles?.nickname||'Гравець')+'</b><span>'+esc(labels[x.action]||x.action)+(Number(x.amount||0)>0?' · '+Number(x.amount)+' ◉':'')+'</span></div>').join('');
+  box.innerHTML=joined+actions||'<p>Дій немає.</p>';
   box.classList.remove('hide');
 }
 function polishSpectator(){
@@ -46,5 +51,5 @@ function mountFairHelp(){
   b.dataset.simpleHelp='1';
   b.onclick=()=>alert('Чесна роздача означає: сервер зафіксував порядок колоди до початку гри. Після завершення браузер перевірив, що колода не була змінена.');
 }
-setInterval(()=>{mountRoundHistory();polishSpectator();mountFairHelp()},700);
+setInterval(()=>{mountRoundHistory();polishSpectator();mountFairHelp()},5000);
 mountRoundHistory();polishSpectator();mountFairHelp();
