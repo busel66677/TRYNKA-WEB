@@ -10,12 +10,7 @@ function mount(){
   const host=document.querySelector('#game .gameTopActions');if(!host)return;
   if(!$('netQualityBadge')){const x=document.createElement('span');x.id='netQualityBadge';x.className='netQualityBadge';x.textContent='● sync';host.prepend(x)}
   if(!$('diagTableBtn')){const b=document.createElement('button');b.id='diagTableBtn';b.className='diagTableBtn hide';b.textContent='🩺 Діагностика';host.prepend(b);b.onclick=openDiag}
-  const table=document.querySelector('#game .table');
-  if(table&&!$('reconnectShield')){
-    const x=document.createElement('div');x.id='reconnectShield';x.className='reconnectShield hide';
-    x.innerHTML='<b>↻ Відновлюємо гру…</b><span>Стан столу синхронізується із сервером</span>';
-    table.appendChild(x);
-  }
+  $('reconnectShield')?.remove();
 }
 function setConnectionState(ok,label='',blocking=false){
   const shield=$('reconnectShield'),was=reconnecting;
