@@ -89,7 +89,7 @@ function updateBalance(v){
 }
 async function loadRecent(){
   if(!me||!$('slotRecent'))return;
-  const {data}=await sb.from('slot_spins').select('game,bet,reel1,reel2,reel3,net,created_at').eq('user_id',me.id).order('id',{ascending:false}).limit(6);
+  const {data}=await sb.rpc('get_my_recent_slot_spins',{p_limit:6});
   $('slotRecent').innerHTML=(data||[]).map(x=>{
     const g=games[x.game]||games.lucky7;
     const net=Number(x.net||0);
