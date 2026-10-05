@@ -110,7 +110,9 @@ async function sync(force=false){
     const s=sig(data);
     if(s!==lastSig){lastSig=s;document.dispatchEvent(new CustomEvent('trynka:game-state',{detail:data}))}
     const expected=expectedTurnText(data),actual=($('roundTurn')?.textContent||'').replace(/ · \d+с$/,'');
-    const potExpected='БАНК: '+Number(data?.round?.pot||0)+' ◉';
+    const potExpected=data?.svara
+      ?'БАНК СВАРИ: '+Number(data?.room?.carried_pot||data?.round?.pot||0)+' ◉'
+      :'БАНК: '+Number(data?.round?.pot||0)+' ◉';
     const bad=(expected&&actual&&!actual.includes(expected))||($('potBig')&&$('potBig').textContent!==potExpected);
     mismatch=bad?mismatch+1:0;
     if((force||mismatch>=2)&&Date.now()-lastForced>2500){
