@@ -20,12 +20,64 @@ function expectedTurnText(s){
   const p=(s.players||[]).find(x=>x.user_id===g.turn_user_id);
   return g.turn_user_id===me?.id?'ВАШ ХІД':'ХІД: '+String(p?.nickname||'ГРАВЕЦЬ').toUpperCase();
 }
+function ensureSvaraBar(){
+  const host=document.querySelector('#game .centerInfo');if(!host)return null;
+  let bar=$('svaraJoinBar');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='svaraJoinBar';
+    bar.className='svaraJoinBar hide';
+    host.appendChild(bar);
+  }
+  return bar;
+}
+async function joinSvara(){
+  const rid=roomId(),bar=$('svaraJoinBar');if(!rid)return;
+  const b=bar?.querySelector('button');if(b)b.disabled=true;
+  try{
+    const {error}=await sb.rpc('join_svara',{p_room:rid});
+    if(error)throw error;
+    await sync(true);
+  }catch(e){
+    alert(e?.message||'Не вдалося увійти у свару');
+    if(b)b.disabled=false;
+  }
+}
+function patchSvara(s){
+  const bar=ensureSvaraBar();if(!bar)return;
+  const sv=s?.svara,r=s?.room,g=s?.round;
+  if(!sv){
+    bar.classList.add('hide');bar.innerHTML='';
+    return;
+  }
+  const mePlayer=(s.players||[]).find(x=>x.user_id===me?.id);
+  const myMember=(sv.members||[]).find(x=>x.user_id===me?.id);
+  const fee=Number(sv.entry_fee||0);
+  const bank=Number(r?.carried_pot||sv.original_pot||0);
+  const left=Math.max(0,Math.ceil((new Date(sv.closes_at).getTime()-Date.now())/1000));
+  const enough=Number(mePlayer?.table_chips||0)>=fee;
+
+  if(myMember){
+    bar.className='svaraJoinBar joined';
+    bar.innerHTML='<b>🔥 СВАРА</b><span>'+(myMember.auto_member?'Ви залишаєтесь у сварі':'Ви зайшли у свару')+'</span><small>Банк '+bank+' ◉ · старт через '+left+'с</small>';
+  }else{
+    bar.className='svaraJoinBar';
+    bar.innerHTML='<b>🔥 СВАРА</b><span>Вхід: '+fee+' ◉</span><button '+(enough?'':'disabled')+'>'+(enough?'УВІЙТИ У СВАРУ — '+fee+' ◉':'НЕ ВИСТАЧАЄ ФІШОК')+'</button><small>Банк '+bank+' ◉ · залишилось '+left+'с</small>';
+    const b=bar.querySelector('button');if(b&&!b.disabled)b.onclick=joinSvara;
+  }
+
+  if($('potBig'))$('potBig').textContent='БАНК СВАРИ: '+bank+' ◉';
+  if($('countdown'))$('countdown').textContent='СВАРА · '+left+'с';
+  if($('turnStatus'))$('turnStatus').textContent=myMember?'Ви у сварі':'Можна зайти за половину банку';
+}
 function patchCritical(s){
-  const g=s?.round,r=s?.room;if(!g||!r)return;
-  if($('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
+  const g=s?.round,r=s?.room;if(!r)return;
+  patchSvara(s);
+  if(!g)return;
+  if(!s?.svara&&$('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
   if($('roundPot'))$('roundPot').textContent='Банк: '+Number(g.pot||0)+' ◉';
   if($('roundBet'))$('roundBet').textContent='Ставка: '+Number(g.current_bet||r.ante||0)+' ◉';
-  if($('tableRoundLabel'))$('tableRoundLabel').textContent='Коло '+Number(g.round_no||1);
+  if($('tableRoundLabel'))$('tableRoundLabel').textContent=(g.is_svara?'СВАРА · ':'Коло ')+Number(g.round_no||1);
   const mine=(s.round_players||[]).find(x=>x.user_id===me?.id);
   const canPlay=g.status==='playing'&&mine&&!mine.folded;
   const box=$('gameActions');if(box)box.classList.toggle('hide',!canPlay);
@@ -43,7 +95,7 @@ function patchCritical(s){
     document.body.classList.add('chipBalanceWarning');
   }else document.body.classList.remove('chipBalanceWarning');
 }
-function sig(s){const g=s?.round||{};return [g.id,g.status,g.turn_user_id,g.turn_started_at,g.round_no,g.current_bet,g.pot,s?.room?.game_status].join('|')}
+function sig(s){const g=s?.round||{},sv=s?.svara||{};return [g.id,g.status,g.turn_user_id,g.turn_started_at,g.round_no,g.current_bet,g.pot,g.is_svara,s?.room?.game_status,s?.room?.carried_pot,sv.source_round_id,sv.entry_fee,sv.closes_at,sv.joined,(sv.members||[]).length].join('|')}
 async function sync(force=false){
   if(busy||$('game')?.classList.contains('hide'))return;
   const rid=roomId();if(!rid||!me)return;
