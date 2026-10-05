@@ -258,6 +258,10 @@ $('showRegister').onclick=()=>authView('register'); $('showLogin').onclick=()=>a
 let authRestoring=false,lastAuthUserId=null;
 async function acceptSession(session,{restore=true}={}){
   if(!session?.user)return false;
+  if(lastAuthUserId===session.user.id&&profile){
+    user=session.user;
+    return true;
+  }
   if(authRestoring)return true;
   authRestoring=true;
   try{
@@ -286,7 +290,7 @@ sb.auth.onAuthStateChange((event,session)=>{
   }
 });
 $('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const pwErr=strongPasswordError(password);if(pwErr)return alert(pwErr);const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert('Не вдалося створити акаунт. Перевір дані та спробуй ще раз.');if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
-$('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await loadProfile()};
+$('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await acceptSession(data.session,{restore:false})};
 $('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
 async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await refreshAdminPanel();subscribeLobby()}
 async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
