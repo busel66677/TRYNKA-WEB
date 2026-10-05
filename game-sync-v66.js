@@ -106,6 +106,7 @@ async function sync(force=false){
     const ms=performance.now()-t;renderLatency(ms);
     if(error)throw error;
     patchCritical(data);
+    window.TRYNKA_GAME_STATE=data;
     const s=sig(data);
     if(s!==lastSig){lastSig=s;document.dispatchEvent(new CustomEvent('trynka:game-state',{detail:data}))}
     const expected=expectedTurnText(data),actual=($('roundTurn')?.textContent||'').replace(/ · \d+с$/,'');
