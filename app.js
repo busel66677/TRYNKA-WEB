@@ -543,7 +543,7 @@ function renderSeats(r,ps){
     if(mine)hand.classList.add('handSeat'+mine.seat_no);
   }
   const occupied=ps.filter(p=>p.seat_no!==null).map(p=>[p.seat_no,p.user_id,p.profiles?.nickname||'',Number(p.table_chips||0),p.profiles?.avatar_key||'spade',p.profiles?.frame_key||'classic',Number(p.profiles?.win_streak||0),!!p.ready,!!p.profiles?.is_bot]).sort((a,b)=>a[0]-b[0]);
-  const sig=JSON.stringify([r.id,r.max_players,r.game_status,occupied]);
+  const sig=JSON.stringify([r.id,r.max_players,r.game_status,!!spectatorMode,user?.id||'',occupied]);
   if(sig===lastSeatSignature&&$('seats')?.children.length===r.max_players)return;
   lastSeatSignature=sig;
   const bySeat=new Map(ps.filter(p=>p.seat_no!==null).map(p=>[p.seat_no,p]));
