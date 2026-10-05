@@ -20,21 +20,32 @@ function mount(){
 function setConnectionState(ok,label='',blocking=false){
   const shield=$('reconnectShield'),was=reconnecting;
   reconnecting=!ok;
-  document.body.classList.toggle('gameReconnecting',!ok);
-  if(shield){
-    if(!ok&&label)shield.querySelector('b').textContent=label;
-    shield.classList.toggle('hide',ok||!blocking);
-  }
+  // Never cover the whole table during a reconnect. The latency badge is enough feedback.
+  document.body.classList.toggle('gameReconnecting',!ok&&blocking);
+  if(shield)shield.classList.add('hide');
   if(!ok){
-    document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.disabled=true);
+    const badge=$('netQualityBadge');
+    if(badge){
+      badge.className='netQualityBadge bad';
+      badge.textContent=navigator.onLine?'◐ зв’язок':'● офлайн';
+      badge.title=label||'Тимчасова проблема зі з’єднанням';
+    }
+    if(blocking)document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.disabled=true);
   }else if(was){
     document.dispatchEvent(new CustomEvent('trynka:reconnected'));
   }
 }
 function renderLatency(ms){
   const b=$('netQualityBadge');if(!b)return;
+  if(!Number.isFinite(ms)||ms>=9000){
+    b.className='netQualityBadge bad';
+    b.textContent='◐ зв’язок';
+    b.title='Очікуємо відповідь сервера';
+    return;
+  }
   b.className='netQualityBadge '+(ms<400?'good':ms<1200?'mid':'bad');
   b.textContent=(ms<400?'● ':'◐ ')+Math.round(ms)+' мс';
+  b.title='Затримка з сервером';
 }
 function expectedTurnText(s){
   const g=s?.round;if(!g||g.status!=='playing')return '';
@@ -124,7 +135,7 @@ async function sync(force=false){
   const t=performance.now();
   try{
     let timeoutId;
-    const timeout=new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('snapshot timeout')),7000)});
+    const timeout=new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('snapshot timeout')),9000)});
     const result=await Promise.race([sb.rpc('get_room_game_snapshot',{p_room:rid}),timeout]);
     clearTimeout(timeoutId);
     const {data,error}=result||{};
@@ -153,10 +164,10 @@ async function sync(force=false){
     await maybeDiagButton(rid);
   }catch(e){
     consecutiveErrors++;
-    renderLatency(9999);
+    renderLatency(NaN);
     const offline=!navigator.onLine;
-    const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:Infinity;
-    const blocking=offline||consecutiveErrors>=2||staleFor>10000;
+    const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:0;
+    const blocking=offline||consecutiveErrors>=3||staleFor>18000;
     setConnectionState(false,offline?'⚠ Немає з’єднання':'↻ Відновлюємо гру…',blocking);
     try{await sb.rpc('log_client_error',{p_message:e?.message||String(e),p_context:'central-sync',p_room:rid})}catch{}
   }finally{
@@ -196,7 +207,7 @@ async function tick(){
   const rid=roomId();
   if(rid){
     const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:0;
-    if(staleFor>9000&&!busy)setConnectionState(false,'↻ Відновлюємо гру…',staleFor>14000);
+    if(staleFor>15000&&!busy)setConnectionState(false,'↻ Відновлюємо гру…',staleFor>20000);
     await bindRealtime(rid);
     await sync(false);
   }else if(reconnecting){
@@ -205,7 +216,7 @@ async function tick(){
 }
 async function init(){
   const {data:{user}}=await sb.auth.getUser();me=user||null;if(!me)return;
-  mount();await tick();setInterval(tick,1200);
+  mount();await tick();setInterval(tick,2500);
   window.addEventListener('offline',()=>setConnectionState(false,'⚠ Немає з’єднання',true));
   window.addEventListener('online',()=>{setConnectionState(false,'↻ Відновлюємо гру…',false);sync(true)});
   document.addEventListener('trynka:reconnected',()=>sync(true));
