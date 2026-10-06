@@ -187,7 +187,7 @@ async function openDiag(){
   d.showModal();
 }
 async function touchHeartbeat(rid){
-  if(!rid||Date.now()-lastHeartbeat<30000)return;
+  if(!rid||Date.now()-lastHeartbeat<45000)return;
   lastHeartbeat=Date.now();
   try{await sb.rpc('touch_game_heartbeat',{p_room:rid})}catch{}
 }
@@ -209,7 +209,7 @@ async function tick(){
   const rid=roomId();
   if(rid){
     const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:Infinity;
-    if(staleFor>15000&&!busy)await sync(false);
+    if(staleFor>20000&&!busy)await sync(false);
     await touchHeartbeat(rid);
   }else if(reconnecting){
     setConnectionState(true);
