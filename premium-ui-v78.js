@@ -4,14 +4,11 @@ let lastFinishedKey='';
 let toastTimer=null;
 
 function actionButtons(){
-  const call=document.querySelector('#gameActions [data-action="call"]');
-  const raise=document.querySelector('#gameActions [data-action="raise"]');
-  const reveal=document.querySelector('#gameActions [data-action="reveal"]');
-  const fold=document.querySelector('#gameActions [data-action="fold"]');
-  if(call)call.textContent='ПІДТРИМАТИ';
-  if(raise)raise.textContent='ПІДНЯТИ';
-  if(reveal)reveal.textContent='ВСКРИТИСЯ';
-  if(fold)fold.textContent='ПАС';
+  const labels={call:'ПІДТРИМАТИ',raise:'ПІДНЯТИ',reveal:'ВСКРИТИСЯ',fold:'ПАС'};
+  Object.entries(labels).forEach(([action,label])=>{
+    const b=document.querySelector('#gameActions [data-action="'+action+'"]');
+    if(b&&b.textContent!==label)b.textContent=label;
+  });
 }
 
 function ensureRoundToast(){
