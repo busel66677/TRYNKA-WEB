@@ -614,7 +614,7 @@ function renderSeats(r,ps){
     d.className='seat s'+visualSlot+' p'+visualSlot+(p?.user_id===user.id?' mine':!p?' free':'')+(p?' roundEligible':'');
     d.dataset.seatNo=String(i);
     if(p)d.dataset.userId=p.user_id;
-    d.innerHTML=p?'<div class="seatAvatar playerFrame '+frameClass(p.profiles?.frame_key||'classic')+'">'+avatarIcon(p.profiles?.avatar_key)+'</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div>'+(Number(p.profiles?.win_streak||0)>=2?'<div class="streakTag">🔥 ×'+Number(p.profiles.win_streak)+'</div>':'')+'<div class="seatStack">СТІЛ: ◉ '+Number(p.table_chips||0).toLocaleString('uk-UA')+'</div><div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
+    d.innerHTML=p?'<div class="seatAvatar playerFrame '+frameClass(p.profiles?.frame_key||'classic')+'">'+avatarIcon(p.profiles?.avatar_key)+'</div><div class="seatBody"><div class="seatName">'+esc(p.profiles?.nickname||'Гравець')+((p.profiles?.nickname||'')==='Адмін'?'<span class="adminTag">ADMIN</span>':'')+(p.user_id===user.id?'<span class="youTag">ВИ</span>':'')+'</div>'+(Number(p.profiles?.win_streak||0)>=2?'<div class="streakTag">🔥 ×'+Number(p.profiles.win_streak)+'</div>':'')+'<div class="seatStack">СТІЛ: ◉ '+Number(p.table_chips||0).toLocaleString('uk-UA')+'</div><div class="betBadge hide">ДАВ <b>0</b> ◉</div><div class="seatState"></div></div>':'<div class="seatFreePlus">＋</div><div class="seatBody"><div class="seatName">Сісти</div><div class="seatStack">Вільне місце</div></div>';
     if(p&&p.disconnected_at){
       const away=document.createElement('span');away.className='awayBadge';away.textContent='ВІДІЙШОВ';d.appendChild(away);
     }
@@ -728,16 +728,16 @@ async function renderRound(r,ps,version=roomRenderVersion,snapshot=null){
   });
 }
 async function renderContributions(gr,ps,rps=[]){
+  document.querySelectorAll('#seats .betBadge').forEach(el=>{el.classList.add('hide');el.classList.remove('foldedBet')});
   if($('contributionBoard'))$('contributionBoard').innerHTML='';
-  document.querySelectorAll('#seats .seatState').forEach(el=>{el.textContent='';el.classList.remove('hasContribution','foldedContribution')});
   if(!gr)return;
   for(const x of (rps||[])){
     const seat=document.querySelector('#seats .seat[data-user-id="'+CSS.escape(String(x.user_id))+'"]');
-    const state=seat?.querySelector('.seatState');
-    if(!state)continue;
-    state.textContent=x.folded?'ВПАВ · ВНІС '+Number(x.contributed||0)+' ◉':'ВНІС: '+Number(x.contributed||0)+' ◉';
-    state.classList.add('hasContribution');
-    if(x.folded)state.classList.add('foldedContribution');
+    const badge=seat?.querySelector('.betBadge');
+    if(!badge)continue;
+    badge.innerHTML=(x.folded?'ВПАВ · ДАВ ':'ДАВ ')+'<b>'+Number(x.contributed||0)+'</b> ◉';
+    badge.classList.remove('hide');
+    if(x.folded)badge.classList.add('foldedBet');
   }
 }
 function renderRevealShowdown(gr,ps){
