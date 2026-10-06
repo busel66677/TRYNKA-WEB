@@ -6,7 +6,7 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let me=null,lastRoomId=null,lastActionsSig='',lastSeatMetaSig='',favoriteIds=new Set(),favLoadedAt=0,profileExtrasLoadedAt=0;
+let me=null,lastRoomId=null,lastActionsSig='',lastSeatMetaSig='',lastSeatMetaAt=0,favoriteIds=new Set(),favLoadedAt=0,profileExtrasLoadedAt=0;
 
 function navState(){
   try{return JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}')||{}}
@@ -159,23 +159,35 @@ async function syncActions(){
   if(!rid||!visible('game'))return;
   mountActionStrip();
 
-  const {data:gr}=await sb.from('game_rounds').select('id,status').eq('room_id',rid).order('id',{ascending:false}).limit(1).maybeSingle();
-  if(!gr){$('v35ActionRows').innerHTML='<span class="v35NoActions">Роздача ще не почалась</span>';return}
+  const snap=window.TRYNKA_GAME_STATE;
+  let gr=null,list=[],players=[];
+  if(Number(snap?.room?.id)===rid){
+    gr=snap.round||null;
+    list=snap.latest_actions||[];
+    players=snap.players||[];
+  }else{
+    const {data:round}=await sb.from('game_rounds').select('id,status').eq('room_id',rid).order('id',{ascending:false}).limit(1).maybeSingle();
+    gr=round;
+    if(gr){
+      const [{data:actions},{data:roomPlayers}]=await Promise.all([
+        sb.from('round_actions').select('id,user_id,action,amount,created_at,profiles(nickname)').eq('round_id',gr.id).order('id',{ascending:false}).limit(12),
+        sb.from('room_players').select('user_id,seat_no').eq('room_id',rid).not('seat_no','is',null)
+      ]);
+      list=actions||[];
+      players=roomPlayers||[];
+    }
+  }
 
-  const {data:actions}=await sb.from('round_actions')
-    .select('id,user_id,action,amount,created_at,profiles(nickname)')
-    .eq('round_id',gr.id)
-    .order('id',{ascending:false})
-    .limit(30);
+  const rows=$('v35ActionRows');
+  if(!gr){if(rows)rows.innerHTML='<span class="v35NoActions">Роздача ще не почалась</span>';return}
 
-  const list=actions||[];
   const sig=list.slice(0,10).map(x=>x.id).join(',');
+  if(sig===lastActionsSig&&rows?.children.length)return;
   lastActionsSig=sig;
 
   const meaningful=list.filter(a=>a.action!=='ante').slice(0,7);
-  const rows=$('v35ActionRows');
   if(rows)rows.innerHTML=meaningful.length?meaningful.map(a=>
-    '<div class="v35ActionRow '+actionClass(a.action)+'"><b>'+esc(a.profiles?.nickname||'Гравець')+'</b><span>'+esc(actionLabel(a))+'</span></div>'
+    '<div class="v35ActionRow '+actionClass(a.action)+'"><b>'+esc(a.nickname||a.profiles?.nickname||'Гравець')+'</b><span>'+esc(actionLabel(a))+'</span></div>'
   ).join(''):'<span class="v35NoActions">Ще немає ходів</span>';
 
   const latestByUser=new Map();
@@ -184,10 +196,10 @@ async function syncActions(){
     latestByUser.set(a.user_id,a);
   }
 
-  const {data:players}=await sb.from('room_players').select('user_id,seat_no').eq('room_id',rid).not('seat_no','is',null);
   for(const p of players||[]){
-    const seat=document.querySelector('#seats .seat.s'+p.seat_no);
+    const seat=document.querySelector('#seats .seat[data-seat-no="'+p.seat_no+'"]');
     if(!seat)continue;
+    seat.dataset.playerId=p.user_id;
     let tag=seat.querySelector('.lastActionTag');
     const a=latestByUser.get(p.user_id);
     if(!a){tag?.remove();continue}
@@ -205,9 +217,11 @@ function badgeFor(p){
   return null;
 }
 
-async function syncSeatMeta(){
+async function syncSeatMeta(force=false){
   const rid=currentRoomId();
   if(!rid||!visible('game'))return;
+  if(!force&&Date.now()-lastSeatMetaAt<60000)return;
+  lastSeatMetaAt=Date.now();
   const {data:players}=await sb.from('room_players')
     .select('user_id,seat_no,profiles(nickname,xp,level,wins,games_played,is_admin)')
     .eq('room_id',rid)
@@ -217,7 +231,7 @@ async function syncSeatMeta(){
   lastSeatMetaSig=sig;
 
   for(const p of players||[]){
-    const seat=document.querySelector('#seats .seat.s'+p.seat_no);
+    const seat=document.querySelector('#seats .seat[data-seat-no="'+p.seat_no+'"]');
     if(!seat)continue;
     seat.dataset.playerId=p.user_id;
     const body=seat.querySelector('.seatBody');
@@ -377,7 +391,7 @@ async function tick(){
 
   if(visible('game')){
     const rid=currentRoomId();
-    if(rid!==lastRoomId){lastRoomId=rid;lastActionsSig='';lastSeatMetaSig=''}
+    if(rid!==lastRoomId){lastRoomId=rid;lastActionsSig='';lastSeatMetaSig='';lastSeatMetaAt=0}
     await Promise.all([syncActions(),syncSeatMeta(),showPrivateCodeBadge()]);
   }
 }
@@ -390,7 +404,7 @@ async function start(){
   mountPrivateControls();
   mountPlayerDialog();
   await tick();
-  setInterval(tick,5000);
+  setInterval(tick,12000);
   const rooms=$('rooms');
   if(rooms)new MutationObserver(()=>decorateRoomCards(false)).observe(rooms,{childList:true});
 }
