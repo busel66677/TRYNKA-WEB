@@ -700,3 +700,40 @@
     font-size:7.5px!important;
   }
 }
+
+
+/* v80 force local hand above controls */
+@media(max-width:650px){
+  /* Old poker-table.css uses the more specific #myHand.handSeat0 selector.
+     Override it here so the cards cannot fall behind the action panel. */
+  #game #myHand.handSeat0{
+    display:flex!important;
+    left:50%!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:188px!important;
+    transform:translateX(-50%)!important;
+    z-index:96!important;
+    width:max-content!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+  #game #myHand.handSeat0 .card{
+    width:48px!important;
+    height:69px!important;
+    margin-left:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+}
+
+@media(max-width:390px){
+  #game #myHand.handSeat0{
+    bottom:180px!important;
+  }
+  #game #myHand.handSeat0 .card{
+    width:45px!important;
+    height:65px!important;
+  }
+}
