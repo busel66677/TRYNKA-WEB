@@ -706,6 +706,14 @@ async function renderRound(r,ps,version=roomRenderVersion,snapshot=null){
   $('roundPot').textContent='Банк: '+gr.pot+' ◉';
   $('roundBet').textContent='Ставка: '+gr.current_bet+' ◉';
   const mine=gr.turn_user_id===user.id;
+  const myRound=(snapshot?.round_players||[]).find(x=>x.user_id===user.id);
+  const toCall=Math.max(0,Number(gr.current_bet||0)-Number(myRound?.contributed||0));
+  const callBtn=document.querySelector('#gameActions button[data-action="call"]');
+  if(callBtn){
+    callBtn.textContent=toCall>0?'ДАТИ '+toCall+' ◉':'ПРОПУСТИТИ';
+    callBtn.title=toCall>0?'Потрібно додати '+toCall+' ◉, щоб зрівняти ставку':'Ви вже зрівняли ставку — можна передати хід без доплати';
+  }
+  if($('roundBet'))$('roundBet').textContent='Ставка: '+Number(gr.current_bet||0)+' ◉ · Вам дати: '+toCall+' ◉';
   if(!window.TRYNKA_STABLE_TURN_UI&&$('roundTurn'))$('roundTurn').textContent=mine?'ВАШ ХІД':'ХІД: '+(turn?.profiles?.nickname||'ГРАВЕЦЬ').toUpperCase();
   document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
     let disabled=!mine;
@@ -719,7 +727,19 @@ async function renderRound(r,ps,version=roomRenderVersion,snapshot=null){
     if(b.dataset.action==='raise')b.title='Максимум: '+maxBet+' ◉';
   });
 }
-async function renderContributions(gr,ps,rps=[]){if(!$('contributionBoard')||!gr){if($('contributionBoard'))$('contributionBoard').innerHTML='';return}$('contributionBoard').innerHTML=(rps||[]).map(x=>{const p=ps.find(v=>v.user_id===x.user_id);return '<span class="'+(x.folded?'folded':'')+'">'+esc(p?.profiles?.nickname||'Гравець')+' <b>'+x.contributed+' ◉</b></span>'}).join('')}
+async function renderContributions(gr,ps,rps=[]){
+  if($('contributionBoard'))$('contributionBoard').innerHTML='';
+  document.querySelectorAll('#seats .seatState').forEach(el=>{el.textContent='';el.classList.remove('hasContribution','foldedContribution')});
+  if(!gr)return;
+  for(const x of (rps||[])){
+    const seat=document.querySelector('#seats .seat[data-user-id="'+CSS.escape(String(x.user_id))+'"]');
+    const state=seat?.querySelector('.seatState');
+    if(!state)continue;
+    state.textContent=x.folded?'ВПАВ · ВНІС '+Number(x.contributed||0)+' ◉':'ВНІС: '+Number(x.contributed||0)+' ◉';
+    state.classList.add('hasContribution');
+    if(x.folded)state.classList.add('foldedContribution');
+  }
+}
 function renderRevealShowdown(gr,ps){
   const box=$('revealShowdown');
   if(!box)return;
