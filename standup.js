@@ -147,7 +147,7 @@ function paintSeats(ps,turnUser,lastAction=null,presence=[]){
   });
 
   for(const p of ps||[]){
-    const seat=document.querySelector('#seats .seat.s'+p.seat_no);
+    const seat=document.querySelector('#seats .seat[data-seat-no="'+p.seat_no+'"]');
     if(!seat)continue;
     if(p.folded)seat.classList.add('foldedSeat');
     if(p.user_id===turnUser&&!p.folded)seat.classList.add('turnActive');
@@ -237,7 +237,7 @@ function paintOpenHands(rows){
   document.querySelectorAll('#seats .seat.revealPairSeat').forEach(x=>x.classList.remove('revealPairSeat'));
 
   for(const r of rows||[]){
-    const seat=document.querySelector('#seats .seat.s'+r.seat_no);
+    const seat=document.querySelector('#seats .seat[data-seat-no="'+r.seat_no+'"]');
     if(!seat||!r.cards?.length)continue;
     seat.classList.add('revealPairSeat');
     const box=document.createElement('div');
