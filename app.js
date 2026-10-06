@@ -725,6 +725,17 @@ function renderRevealShowdown(gr,ps){
   if(!box)return;
   box.classList.add('hide');
   box.innerHTML='';
+  if(!gr||!user||!gr.reveal_actor||!gr.reveal_target)return;
+  const isActor=gr.reveal_actor===user.id;
+  const isTarget=gr.reveal_target===user.id;
+  if(!isActor&&!isTarget)return;
+  const opponentId=isActor?gr.reveal_target:gr.reveal_actor;
+  const cards=isActor?gr.reveal_cards:gr.reveal_actor_cards;
+  if(!Array.isArray(cards)||!cards.length)return;
+  const opponent=ps.find(p=>p.user_id===opponentId);
+  box.innerHTML='<div class="revealTitle">КАРТИ '+esc((opponent?.profiles?.nickname||'СУПЕРНИКА').toUpperCase())+'</div>'+
+    '<div class="revealCards">'+cards.map(c=>'<div class="card '+(/[♠♣]/.test(c)?'black ':'')+'"><span class="cardFace">'+esc(c)+'</span></div>').join('')+'</div>';
+  box.classList.remove('hide');
 }
 async function renderActionLog(roundId,ps,a=[]){if(!$('tableActionLog'))return;const rows=(a||[]).slice(0,5);const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'час вийшов — автоматично впав'};$('tableActionLog').innerHTML=rows.map(x=>'<div class="actionLogRow"><b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';const x=rows[0],flash=$('lastActionFlash');if(x&&flash&&x.action!=='ante'){const paid=x.action==='call'||x.action==='raise';flash.innerHTML='<b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';flash.classList.remove('hide');if(lastActionId!==x.id){lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop')}}}
 async function doGameAction(action){
