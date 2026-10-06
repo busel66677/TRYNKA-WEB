@@ -988,3 +988,9 @@
     bottom:-14px!important;
   }
 }
+
+/* v82 betting clarity */
+#game .seatState.hasContribution{display:inline-flex!important;align-items:center;justify-content:center;margin-top:4px!important;padding:2px 6px!important;border-radius:999px;background:#07130ee8;border:1px solid #d6b94f99;color:#f4dc75!important;font-size:9px!important;font-weight:900!important;line-height:1.15!important;white-space:nowrap;box-shadow:0 2px 8px #0007}
+#game .seatState.foldedContribution{opacity:.62;color:#c7c7c7!important;border-color:#7778}
+#game #roundBet{font-weight:900!important;color:#f4dc75!important}
+@media(max-width:800px){#game .seatState.hasContribution{font-size:7px!important;padding:2px 4px!important;margin-top:2px!important}#game #roundBet{font-size:8px!important}}
