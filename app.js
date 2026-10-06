@@ -2,7 +2,7 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
 const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}});
-let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null,spectatorMode=false;
+let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,lobbyPollTimer=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null,spectatorMode=false;
 let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null,gameActionBusy=false;
 let roomRefreshTimer=null,lobbyRefreshTimer=null,roomRenderBusy=false,roomRenderQueued=false,lastTableHistoryAt=0,lastHistoryRoundId=null;
 const $=id=>document.getElementById(id), sections=['login','lobby','profile','create','game'];
@@ -292,8 +292,8 @@ sb.auth.onAuthStateChange((event,session)=>{
 });
 $('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const pwErr=strongPasswordError(password);if(pwErr)return alert(pwErr);const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert('Не вдалося створити акаунт. Перевір дані та спробуй ще раз.');if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await acceptSession(data.session,{restore:false})};
-$('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
-async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await Promise.all([refreshFriends(),refreshInvites()]);await refreshAdminPanel();subscribeLobby()}
+$('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearInterval(lobbyPollTimer);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
+async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);clearInterval(lobbyPollTimer);lobbyPollTimer=setInterval(()=>{if(!$('lobby')?.classList.contains('hide'))refreshLobby()},12000);show('lobby');ensureLobbySupport();await refreshLobby();await Promise.all([refreshFriends(),refreshInvites()]);await refreshAdminPanel();subscribeLobby()}
 async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
 $('profileBtn').onclick=async()=>{await renderProfile();show('profile')};document.querySelectorAll('.toLobby').forEach(b=>b.onclick=async()=>{
   const {data:activeSeat}=await sb.from('room_players')
@@ -364,32 +364,27 @@ $('homeCabinet').onclick=async()=>{await renderProfile();show('profile')};
 $('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>{const seated=(r.room_players||[]).filter(p=>p.seat_no!==null).length;return !r.is_private&&seated>0&&seated<r.max_players&&r.game_status!=='playing'});if(open)return joinRoom(open);show('create')};
 $('createForm').onsubmit=async e=>{e.preventDefault();const isPrivate=!!$('privateRoomToggle')?.checked;const {data,error}=await sb.rpc('create_secure_room_v2',{p_name:$('roomName').value.trim()||'Мій стіл',p_max_players:+$('maxPlayers').value,p_turn_seconds:+$('turnTime').value,p_ante:+$('ante').value,p_private:isPrivate});if(error)return alert(error.message);const rid=Number(data?.room_id||0),code=data?.invite_code||'';if(rid)await openRoom(rid);if(isPrivate&&code){if(window.TRYNKA_SHOW_PRIVATE_INVITE)window.TRYNKA_SHOW_PRIVATE_INVITE(rid,code);else alert('Код столу: '+code)}}
 async function refreshLobby(){
-  const cutoff=new Date(Date.now()-70000).toISOString();
-  const [{count:online},{data:rooms},{data:p}]=await Promise.all([
-    sb.from('profiles').select('*',{count:'exact',head:true}).gt('online_at',cutoff),
-    sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:false}),
-    sb.from('profiles').select('*').eq('id',user.id).single()
-  ]);
-
-  if(p)profile=p;
+  const {data:snapshot,error}=await sb.rpc('get_lobby_snapshot');
+  if(error||!snapshot)return;
+  if(profile&&snapshot.chips!==null&&snapshot.chips!==undefined)profile.chips=Number(snapshot.chips);
   if($('gameBalance'))$('gameBalance').textContent='Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');
 
-  const n=online||0;
+  const n=Number(snapshot.online_count||0);
   $('onlineBadge').textContent='● '+n+' онлайн';
   $('onlineCount').textContent=n;
   $('onlineStat').textContent=n;
   $('myChips').textContent=profile?.chips??0;
 
-  const active=(rooms||[]).filter(r=>!r.is_private);
+  const active=snapshot.rooms||[];
   $('tablesStat').textContent=active.length;
   $('rooms').innerHTML='';
 
   active.forEach(r=>{
-    const count=(r.room_players||[]).filter(p=>p.seat_no!==null).length;
+    const count=Number(r.seated||0);
     const playing=r.game_status==='playing';
     const locked=!!r.join_locked;
-    const mine=(r.room_players||[]).some(p=>p.user_id===user.id);
-    const mineSeated=(r.room_players||[]).some(p=>p.user_id===user.id&&p.seat_no!==null);
+    const mine=!!r.mine;
+    const mineSeated=!!r.mine_seated;
     const d=document.createElement('div');
     d.className='roomCard';
     d.dataset.roomId=String(r.id);
@@ -406,7 +401,6 @@ async function refreshLobby(){
       '<div class="roomMeta">'+
         '<span class="pill '+(playing?'playing':'live')+'">'+(playing?'● Грають':'● Очікує')+'</span>'+
         '<span class="pill">👥 '+count+'/'+r.max_players+'</span>'+
-
         '<span class="pill">◉ '+r.ante+'</span>'+
         '<span class="pill">⏱ '+r.turn_seconds+'с</span>'+(locked?'<span class="pill lockedPill">🔒 Закрито</span>':'')+
       '</div></div>'+
@@ -469,7 +463,9 @@ async function openRoom(id){
   if(channel)await sb.removeChannel(channel);
   if(currentRoom!==id)return;
   channel=sb.channel('room-'+id)
-    .on('postgres_changes',{event:'*',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(120))
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(100))
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(100))
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(1800))
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+id},()=>scheduleRoomRefresh(120))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_hands',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(80))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+id},p=>addMessage(p.new))
@@ -888,7 +884,7 @@ async function refreshFriends(){const {data}=await sb.from('friends').select('fr
 $('inviteBtn').onclick=async()=>{const {data}=await sb.from('friends').select('friend_id,profiles!friends_friend_id_fkey(nickname)').eq('user_id',user.id);$('inviteFriends').innerHTML='';(data||[]).filter(f=>!window.TRYNKA_BLOCKED_USERS?.has?.(f.friend_id)).forEach(f=>{const b=document.createElement('button');b.textContent='Запросити '+f.profiles.nickname;b.onclick=async()=>{await sb.from('invites').insert({room_id:currentRoom,from_user:user.id,to_user:f.friend_id});b.disabled=true;b.textContent='Запрошено ✓'};$('inviteFriends').appendChild(b)});$('inviteDialog').showModal()}
 async function refreshInvites(){const {data}=await sb.from('invites').select('id,room_id,from_user,profiles!invites_from_user_fkey(nickname),rooms(name)').eq('to_user',user.id).eq('status','pending');$('invites').innerHTML='';(data||[]).filter(i=>!window.TRYNKA_BLOCKED_USERS?.has?.(i.from_user)).forEach(i=>{const d=document.createElement('div');d.className='invite';d.innerHTML='<b>'+esc(i.profiles.nickname)+'</b> запрошує: '+esc(i.rooms?.name||'стіл')+' ';const b=document.createElement('button');b.textContent='Прийняти';b.onclick=async()=>{await sb.from('invites').update({status:'accepted'}).eq('id',i.id);const {error}=await sb.rpc('secure_join_room',{p_room:i.room_id});if(error)return alert(error.message);await openRoom(i.room_id)};d.appendChild(b);$('invites').appendChild(d)});if(!$('invites').children.length)$('invites').innerHTML='<p>Немає нових.</p>'}
 function scheduleLobbyRefresh(){clearTimeout(lobbyRefreshTimer);lobbyRefreshTimer=setTimeout(()=>{if(!$('lobby')?.classList.contains('hide'))refreshLobby()},800)}
-function subscribeLobby(){if(lobbyChannel)sb.removeChannel(lobbyChannel);lobbyChannel=sb.channel('lobby-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'rooms'},scheduleLobbyRefresh).on('postgres_changes',{event:'*',schema:'public',table:'room_players'},scheduleLobbyRefresh).on('postgres_changes',{event:'INSERT',schema:'public',table:'invites',filter:'to_user=eq.'+user.id},refreshInvites).subscribe()}
+function subscribeLobby(){if(lobbyChannel)sb.removeChannel(lobbyChannel);lobbyChannel=sb.channel('lobby-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'rooms'},scheduleLobbyRefresh).on('postgres_changes',{event:'INSERT',schema:'public',table:'invites',filter:'to_user=eq.'+user.id},refreshInvites).subscribe()}
 $('contactAdmin').onclick=()=>$('adminDialog').showModal();$('closeAdminDialog').onclick=()=>$('adminDialog').close();$('adminRequestForm').onsubmit=async e=>{e.preventDefault();const {error}=await sb.rpc('create_chip_request',{p_amount:+$('chipAmount').value,p_message:$('adminRequestText').value.trim()});if(error)return alert(error.message);$('adminDialog').close();alert('Заявку надіслано адміну ✓')}
 async function refreshAdminPanel(){if(!profile)return;const {data:isAdmin}=await sb.rpc('is_admin');if(!isAdmin){$('adminPanel').classList.add('hide');return}$('adminPanel').classList.remove('hide');const {data}=await sb.from('chip_requests').select('id,user_id,amount,message,profiles(nickname)').eq('status','pending').order('created_at');$('chipRequests').innerHTML='';(data||[]).forEach(r=>{const d=document.createElement('div');d.className='invite';d.innerHTML='<b>'+esc(r.profiles?.nickname||'Гравець')+'</b> — '+r.amount+' ◉ ';const b=document.createElement('button');b.textContent='Нарахувати';b.onclick=async()=>{const {error}=await sb.rpc('grant_virtual_chips',{target_user:r.user_id,chip_amount:r.amount,request_id:r.id});if(error)return alert(error.message);refreshAdminPanel()};d.appendChild(b);$('chipRequests').appendChild(d)});if(!$('chipRequests').children.length)$('chipRequests').innerHTML='<p>Нових заявок немає.</p>';await refreshSecurityAdmin();await refreshAdminRooms()}
 async function reportPlayer(id,nick){const reason=prompt('Причина скарги на '+nick+':');if(!reason)return;const {error}=await sb.rpc('report_player',{p_reported:id,p_room:currentRoom,p_reason:reason});alert(error?error.message:'Скаргу надіслано адміну ✓')}
