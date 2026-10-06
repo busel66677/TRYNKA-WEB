@@ -551,6 +551,11 @@ function positionOwnHandNearSeat(){
   const hand=$('myHand');
   if(!table||!seat||!hand)return;
 
+  if(window.innerWidth<=650){
+    ['left','top','right','bottom','transform'].forEach(k=>hand.style.removeProperty(k));
+    return;
+  }
+
   const tr=table.getBoundingClientRect();
   const sr=seat.getBoundingClientRect();
   if(!tr.width||!tr.height||!sr.width||!sr.height)return;
@@ -564,7 +569,7 @@ function positionOwnHandNearSeat(){
   const len=Math.hypot(dx,dy)||1;
   dx/=len;dy/=len;
 
-  const inward=window.innerWidth<=650?48:Math.min(120,Math.max(82,Math.min(tr.width,tr.height)*0.18));
+  const inward=Math.min(120,Math.max(82,Math.min(tr.width,tr.height)*0.18));
   const x=seatCx-tr.left-dx*inward;
   const y=seatCy-tr.top-dy*inward;
 
