@@ -16,7 +16,7 @@
 #game #potBig{display:block;font-size:24px!important;line-height:29px;color:#ffe36e;text-shadow:0 2px 5px #000;margin:0 0 3px;font-weight:950;letter-spacing:.3px}
 #game #bankInfo{display:block;font-size:11px!important;color:#cfe1d6;margin:0}
 #game #countdown{display:block;font-size:11px;font-weight:900;color:#ffffff;margin-top:4px;min-height:14px;letter-spacing:.8px}
-#game #turnStatus,#game #contributionBoard,#game #revealShowdown{display:none!important}
+#game #turnStatus,#game #contributionBoard{display:none!important}
 
 #game .seat{width:132px;min-height:52px;border:1px solid #ffffff2c;border-radius:25px;background:#111b1aed;box-shadow:0 6px 16px #0008;padding:7px 11px;transition:none!important;animation:none!important;overflow:visible}
 #game .seatName{font-size:12px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
@@ -348,7 +348,7 @@
 #game #revealShowdown.hide{display:none!important}
 
 /* v18 — reveal cards live beside the two players, not in the middle */
-#game #revealShowdown{display:none!important}
+#game #revealShowdown.hide{display:none!important}
 #game .seat.revealPairSeat{
   border-color:#ffe36e!important;
   box-shadow:0 0 0 2px #ffe36e22,0 0 20px #ffe36e66,0 8px 20px #000a!important;
