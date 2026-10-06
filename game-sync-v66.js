@@ -3,7 +3,7 @@ const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}});
 const $=id=>document.getElementById(id);
 window.TRYNKA_STABLE_TURN_UI=true;
-let me=null,lastRoom=null,lastSig='',mismatch=0,channel=null,lastHeartbeat=0,lastForced=0,busy=false,lastSuccessAt=0,reconnecting=false,syncQueued=false,consecutiveErrors=0;
+let me=null,lastSig='',mismatch=0,lastHeartbeat=0,lastForced=0,busy=false,lastSuccessAt=0,reconnecting=false,syncQueued=false,consecutiveErrors=0;
 
 function roomId(){try{const s=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');return s.view==='game'&&s.roomId?Number(s.roomId):null}catch{return null}}
 function mount(){
@@ -153,9 +153,6 @@ async function sync(force=false){
     if((force||mismatch>=2)&&Date.now()-lastForced>2500){
       lastForced=Date.now();mismatch=0;await window.TRYNKA_FORCE_RENDER?.();
     }
-    if(Date.now()-lastHeartbeat>9000){
-      lastHeartbeat=Date.now();sb.rpc('touch_game_heartbeat',{p_room:rid}).catch(()=>{});
-    }
     await maybeDiagButton(rid);
   }catch(e){
     consecutiveErrors++;
@@ -189,33 +186,44 @@ async function openDiag(){
   $('diagBody').textContent=`Раунд: ${g.id||'—'}\nСтатус: ${g.status||'—'}\nХід: ${g.turn_user_id||'—'}\nКоло: ${g.round_no||'—'}\nБанк: ${g.pot||0}\nСтавка: ${g.current_bet||0}\nБаланс фішок: ${bc?(bc.ok?'OK':'ПОМИЛКА Δ '+bc.delta):'ще не перевірено'}\n\nГРАВЦІ\n${players}\n\nОСТАННІ СТАНИ\n${logs}`;
   d.showModal();
 }
-async function bindRealtime(rid){
-  if(lastRoom===rid)return;lastRoom=rid;
-  if(channel)await sb.removeChannel(channel);
-  channel=sb.channel('central-'+rid)
-    .on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+rid},()=>sync(true))
-    .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+rid},()=>sync(true))
-    .subscribe();
+async function touchHeartbeat(rid){
+  if(!rid||Date.now()-lastHeartbeat<30000)return;
+  lastHeartbeat=Date.now();
+  try{await sb.rpc('touch_game_heartbeat',{p_room:rid})}catch{}
+}
+function acceptRoomSnapshot(data){
+  if(!data?.room)return;
+  lastSuccessAt=Date.now();
+  consecutiveErrors=0;
+  setConnectionState(true);
+  patchCritical(data);
+  window.TRYNKA_GAME_STATE=data;
+  const nextSig=sig(data);
+  if(nextSig!==lastSig){
+    lastSig=nextSig;
+    document.dispatchEvent(new CustomEvent('trynka:game-state',{detail:data}));
+  }
 }
 async function tick(){
   mount();
   const rid=roomId();
   if(rid){
-    const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:0;
-    if(staleFor>15000&&!busy)setConnectionState(false,'↻ Відновлюємо гру…',staleFor>20000);
-    await bindRealtime(rid);
-    await sync(false);
+    const staleFor=lastSuccessAt?Date.now()-lastSuccessAt:Infinity;
+    if(staleFor>15000&&!busy)await sync(false);
+    await touchHeartbeat(rid);
   }else if(reconnecting){
     setConnectionState(true);
   }
 }
 async function init(){
   const {data:{user}}=await sb.auth.getUser();me=user||null;if(!me)return;
-  mount();await tick();setInterval(tick,2500);
+  mount();
+  document.addEventListener('trynka:room-snapshot',e=>acceptRoomSnapshot(e.detail));
+  document.addEventListener('trynka:room-render-error',()=>sync(true));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastSuccessAt>5000)sync(true)});
   window.addEventListener('offline',()=>setConnectionState(false,'⚠ Немає з’єднання',true));
   window.addEventListener('online',()=>{setConnectionState(false,'↻ Відновлюємо гру…',false);sync(true)});
-  document.addEventListener('trynka:reconnected',()=>sync(true));
-  document.addEventListener('trynka:room-render-error',()=>sync(true));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(true)});
+  await tick();
+  setInterval(tick,5000);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
