@@ -4,6 +4,7 @@ if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}});
 let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null,spectatorMode=false;
 let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null,gameActionBusy=false;
+let roomRefreshTimer=null,lobbyRefreshTimer=null,roomRenderBusy=false,roomRenderQueued=false,lastTableHistoryAt=0,lastHistoryRoundId=null;
 const $=id=>document.getElementById(id), sections=['login','lobby','profile','create','game'];
 window.addEventListener('trynka:deal-start',()=>{
   ownDealActive=true;ownDealtCount=0;lastHandPaint='';handPullY=[0,0,0];
@@ -292,7 +293,7 @@ sb.auth.onAuthStateChange((event,session)=>{
 $('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail').value.trim().toLowerCase(),nickname=$('regNick').value.trim(),password=$('regPassword').value,password2=$('regPassword2').value;if(password!==password2)return alert('Паролі не співпадають');const pwErr=strongPasswordError(password);if(pwErr)return alert(pwErr);const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error)return alert('Не вдалося створити акаунт. Перевір дані та спробуй ще раз.');if(data.session){user=data.user;await sb.from('profiles').upsert({id:user.id,nickname});await loadProfile()}else{alert('Перевір пошту та підтвердь реєстрацію.');authView('login');$('loginEmail').value=email}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await acceptSession(data.session,{restore:false})};
 $('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
-async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await refreshAdminPanel();subscribeLobby()}
+async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);show('lobby');ensureLobbySupport();await refreshLobby();await Promise.all([refreshFriends(),refreshInvites()]);await refreshAdminPanel();subscribeLobby()}
 async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
 $('profileBtn').onclick=async()=>{await renderProfile();show('profile')};document.querySelectorAll('.toLobby').forEach(b=>b.onclick=async()=>{
   const {data:activeSeat}=await sb.from('room_players')
@@ -363,7 +364,6 @@ $('homeCabinet').onclick=async()=>{await renderProfile();show('profile')};
 $('quickPlay').onclick=async()=>{const {data:rooms}=await sb.from('rooms').select('*,room_players(user_id,seat_no)').order('created_at',{ascending:true});const open=(rooms||[]).find(r=>{const seated=(r.room_players||[]).filter(p=>p.seat_no!==null).length;return !r.is_private&&seated>0&&seated<r.max_players&&r.game_status!=='playing'});if(open)return joinRoom(open);show('create')};
 $('createForm').onsubmit=async e=>{e.preventDefault();const isPrivate=!!$('privateRoomToggle')?.checked;const {data,error}=await sb.rpc('create_secure_room_v2',{p_name:$('roomName').value.trim()||'Мій стіл',p_max_players:+$('maxPlayers').value,p_turn_seconds:+$('turnTime').value,p_ante:+$('ante').value,p_private:isPrivate});if(error)return alert(error.message);const rid=Number(data?.room_id||0),code=data?.invite_code||'';if(rid)await openRoom(rid);if(isPrivate&&code){if(window.TRYNKA_SHOW_PRIVATE_INVITE)window.TRYNKA_SHOW_PRIVATE_INVITE(rid,code);else alert('Код столу: '+code)}}
 async function refreshLobby(){
-  await pingOnline();
   const cutoff=new Date(Date.now()-70000).toISOString();
   const [{count:online},{data:rooms},{data:p}]=await Promise.all([
     sb.from('profiles').select('*',{count:'exact',head:true}).gt('online_at',cutoff),
@@ -417,8 +417,6 @@ async function refreshLobby(){
   });
 
   if(!active.length)$('rooms').innerHTML='<p>Активних столів поки немає. Створи перший.</p>';
-  await refreshFriends();
-  await refreshInvites();
 }
 async function joinRoom(r){const {error}=await sb.rpc('secure_join_room',{p_room:r.id});if(error)return alert(error.message);await openRoom(r.id)}
 async function watchRoom(r){
@@ -448,9 +446,15 @@ function setSpectatorMode(next,{persist=true}={}){
   if($('gameBalance'))$('gameBalance').textContent=spectatorMode?'Режим перегляду':'Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');
   if(changed&&persist&&currentRoom&&!$('game')?.classList.contains('hide'))saveNavState('game');
 }
+function scheduleRoomRefresh(delay=120){
+  if(!currentRoom||$('game')?.classList.contains('hide'))return;
+  clearTimeout(roomRefreshTimer);
+  roomRefreshTimer=setTimeout(()=>renderRoom(),delay);
+}
 async function openRoom(id){
   id=Number(id);
-  currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';
+  currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';lastTableHistoryAt=0;lastHistoryRoundId=null;
+  clearTimeout(roomRefreshTimer);
   const [memberRes,watcherRes]=await Promise.all([
     sb.from('room_players').select('room_id,seat_no').eq('room_id',id).eq('user_id',user.id).maybeSingle(),
     sb.from('room_spectators').select('room_id').eq('room_id',id).eq('user_id',user.id).maybeSingle()
@@ -465,44 +469,84 @@ async function openRoom(id){
   if(channel)await sb.removeChannel(channel);
   if(currentRoom!==id)return;
   channel=sb.channel('room-'+id)
-    .on('postgres_changes',{event:'*',schema:'public',table:'room_players',filter:'room_id=eq.'+id},renderRoom)
-    .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+id},renderRoom)
-    .on('postgres_changes',{event:'*',schema:'public',table:'room_hands',filter:'room_id=eq.'+id},renderHand)
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(120))
+    .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+id},()=>scheduleRoomRefresh(120))
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_hands',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(80))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+id},p=>addMessage(p.new))
-    .on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+id},renderRoom)
+    .on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(80))
     .subscribe();
   await renderRoom();
 }
 async function renderRoom(){
   if(!currentRoom||!user)return;
+  if(roomRenderBusy){roomRenderQueued=true;return}
+  roomRenderBusy=true;
   const roomId=currentRoom,version=++roomRenderVersion;
-  const [roomRes,playersRes]=await Promise.all([
-    sb.from('rooms').select('*').eq('id',roomId).single(),
-    sb.from('room_players').select('user_id,seat_no,table_chips,ready,last_seen_at,disconnected_at,profiles(nickname,chips,avatar_key,frame_key,win_streak,is_bot)').eq('room_id',roomId)
-  ]);
-  if(version!==roomRenderVersion||currentRoom!==roomId)return;
-  if(roomRes.error||playersRes.error){
-    console.warn('TRYNKA room refresh skipped',roomRes.error||playersRes.error);
-    document.dispatchEvent(new CustomEvent('trynka:room-render-error',{detail:{roomId,message:(roomRes.error||playersRes.error)?.message||'refresh failed'}}));
-    return;
-  }
-  const r=roomRes.data,ps=playersRes.data||[];
-  if(!r)return leaveRoom();
-  const mineMember=ps.some(p=>p.user_id===user.id);
-  if(mineMember&&spectatorMode)setSpectatorMode(false);
-  $('roomTitle').textContent=r.name;
-  renderSeats(r,ps);
-  renderGameState(r,ps);
-  await renderRound(r,ps,version);
-  if(version!==roomRenderVersion||currentRoom!==roomId)return;
-  if(messagesLoadedRoom!==currentRoom){
-    const {data:ms}=await sb.from('messages').select('*,profiles(nickname)').eq('room_id',currentRoom).order('created_at').limit(50);
+  try{
+    const {data:snapshot,error}=await sb.rpc('get_room_game_snapshot',{p_room:roomId});
     if(version!==roomRenderVersion||currentRoom!==roomId)return;
-    $('messages').innerHTML='';(ms||[]).forEach(addMessage);messagesLoadedRoom=currentRoom;
+    if(error||!snapshot?.room){
+      console.warn('TRYNKA room snapshot skipped',error);
+      document.dispatchEvent(new CustomEvent('trynka:room-render-error',{detail:{roomId,message:error?.message||'snapshot failed'}}));
+      return;
+    }
+
+    const r=snapshot.room;
+    const ps=(snapshot.players||[]).map(p=>({
+      user_id:p.user_id,
+      seat_no:p.seat_no,
+      table_chips:p.table_chips,
+      ready:p.ready,
+      last_seen_at:p.last_seen_at,
+      game_heartbeat_at:p.game_heartbeat_at,
+      disconnected_at:p.disconnected_at,
+      profiles:{
+        nickname:p.nickname,
+        chips:p.chips,
+        avatar_key:p.avatar_key,
+        frame_key:p.frame_key,
+        win_streak:p.win_streak,
+        is_bot:p.is_bot
+      }
+    }));
+
+    window.TRYNKA_GAME_STATE=snapshot;
+    document.dispatchEvent(new CustomEvent('trynka:room-snapshot',{detail:snapshot}));
+
+    const mineMember=ps.some(p=>p.user_id===user.id);
+    if(mineMember&&spectatorMode)setSpectatorMode(false);
+    $('roomTitle').textContent=r.name||'Стіл';
+    renderSeats(r,ps);
+    renderGameState(r,ps);
+    await renderRound(r,ps,version,snapshot);
+    if(version!==roomRenderVersion||currentRoom!==roomId)return;
+
+    if(messagesLoadedRoom!==currentRoom){
+      const {data:ms}=await sb.from('messages')
+        .select('*,profiles(nickname)')
+        .eq('room_id',currentRoom)
+        .order('created_at',{ascending:false})
+        .limit(50);
+      if(version!==roomRenderVersion||currentRoom!==roomId)return;
+      $('messages').innerHTML='';
+      [...(ms||[])].reverse().forEach(addMessage);
+      messagesLoadedRoom=currentRoom;
+    }
+
+    await renderHand(r,snapshot);
+    if(version!==roomRenderVersion||currentRoom!==roomId)return;
+
+    const finishedRoundId=snapshot.round?.status==='finished'?snapshot.round?.id:null;
+    const forceHistory=!!finishedRoundId&&finishedRoundId!==lastHistoryRoundId;
+    if(finishedRoundId)lastHistoryRoundId=finishedRoundId;
+    await renderTableHistory(forceHistory);
+  }finally{
+    roomRenderBusy=false;
+    if(roomRenderQueued){
+      roomRenderQueued=false;
+      if(currentRoom===roomId)setTimeout(()=>renderRoom(),0);
+    }
   }
-  await renderHand(r);
-  if(version!==roomRenderVersion||currentRoom!==roomId)return;
-  await renderTableHistory();
 }
 window.TRYNKA_FORCE_RENDER=renderRoom;
 function positionOwnHandNearSeat(){
@@ -628,21 +672,67 @@ function renderGameState(r,ps){
   $('countdown').textContent='Гра почалась';
   $('turnStatus').textContent='Карти роздаються по одній';
 }
-async function renderRound(r,ps,version=roomRenderVersion){const valid=()=>version===roomRenderVersion&&currentRoom===r.id;if(!valid()||!$('gameActions'))return;const {data:gr}=await sb.from('game_rounds').select('*').eq('room_id',currentRoom).order('id',{ascending:false}).limit(1).maybeSingle();if(!valid())return;currentRound=gr;clearInterval(turnTimer);if($('potBig'))$('potBig').textContent=(gr?.result_note==='Свара'&&r.game_status!=='playing'?'БАНК СВАРИ: '+Number(r.carried_pot||gr?.pot||0):'БАНК: '+Number(gr?.pot||0))+' ◉';if($('bankInfo')){const maxBet=Math.max(1,Number(r.ante||1)*100);$('bankInfo').textContent='Ставка: '+Number(gr?.current_bet||r.ante||0)+' ◉ · Макс: '+maxBet+' ◉';}await renderContributions(gr,ps);if(!valid())return;renderRevealShowdown(gr,ps);if(!gr){$('gameActions').classList.add('hide');return}if($('tableRoundLabel'))$('tableRoundLabel').textContent=(gr.is_svara?'СВАРА · ':'Коло ')+(gr.round_no||1);await renderActionLog(gr.id,ps);if(!valid())return;clearInterval(turnTimer);if(gr.status!=='playing'){$('gameActions').classList.add('hide');if(gr.status==='finished'){const winner=ps.find(p=>p.user_id===gr.winner_id);if(r.game_status!=='countdown')$('countdown').textContent=gr.result_note==='Свара'?'СВАРА — ВХІД ЗА ½ БАНКУ':gr.winner_id?(gr.winner_id===user.id?'ВИ ПЕРЕМОГЛИ!':'ПЕРЕМІГ '+(winner?.profiles?.nickname||'ГРАВЕЦЬ')):(gr.result_note||'Роздачу завершено');$('turnStatus').textContent=gr.result_note==='Свара'?'Очікуємо учасників свари':(r.game_status==='countdown'?'Готуємо наступну роздачу':'Очікуємо наступну роздачу');}return}$('gameActions').classList.remove('hide');const turn=ps.find(p=>p.user_id===gr.turn_user_id);$('roundPot').textContent='Банк: '+gr.pot+' ◉';$('roundBet').textContent='Ставка: '+gr.current_bet+' ◉';const mine=gr.turn_user_id===user.id;if(!window.TRYNKA_STABLE_TURN_UI&&$('roundTurn'))$('roundTurn').textContent=mine?'ВАШ ХІД':'ХІД: '+(turn?.profiles?.nickname||'ГРАВЕЦЬ').toUpperCase();document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{let disabled=!mine;const maxBet=Math.max(1,Number(r.ante||1)*100);if(b.dataset.action==='reveal'&&Number(gr.round_no||1)<2)disabled=true;if(b.dataset.action==='raise'&&Number(gr.current_bet||0)>=maxBet)disabled=true;if(b.dataset.action==='dark'&&Number(gr.round_no||1)>2)disabled=true;if(b.dataset.action==='boil'&&ps.filter(p=>p.seat_no!==null).length<2)disabled=true;b.disabled=disabled;if(b.dataset.action==='reveal')b.title=Number(gr.round_no||1)<2?'Вскриття доступне з другого кола':'Якщо не вистачає на повну підтримку, вскриття піде на весь доступний стек, а зайве супернику повернеться';if(b.dataset.action==='raise')b.title='Максимум: '+maxBet+' ◉'})}
-async function renderContributions(gr,ps){if(!$('contributionBoard')||!gr){if($('contributionBoard'))$('contributionBoard').innerHTML='';return}const {data:rps}=await sb.from('round_players').select('user_id,contributed,folded').eq('round_id',gr.id);$('contributionBoard').innerHTML=(rps||[]).map(x=>{const p=ps.find(v=>v.user_id===x.user_id);return '<span class="'+(x.folded?'folded':'')+'">'+esc(p?.profiles?.nickname||'Гравець')+' <b>'+x.contributed+' ◉</b></span>'}).join('')}
+async function renderRound(r,ps,version=roomRenderVersion,snapshot=null){
+  const valid=()=>version===roomRenderVersion&&currentRoom===r.id;
+  if(!valid()||!$('gameActions'))return;
+  const gr=snapshot?.round||null;
+  currentRound=gr;
+  clearInterval(turnTimer);
+  if($('potBig'))$('potBig').textContent=(gr?.result_note==='Свара'&&r.game_status!=='playing'?'БАНК СВАРИ: '+Number(r.carried_pot||gr?.pot||0):'БАНК: '+Number(gr?.pot||0))+' ◉';
+  if($('bankInfo')){
+    const maxBet=Math.max(1,Number(r.ante||1)*100);
+    $('bankInfo').textContent='Ставка: '+Number(gr?.current_bet||r.ante||0)+' ◉ · Макс: '+maxBet+' ◉';
+  }
+  await renderContributions(gr,ps,snapshot?.round_players||[]);
+  if(!valid())return;
+  renderRevealShowdown(gr,ps);
+  if(!gr){$('gameActions').classList.add('hide');return}
+  if($('tableRoundLabel'))$('tableRoundLabel').textContent=(gr.is_svara?'СВАРА · ':'Коло ')+(gr.round_no||1);
+  await renderActionLog(gr.id,ps,snapshot?.latest_actions||[]);
+  if(!valid())return;
+  clearInterval(turnTimer);
+  if(gr.status!=='playing'){
+    $('gameActions').classList.add('hide');
+    if(gr.status==='finished'){
+      const winner=ps.find(p=>p.user_id===gr.winner_id);
+      if(r.game_status!=='countdown')$('countdown').textContent=gr.result_note==='Свара'?'СВАРА — ВХІД ЗА ½ БАНКУ':gr.winner_id?(gr.winner_id===user.id?'ВИ ПЕРЕМОГЛИ!':'ПЕРЕМІГ '+(winner?.profiles?.nickname||'ГРАВЕЦЬ')):(gr.result_note||'Роздачу завершено');
+      $('turnStatus').textContent=gr.result_note==='Свара'?'Очікуємо учасників свари':(r.game_status==='countdown'?'Готуємо наступну роздачу':'Очікуємо наступну роздачу');
+    }
+    return;
+  }
+  $('gameActions').classList.remove('hide');
+  const turn=ps.find(p=>p.user_id===gr.turn_user_id);
+  $('roundPot').textContent='Банк: '+gr.pot+' ◉';
+  $('roundBet').textContent='Ставка: '+gr.current_bet+' ◉';
+  const mine=gr.turn_user_id===user.id;
+  if(!window.TRYNKA_STABLE_TURN_UI&&$('roundTurn'))$('roundTurn').textContent=mine?'ВАШ ХІД':'ХІД: '+(turn?.profiles?.nickname||'ГРАВЕЦЬ').toUpperCase();
+  document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
+    let disabled=!mine;
+    const maxBet=Math.max(1,Number(r.ante||1)*100);
+    if(b.dataset.action==='reveal'&&Number(gr.round_no||1)<2)disabled=true;
+    if(b.dataset.action==='raise'&&Number(gr.current_bet||0)>=maxBet)disabled=true;
+    if(b.dataset.action==='dark'&&Number(gr.round_no||1)>2)disabled=true;
+    if(b.dataset.action==='boil'&&ps.filter(p=>p.seat_no!==null).length<2)disabled=true;
+    b.disabled=disabled;
+    if(b.dataset.action==='reveal')b.title=Number(gr.round_no||1)<2?'Вскриття доступне з другого кола':'Якщо не вистачає на повну підтримку, вскриття піде на весь доступний стек, а зайве супернику повернеться';
+    if(b.dataset.action==='raise')b.title='Максимум: '+maxBet+' ◉';
+  });
+}
+async function renderContributions(gr,ps,rps=[]){if(!$('contributionBoard')||!gr){if($('contributionBoard'))$('contributionBoard').innerHTML='';return}$('contributionBoard').innerHTML=(rps||[]).map(x=>{const p=ps.find(v=>v.user_id===x.user_id);return '<span class="'+(x.folded?'folded':'')+'">'+esc(p?.profiles?.nickname||'Гравець')+' <b>'+x.contributed+' ◉</b></span>'}).join('')}
 function renderRevealShowdown(gr,ps){
   const box=$('revealShowdown');
   if(!box)return;
   box.classList.add('hide');
   box.innerHTML='';
 }
-async function renderActionLog(roundId,ps){if(!$('tableActionLog'))return;const {data:a}=await sb.from('round_actions').select('id,user_id,action,amount,created_at,profiles(nickname)').eq('round_id',roundId).order('created_at',{ascending:false}).limit(5);const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'час вийшов — автоматично впав'};$('tableActionLog').innerHTML=(a||[]).map(x=>'<div class="actionLogRow"><b>'+esc(x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';const x=(a||[])[0],flash=$('lastActionFlash');if(x&&flash&&x.action!=='ante'){const paid=x.action==='call'||x.action==='raise';flash.innerHTML='<b>'+esc(x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';flash.classList.remove('hide');if(lastActionId!==x.id){lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop')}}}
+async function renderActionLog(roundId,ps,a=[]){if(!$('tableActionLog'))return;const rows=(a||[]).slice(0,5);const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'час вийшов — автоматично впав'};$('tableActionLog').innerHTML=rows.map(x=>'<div class="actionLogRow"><b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';const x=rows[0],flash=$('lastActionFlash');if(x&&flash&&x.action!=='ante'){const paid=x.action==='call'||x.action==='raise';flash.innerHTML='<b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';flash.classList.remove('hide');if(lastActionId!==x.id){lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop')}}}
 async function doGameAction(action){
   if(!currentRoom||spectatorMode||gameActionBusy)return;
   let raiseTo=null;
 
   if(action==='raise'){
-    const {data:r}=await sb.from('rooms').select('ante').eq('id',currentRoom).single();
+    const cachedRoom=window.TRYNKA_GAME_STATE?.room;
+    const r=cachedRoom||((await sb.from('rooms').select('ante').eq('id',currentRoom).single()).data);
     const current=Number(currentRound?.current_bet||r?.ante||0);
     const maxBet=Math.max(1,Number(r?.ante||1)*100);
     const suggested=Math.min(maxBet,Math.max(current+1,current*2));
@@ -673,10 +763,11 @@ async function doGameAction(action){
   }
 }
 document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.onclick=()=>doGameAction(b.dataset.action));
-async function renderHand(roomArg){
+async function renderHand(roomArg,snapshotArg=null){
   if(!currentRoom)return;
   if(spectatorMode){$('myHand').innerHTML='';lastHandPaint='';return;}
-  const r=roomArg?.id?roomArg:(await sb.from('rooms').select('*').eq('id',currentRoom).single()).data;
+  const snapshot=snapshotArg||window.TRYNKA_GAME_STATE||null;
+  const r=roomArg?.id?roomArg:snapshot?.room||((await sb.from('rooms').select('*').eq('id',currentRoom).single()).data);
   if(!r||r.game_status!=='playing'){
     $('myHand').innerHTML='';
     lastHandPaint='';handPullKey='';handPullY=[0,0,0];
@@ -685,11 +776,15 @@ async function renderHand(roomArg){
     return;
   }
 
-  const {data:h}=await sb.from('room_hands').select('cards').eq('room_id',currentRoom).eq('user_id',user.id).maybeSingle();
-  if(!h?.cards?.length)return;
+  let cards=Array.isArray(snapshot?.my_hand)?snapshot.my_hand:null;
+  if(!cards){
+    const {data:h}=await sb.from('room_hands').select('cards').eq('room_id',currentRoom).eq('user_id',user.id).maybeSingle();
+    cards=h?.cards||[];
+  }
+  if(!cards?.length)return;
   clearInterval(dealTimer);
 
-  const dealKey=currentRoom+'|'+(r.deal_started_at||'')+'|'+h.cards.join('|');
+  const dealKey=currentRoom+'|'+(r.deal_started_at||'')+'|'+cards.join('|');
   if(dealKey!==handPullKey){
     handPullKey=dealKey;
     handPullY=[0,0,0];
@@ -706,7 +801,7 @@ async function renderHand(roomArg){
   if(lastHandPaint===paintKey&&$('myHand')?.querySelectorAll('.pullCard').length===visible)return;
   lastHandPaint=paintKey;
 
-  $('myHand').innerHTML=h.cards.slice(0,visible).map((c,i)=>
+  $('myHand').innerHTML=cards.slice(0,visible).map((c,i)=>
     '<div class="card pullCard '+(/[♠♣]/.test(c)?'black ':'')+'" data-card-index="'+i+'">'+
       '<span class="cardFace">'+esc(c)+'</span>'+
       '<div class="cardCover"><i>♠</i><small>ПОТЯГНИ КАРТУ</small></div>'+
@@ -783,7 +878,7 @@ async function renderHand(roomArg){
   const trail=$('dealTrail');
   if(trail){trail.classList.remove('dealing');trail.innerHTML=''}
 }
-async function renderTableHistory(){if(!$('tableGameHistory')||!user)return;const {data:g}=await sb.from('game_history').select('room_name,result,pot,chip_change,finished_at').order('finished_at',{ascending:false}).limit(8);$('tableGameHistory').innerHTML=(g||[]).map(x=>{const label=x.result==='win'?'Перемога':x.result==='loss'?'Поразка':x.result==='draw'?'Свара':'Скасовано',cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';return '<div class="sideHistoryRow"><span class="resultDot '+cls+'"></span><div><b>'+label+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</small></div><strong class="'+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉</strong></div>'}).join('')||'<div class="sideHistoryEmpty">Зіграні партії<br>з’являться тут</div>'}
+async function renderTableHistory(force=false){if(!$('tableGameHistory')||!user)return;if(!force&&Date.now()-lastTableHistoryAt<30000)return;lastTableHistoryAt=Date.now();const {data:g}=await sb.from('game_history').select('room_name,result,pot,chip_change,finished_at').eq('player_id',user.id).order('finished_at',{ascending:false}).limit(8);$('tableGameHistory').innerHTML=(g||[]).map(x=>{const label=x.result==='win'?'Перемога':x.result==='loss'?'Поразка':x.result==='draw'?'Свара':'Скасовано',cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';return '<div class="sideHistoryRow"><span class="resultDot '+cls+'"></span><div><b>'+label+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</small></div><strong class="'+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉</strong></div>'}).join('')||'<div class="sideHistoryEmpty">Зіграні партії<br>з’являться тут</div>'}
 async function leaveRoom(){++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;if(spectatorMode)await sb.rpc('unwatch_room',{p_room:rid});else await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null;spectatorMode=false}if(channel){await sb.removeChannel(channel);channel=null}syncSpectatorUi();show('lobby');await refreshLobby()}
 $('leaveRoom').onclick=leaveRoom;
 $('chatForm').onsubmit=async e=>{e.preventDefault();const body=$('chatInput').value.trim();if(!body)return;const {error}=await sb.rpc('send_chat_message',{p_room:currentRoom,p_body:body});if(error)return alert(error.message);$('chatInput').value=''}
@@ -792,7 +887,8 @@ $('friendForm').onsubmit=async e=>{e.preventDefault();const n=$('friendNick').va
 async function refreshFriends(){const {data}=await sb.from('friends').select('friend_id,profiles!friends_friend_id_fkey(nickname)').eq('user_id',user.id);const list=(data||[]).filter(f=>!window.TRYNKA_BLOCKED_USERS?.has?.(f.friend_id));$('friends').innerHTML=list.map(f=>'<div class="friend">● <b>'+esc(f.profiles.nickname)+'</b></div>').join('')||'<p>Друзів ще немає.</p>'}
 $('inviteBtn').onclick=async()=>{const {data}=await sb.from('friends').select('friend_id,profiles!friends_friend_id_fkey(nickname)').eq('user_id',user.id);$('inviteFriends').innerHTML='';(data||[]).filter(f=>!window.TRYNKA_BLOCKED_USERS?.has?.(f.friend_id)).forEach(f=>{const b=document.createElement('button');b.textContent='Запросити '+f.profiles.nickname;b.onclick=async()=>{await sb.from('invites').insert({room_id:currentRoom,from_user:user.id,to_user:f.friend_id});b.disabled=true;b.textContent='Запрошено ✓'};$('inviteFriends').appendChild(b)});$('inviteDialog').showModal()}
 async function refreshInvites(){const {data}=await sb.from('invites').select('id,room_id,from_user,profiles!invites_from_user_fkey(nickname),rooms(name)').eq('to_user',user.id).eq('status','pending');$('invites').innerHTML='';(data||[]).filter(i=>!window.TRYNKA_BLOCKED_USERS?.has?.(i.from_user)).forEach(i=>{const d=document.createElement('div');d.className='invite';d.innerHTML='<b>'+esc(i.profiles.nickname)+'</b> запрошує: '+esc(i.rooms?.name||'стіл')+' ';const b=document.createElement('button');b.textContent='Прийняти';b.onclick=async()=>{await sb.from('invites').update({status:'accepted'}).eq('id',i.id);const {error}=await sb.rpc('secure_join_room',{p_room:i.room_id});if(error)return alert(error.message);await openRoom(i.room_id)};d.appendChild(b);$('invites').appendChild(d)});if(!$('invites').children.length)$('invites').innerHTML='<p>Немає нових.</p>'}
-function subscribeLobby(){if(lobbyChannel)sb.removeChannel(lobbyChannel);lobbyChannel=sb.channel('lobby-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'rooms'},refreshLobby).on('postgres_changes',{event:'*',schema:'public',table:'room_players'},refreshLobby).on('postgres_changes',{event:'INSERT',schema:'public',table:'invites',filter:'to_user=eq.'+user.id},refreshInvites).subscribe()}
+function scheduleLobbyRefresh(){clearTimeout(lobbyRefreshTimer);lobbyRefreshTimer=setTimeout(()=>{if(!$('lobby')?.classList.contains('hide'))refreshLobby()},800)}
+function subscribeLobby(){if(lobbyChannel)sb.removeChannel(lobbyChannel);lobbyChannel=sb.channel('lobby-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'rooms'},scheduleLobbyRefresh).on('postgres_changes',{event:'*',schema:'public',table:'room_players'},scheduleLobbyRefresh).on('postgres_changes',{event:'INSERT',schema:'public',table:'invites',filter:'to_user=eq.'+user.id},refreshInvites).subscribe()}
 $('contactAdmin').onclick=()=>$('adminDialog').showModal();$('closeAdminDialog').onclick=()=>$('adminDialog').close();$('adminRequestForm').onsubmit=async e=>{e.preventDefault();const {error}=await sb.rpc('create_chip_request',{p_amount:+$('chipAmount').value,p_message:$('adminRequestText').value.trim()});if(error)return alert(error.message);$('adminDialog').close();alert('Заявку надіслано адміну ✓')}
 async function refreshAdminPanel(){if(!profile)return;const {data:isAdmin}=await sb.rpc('is_admin');if(!isAdmin){$('adminPanel').classList.add('hide');return}$('adminPanel').classList.remove('hide');const {data}=await sb.from('chip_requests').select('id,user_id,amount,message,profiles(nickname)').eq('status','pending').order('created_at');$('chipRequests').innerHTML='';(data||[]).forEach(r=>{const d=document.createElement('div');d.className='invite';d.innerHTML='<b>'+esc(r.profiles?.nickname||'Гравець')+'</b> — '+r.amount+' ◉ ';const b=document.createElement('button');b.textContent='Нарахувати';b.onclick=async()=>{const {error}=await sb.rpc('grant_virtual_chips',{target_user:r.user_id,chip_amount:r.amount,request_id:r.id});if(error)return alert(error.message);refreshAdminPanel()};d.appendChild(b);$('chipRequests').appendChild(d)});if(!$('chipRequests').children.length)$('chipRequests').innerHTML='<p>Нових заявок немає.</p>';await refreshSecurityAdmin();await refreshAdminRooms()}
 async function reportPlayer(id,nick){const reason=prompt('Причина скарги на '+nick+':');if(!reason)return;const {error}=await sb.rpc('report_player',{p_reported:id,p_room:currentRoom,p_reason:reason});alert(error?error.message:'Скаргу надіслано адміну ✓')}
