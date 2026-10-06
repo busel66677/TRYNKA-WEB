@@ -994,3 +994,10 @@
 #game .seatState.foldedContribution{opacity:.62;color:#c7c7c7!important;border-color:#7778}
 #game #roundBet{font-weight:900!important;color:#f4dc75!important}
 @media(max-width:800px){#game .seatState.hasContribution{font-size:7px!important;padding:2px 4px!important;margin-top:2px!important}#game #roundBet{font-size:8px!important}}
+
+/* v83 unmistakable per-player bet badges */
+#game .betBadge{display:inline-flex!important;align-items:center;justify-content:center;gap:3px;margin-top:4px;padding:4px 8px;border-radius:8px;background:#e6c34f;color:#171006;font-size:10px;font-weight:900;line-height:1;white-space:nowrap;box-shadow:0 3px 10px #0009;border:1px solid #fff4a866}
+#game .betBadge b{font-size:13px;color:#171006}
+#game .betBadge.hide{display:none!important}
+#game .betBadge.foldedBet{background:#4b5052;color:#fff;opacity:.78}#game .betBadge.foldedBet b{color:#fff}
+@media(max-width:800px){#game .betBadge{font-size:8px!important;padding:3px 5px!important;margin-top:2px!important}#game .betBadge b{font-size:11px!important}}
