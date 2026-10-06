@@ -596,3 +596,107 @@
   #game .premiumMoreBtn{margin-left:2px}
   #game .premiumGameMenu{right:0}
 }
+
+
+/* v79 mobile hand safe zone */
+@media(max-width:650px){
+  #game .centerInfo{
+    top:42%!important;
+  }
+
+  /* Reserve three separate layers: cards, local seat, action panel. */
+  #game .seat.p0{
+    bottom:120px!important;
+  }
+  #game .seat.p1,
+  #game .seat.p7{
+    bottom:126px!important;
+  }
+  #game .hand{
+    left:50%!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:180px!important;
+    transform:translateX(-50%)!important;
+    z-index:78!important;
+  }
+
+  #game .gameActions{
+    bottom:5px!important;
+    padding:4px!important;
+    width:calc(100% - 16px)!important;
+    z-index:105!important;
+  }
+  #game .roundMeta{
+    grid-template-columns:1fr!important;
+    margin-bottom:3px!important;
+  }
+  #game #roundPot,
+  #game #roundBet{
+    display:none!important;
+  }
+  #game #roundTurn{
+    width:100%!important;
+    box-sizing:border-box!important;
+    text-align:center!important;
+    padding:3px 6px!important;
+    font-size:7px!important;
+    line-height:10px!important;
+  }
+  #game .supportSummary{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:3px!important;
+    margin:0 0 4px!important;
+  }
+  #game .supportSummary>span{
+    min-height:29px!important;
+    padding:3px 2px!important;
+    border-radius:7px!important;
+    font-size:5.5px!important;
+    line-height:7px!important;
+  }
+  #game .supportSummary b{
+    margin-top:1px!important;
+    font-size:8px!important;
+    line-height:9px!important;
+  }
+  #game .supportSummary .supportNeed small{
+    display:none!important;
+  }
+  #game .actionButtons{
+    gap:3px!important;
+  }
+  #game .actionButtons button{
+    min-height:31px!important;
+    padding:3px 2px!important;
+    font-size:7px!important;
+    line-height:9px!important;
+  }
+}
+
+@media(max-width:390px){
+  #game .centerInfo{
+    top:41.5%!important;
+  }
+  #game .seat.p0{
+    bottom:115px!important;
+  }
+  #game .seat.p1,
+  #game .seat.p7{
+    bottom:120px!important;
+  }
+  #game .hand{
+    bottom:172px!important;
+  }
+  #game .gameActions{
+    padding:4px!important;
+    bottom:4px!important;
+  }
+  #game .supportSummary>span{
+    min-height:28px!important;
+    font-size:5px!important;
+  }
+  #game .supportSummary b{
+    font-size:7.5px!important;
+  }
+}
