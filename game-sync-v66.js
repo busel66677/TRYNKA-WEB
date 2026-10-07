@@ -63,7 +63,19 @@ async function joinSvara(){
   const b=bar?.querySelector('button');if(b)b.disabled=true;
   try{
     const {error}=await sb.rpc('join_svara',{p_room:rid});
-    if(error)throw error;
+    if(error){
+      if(/Not at this table/i.test(error.message||'')){
+        if(roomId()===rid){
+          window.currentRoom=null;
+          try{localStorage.removeItem('currentRoom')}catch{}
+          window.showLobby?.();
+        }
+        consecutiveErrors=0;
+        setConnectionState(true);
+        return;
+      }
+      throw error;
+    }
     await sync(true);
   }catch(e){
     alert(e?.message||'Не вдалося увійти у свару');
@@ -103,7 +115,11 @@ function patchCritical(s){
   if(!g)return;
   if(!s?.svara&&$('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
   if($('roundPot'))$('roundPot').textContent='Банк: '+Number(g.pot||0)+' ◉';
-  if($('roundBet'))$('roundBet').textContent='Ставка: '+Number(g.current_bet||r.ante||0)+' ◉';
+  if($('roundBet')){
+    const mineBet=(s.round_players||[]).find(x=>x.user_id===me?.id);
+    const toCall=Math.max(0,Number(g.current_bet||0)-Number(mineBet?.contributed||0));
+    $('roundBet').textContent='Ставка: '+Number(g.current_bet||r.ante||0)+' ◉ · Вам дати: '+toCall+' ◉';
+  }
   if($('tableRoundLabel'))$('tableRoundLabel').textContent=(g.is_svara?'СВАРА · ':'Коло ')+Number(g.round_no||1);
   const mine=(s.round_players||[]).find(x=>x.user_id===me?.id);
   const canPlay=g.status==='playing'&&mine&&!mine.folded;
