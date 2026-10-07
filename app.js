@@ -294,7 +294,31 @@ $('registerForm').onsubmit=async e=>{e.preventDefault();const email=$('regEmail'
 $('loginForm').onsubmit=async e=>{e.preventDefault();const wait=loginWaitSeconds();if(wait>0)return alert('Забагато невдалих спроб. Спробуй ще раз через '+wait+' с.');const email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){const delay=noteLoginFailure();await new Promise(r=>setTimeout(r,700));return alert('Не вдалося увійти. Перевір дані та підтвердження пошти.'+(delay?' Наступна спроба через '+delay+' с.':''))}clearLoginGuard();user=data.user;let {data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();if(!p)await sb.from('profiles').upsert({id:user.id,nickname:user.user_metadata?.nickname||email.split('@')[0].slice(0,20)});await acceptSession(data.session,{restore:false})};
 $('logoutBtn').onclick=async()=>{if(currentRoom)await leaveRoom();clearInterval(heartbeat);clearInterval(lobbyPollTimer);clearNavState();await sb.auth.signOut();user=profile=null;$('logoutBtn').classList.add('hide');$('profileBtn').classList.add('hide');$('me').textContent='Гість';show('login')};
 async function loadProfile(){const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();profile=data;if(!profile)return;const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){await sb.auth.signOut();alert('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));show('login');return;} $('me').textContent=profile.nickname;$('logoutBtn').classList.remove('hide');$('profileBtn').classList.remove('hide');await pingOnline();clearInterval(heartbeat);heartbeat=setInterval(pingOnline,30000);clearInterval(lobbyPollTimer);lobbyPollTimer=setInterval(()=>{if(!$('lobby')?.classList.contains('hide'))refreshLobby()},12000);show('lobby');ensureLobbySupport();await refreshLobby();await Promise.all([refreshFriends(),refreshInvites()]);await refreshAdminPanel();subscribeLobby()}
-async function pingOnline(){if(user)await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id)}
+let moderationCheckBusy=false;
+async function forceSessionExit(message){
+  clearTimeout(roomRefreshTimer);clearInterval(heartbeat);clearInterval(lobbyPollTimer);
+  if(channel){try{await sb.removeChannel(channel)}catch{} channel=null}
+  currentRoom=null;currentRound=null;window.TRYNKA_GAME_STATE=null;clearNavState();
+  if(message)alert(message);
+  await sb.auth.signOut();
+}
+async function checkLiveModeration(){
+  if(!user||moderationCheckBusy)return false;
+  moderationCheckBusy=true;
+  try{
+    const {data:mod}=await sb.from('player_moderation').select('banned_until,reason').eq('user_id',user.id).maybeSingle();
+    if(mod?.banned_until&&new Date(mod.banned_until)>new Date()){
+      await forceSessionExit('Акаунт тимчасово заблоковано'+(mod.reason?'\nПричина: '+mod.reason:''));
+      return true;
+    }
+    return false;
+  }finally{moderationCheckBusy=false}
+}
+async function pingOnline(){
+  if(!user)return;
+  if(await checkLiveModeration())return;
+  await sb.from('profiles').update({online_at:new Date().toISOString()}).eq('id',user.id);
+}
 $('profileBtn').onclick=async()=>{await renderProfile();show('profile')};document.querySelectorAll('.toLobby').forEach(b=>b.onclick=async()=>{
   const {data:activeSeat}=await sb.from('room_players')
     .select('room_id,seat_no')
@@ -483,7 +507,17 @@ async function renderRoom(){
     if(version!==roomRenderVersion||currentRoom!==roomId)return;
     if(error||!snapshot?.room){
       console.warn('TRYNKA room snapshot skipped',error);
-      document.dispatchEvent(new CustomEvent('trynka:room-render-error',{detail:{roomId,message:error?.message||'snapshot failed'}}));
+      const msg=String(error?.message||'');
+      if(msg.includes('Not at this table')||(!error&&!snapshot?.room)){
+        clearTimeout(roomRefreshTimer);
+        if(channel){try{await sb.removeChannel(channel)}catch{} channel=null}
+        currentRoom=null;currentRound=null;window.TRYNKA_GAME_STATE=null;clearNavState();
+        show('lobby');
+        await refreshLobby();
+        alert('Вас видалено зі столу.');
+        return;
+      }
+      document.dispatchEvent(new CustomEvent('trynka:room-render-error',{detail:{roomId,message:msg||'snapshot failed'}}));
       return;
     }
 
