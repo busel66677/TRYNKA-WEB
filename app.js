@@ -691,19 +691,13 @@ function renderGameState(r,ps){
   const seated=ps.filter(p=>p.seat_no!==null).length;
   const mineSeated=ps.some(p=>p.user_id===user.id&&p.seat_no!==null);
   if(r.game_status==='waiting'){
-    if(seated>=2){
-      $('countdown').textContent='Готуємо роздачу…';
-      $('turnStatus').textContent='Старт автоматично';
-    }else if(mineSeated){
-      $('countdown').textContent='Очікуємо суперника';
-      $('turnStatus').textContent='Гра почнеться, коли сяде ще один гравець';
-    }else if(spectatorMode){
-      $('countdown').textContent='Очікуємо гравців';
-      $('turnStatus').textContent='Ви спостерігаєте за столом';
-    }else{
-      $('countdown').textContent='Оберіть місце';
-      $('turnStatus').textContent='Сядьте за стіл, щоб почати гру';
+    if(seated<2){
+      $('countdown').textContent='';
+      $('turnStatus').textContent='';
+      return;
     }
+    $('countdown').textContent='Готуємо роздачу…';
+    $('turnStatus').textContent='Старт автоматично';
     return;
   }
   if(r.game_status==='countdown'){
@@ -721,8 +715,27 @@ async function renderRound(r,ps,version=roomRenderVersion,snapshot=null){
   const valid=()=>version===roomRenderVersion&&currentRoom===r.id;
   if(!valid()||!$('gameActions'))return;
   const gr=snapshot?.round||null;
+  const seatedCount=ps.filter(p=>p.seat_no!==null).length;
+  const idleSingle=r.game_status==='waiting'&&seatedCount<2;
   currentRound=gr;
   clearInterval(turnTimer);
+
+  if(idleSingle){
+    currentRound=null;
+    $('gameActions')?.classList.add('hide');
+    if($('potBig'))$('potBig').textContent='БАНК: 0 ◉';
+    if($('bankInfo'))$('bankInfo').textContent='';
+    if($('countdown'))$('countdown').textContent='';
+    if($('turnStatus'))$('turnStatus').textContent='';
+    if($('tableRoundLabel'))$('tableRoundLabel').textContent='';
+    if($('roundTurn'))$('roundTurn').textContent='';
+    if($('lastActionFlash')){$('lastActionFlash').classList.add('hide');$('lastActionFlash').innerHTML=''}
+    if($('tableActionLog'))$('tableActionLog').innerHTML='';
+    await renderContributions(null,ps,[]);
+    renderRevealShowdown();
+    return;
+  }
+
   if($('potBig'))$('potBig').textContent=(gr?.result_note==='Свара'&&r.game_status!=='playing'?'БАНК СВАРИ: '+Number(r.carried_pot||gr?.pot||0):'БАНК: '+Number(gr?.pot||0))+' ◉';
   if($('bankInfo')){
     const maxBet=Math.max(1,Number(r.ante||1)*100);
