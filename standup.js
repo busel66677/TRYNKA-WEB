@@ -229,30 +229,35 @@ function updateSupportUi(g,ps,r,mySeat){
 }
 
 function paintOpenHands(rows){
-  const sig=JSON.stringify((rows||[]).map(r=>[r.user_id,r.seat_no,r.cards]).sort((a,b)=>a[1]-b[1]));
-  const count=document.querySelectorAll('#seats .openHand').length;
-  if(sig===lastOpenState&&count===(rows||[]).length)return;
-  lastOpenState=sig;
-
+  const dock=$('revealDock');
+  const cardDock=$('cardDock');
   document.querySelectorAll('#seats .openHand').forEach(x=>x.remove());
   document.querySelectorAll('#seats .seat.revealPairSeat').forEach(x=>x.classList.remove('revealPairSeat'));
+  if(!dock)return;
 
-  for(const r of rows||[]){
-    const seat=document.querySelector('#seats .seat[data-user-id="'+CSS.escape(String(r.user_id))+'"]')||
-      document.querySelector('#seats .seat[data-seat-no="'+r.seat_no+'"]');
-    if(!seat||!r.cards?.length)continue;
-    seat.classList.add('revealPairSeat');
-    const box=document.createElement('div');
-    box.className='openHand revealHand';
-    box.setAttribute('aria-label','Відкриті карти');
-    for(const card of r.cards){
-      const cardEl=document.createElement('b');
-      cardEl.textContent=card;
-      if(card.includes('♥')||card.includes('♦'))cardEl.classList.add('red');
-      box.appendChild(cardEl);
-    }
-    seat.appendChild(box);
+  const clean=(rows||[]).filter(r=>Array.isArray(r.cards)&&r.cards.length);
+  const sig=JSON.stringify(clean.map(r=>[r.user_id,r.nickname,r.cards]));
+  if(sig===lastOpenState&&dock.querySelectorAll('.revealDockRow').length===clean.length)return;
+  lastOpenState=sig;
+
+  if(!clean.length){
+    dock.innerHTML='';
+    dock.classList.add('hide');
+    cardDock?.classList.remove('revealMode');
+    return;
   }
+
+  dock.innerHTML=clean.map(r=>
+    '<div class="revealDockRow">'+
+      '<span>'+escapeHtml(r.user_id===me?.id?'ВИ':(r.nickname||'СУПЕРНИК'))+'</span>'+
+      '<div class="revealDockCards">'+r.cards.map(card=>
+        '<b class="'+((card.includes('♥')||card.includes('♦'))?'red':'')+'">'+escapeHtml(card)+'</b>'
+      ).join('')+'</div>'+
+    '</div>'
+  ).join('');
+  dock.classList.remove('hide');
+  cardDock?.classList.remove('hide');
+  cardDock?.classList.add('revealMode');
 }
 async function syncUi(){
   if(busy||$('game')?.classList.contains('hide'))return;
@@ -309,6 +314,7 @@ function applyCentralState(state){
     paintSeats([],null,null,presence);
     if($('supportSummary'))$('supportSummary').innerHTML='';
     $('myHand')?.classList.remove('handRevealed');
+    $('cardDock')?.classList.add('hide');
     return;
   }
 
@@ -347,8 +353,10 @@ function applyCentralState(state){
     const targetCards=Array.isArray(g.reveal_cards)&&g.reveal_cards.length
       ?g.reveal_cards
       :(me?.id===g.reveal_target&&Array.isArray(state.my_hand)?state.my_hand:[]);
-    if(actor&&actorCards.length)openRows.push({user_id:actor.user_id,seat_no:actor.seat_no,cards:actorCards});
-    if(target&&targetCards.length)openRows.push({user_id:target.user_id,seat_no:target.seat_no,cards:targetCards});
+    const actorPresence=presence.find(p=>p.user_id===actor?.user_id);
+    const targetPresence=presence.find(p=>p.user_id===target?.user_id);
+    if(actor&&actorCards.length)openRows.push({user_id:actor.user_id,nickname:actorPresence?.nickname||'',cards:actorCards});
+    if(target&&targetCards.length)openRows.push({user_id:target.user_id,nickname:targetPresence?.nickname||'',cards:targetCards});
   }
   paintOpenHands(openRows);
 
