@@ -269,6 +269,12 @@ async function syncUi(){
       return;
     }
 
+    const central=window.TRYNKA_GAME_STATE;
+    if(central?.room?.id&&Number(central.room.id)===Number(currentRoom)){
+      applyCentralState(central);
+      return;
+    }
+
     const [{data:r},{data:g}]=await Promise.all([
       sb.from('rooms').select('turn_seconds,ante,game_status').eq('id',currentRoom).maybeSingle(),
       sb.from('game_rounds').select('id,status,pot,current_bet,round_no,turn_user_id,turn_started_at,created_at').eq('room_id',currentRoom).order('id',{ascending:false}).limit(1).maybeSingle()
