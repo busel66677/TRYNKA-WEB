@@ -751,13 +751,13 @@ async function renderRound(r,ps,version=roomRenderVersion,snapshot=null){
   $('roundBet').textContent='Ставка: '+gr.current_bet+' ◉';
   const mine=gr.turn_user_id===user.id;
   const myRound=(snapshot?.round_players||[]).find(x=>x.user_id===user.id);
-  const toCall=Math.max(0,Number(gr.current_bet||0)-Number(myRound?.contributed||0));
+  const toCall=Math.max(1,Number(gr.current_bet||r.ante||1));
   const callBtn=document.querySelector('#gameActions button[data-action="call"]');
   if(callBtn){
-    callBtn.textContent=toCall>0?'ДАТИ '+toCall+' ◉':'ПРОПУСТИТИ';
-    callBtn.title=toCall>0?'Потрібно додати '+toCall+' ◉, щоб зрівняти ставку':'Ви вже зрівняли ставку — можна передати хід без доплати';
+    callBtn.textContent='ПІДТРИМАТИ '+toCall+' ◉';
+    callBtn.title='Підтримка завжди вносить поточну ставку: '+toCall+' ◉';
   }
-  if($('roundBet'))$('roundBet').textContent='Ставка: '+Number(gr.current_bet||0)+' ◉ · Вам дати: '+toCall+' ◉';
+  if($('roundBet'))$('roundBet').textContent='Ставка: '+Number(gr.current_bet||r.ante||1)+' ◉ · Підтримати: '+toCall+' ◉';
   if(!window.TRYNKA_STABLE_TURN_UI&&$('roundTurn'))$('roundTurn').textContent=mine?'ВАШ ХІД':'ХІД: '+(turn?.profiles?.nickname||'ГРАВЕЦЬ').toUpperCase();
   document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
     let disabled=!mine;
@@ -784,22 +784,11 @@ async function renderContributions(gr,ps,rps=[]){
     if(x.folded)badge.classList.add('foldedBet');
   }
 }
-function renderRevealShowdown(gr,ps){
+function renderRevealShowdown(){
   const box=$('revealShowdown');
   if(!box)return;
   box.classList.add('hide');
   box.innerHTML='';
-  if(!gr||!user||!gr.reveal_actor||!gr.reveal_target)return;
-  const isActor=gr.reveal_actor===user.id;
-  const isTarget=gr.reveal_target===user.id;
-  if(!isActor&&!isTarget)return;
-  const opponentId=isActor?gr.reveal_target:gr.reveal_actor;
-  const cards=isActor?gr.reveal_cards:gr.reveal_actor_cards;
-  if(!Array.isArray(cards)||!cards.length)return;
-  const opponent=ps.find(p=>p.user_id===opponentId);
-  box.innerHTML='<div class="revealTitle">КАРТИ '+esc((opponent?.profiles?.nickname||'СУПЕРНИКА').toUpperCase())+'</div>'+
-    '<div class="revealCards">'+cards.map(c=>'<div class="card '+(/[♠♣]/.test(c)?'black ':'')+'"><span class="cardFace">'+esc(c)+'</span></div>').join('')+'</div>';
-  box.classList.remove('hide');
 }
 async function renderActionLog(roundId,ps,a=[]){if(!$('tableActionLog'))return;const rows=(a||[]).slice(0,5);const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'час вийшов — автоматично впав'};$('tableActionLog').innerHTML=rows.map(x=>'<div class="actionLogRow"><b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';const x=rows[0],flash=$('lastActionFlash');if(x&&flash&&x.action!=='ante'){const paid=x.action==='call'||x.action==='raise';flash.innerHTML='<b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';flash.classList.remove('hide');if(lastActionId!==x.id){lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop')}}}
 async function doGameAction(action){
@@ -812,7 +801,7 @@ async function doGameAction(action){
     const current=Number(currentRound?.current_bet||r?.ante||0);
     const maxBet=Math.max(1,Number(r?.ante||1)*100);
     const suggested=Math.min(maxBet,Math.max(current+1,current*2));
-    const raw=prompt('До якої ЗАГАЛЬНОЇ ставки підняти?\nПоточна: '+current+' ◉\nМаксимум: '+maxBet+' ◉',String(suggested));
+    const raw=prompt('До якої ставки підняти?\nПоточна: '+current+' ◉\nМаксимум: '+maxBet+' ◉',String(suggested));
     if(raw===null)return;
     raiseTo=Math.trunc(Number(raw));
     if(!raiseTo||raiseTo<=current)return alert('Ставка має бути більшою за '+current+' ◉');
