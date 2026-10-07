@@ -60,6 +60,11 @@ async function touchPresence(){
 
 async function myRoom(){
   const u=await getMe();if(!u)return null;
+  const central=window.TRYNKA_GAME_STATE;
+  if(currentRoom&&central?.room?.id&&Number(central.room.id)===Number(currentRoom)){
+    const mine=(central.players||[]).find(x=>x.user_id===u.id);
+    if(mine)return {room_id:Number(currentRoom),seat_no:mine.seat_no,table_chips:Number(mine.table_chips||0)};
+  }
   try{
     const saved=JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}');
     if(saved.view==='game'&&saved.roomId){
@@ -91,12 +96,40 @@ function mountStand(){
   actions.prepend(b);
   b.addEventListener('click',async()=>{
     if(standing)return;
-    const rp=await myRoom();if(!rp||rp.seat_no==null)return;
-    standing=true;b.disabled=true;b.textContent='Встаємо…';
-    const {error}=await sb.rpc('stand_up_from_table',{p_room:rp.room_id});
-    standing=false;b.disabled=false;b.textContent='↑ Встати';
-    if(error)return alert(error.message);
-    lastSeatState='';lastOpenState='';await syncUi();
+    const rid=Number(currentRoom||window.TRYNKA_GAME_STATE?.room?.id||0);
+    if(!rid){
+      alert('Не вдалося визначити стіл. Оновіть сторінку.');
+      return;
+    }
+    standing=true;
+    b.disabled=true;
+    b.textContent='Встаємо…';
+    try{
+      const {error}=await sb.rpc('stand_up_from_table',{p_room:rid});
+      if(error){
+        alert(error.message);
+        return;
+      }
+      lastSeatState='';
+      lastOpenState='';
+      lastSeated=false;
+      syncStand(false);
+      paintOpenHands([]);
+      const central=window.TRYNKA_GAME_STATE;
+      if(central?.room?.id&&Number(central.room.id)===rid&&Array.isArray(central.players)){
+        const mine=central.players.find(x=>x.user_id===me?.id);
+        if(mine){mine.seat_no=null;mine.table_chips=0}
+      }
+      document.dispatchEvent(new CustomEvent('trynka:stand-up',{detail:{roomId:rid}}));
+      try{await window.TRYNKA_FORCE_RENDER?.()}catch{}
+      await syncUi();
+    }catch(e){
+      alert(e?.message||'Не вдалося встати зі столу');
+    }finally{
+      standing=false;
+      b.disabled=false;
+      b.textContent='↑ Встати';
+    }
   });
 }
 function mountGameInfo(){
