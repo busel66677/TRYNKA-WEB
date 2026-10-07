@@ -1001,3 +1001,9 @@
 #game .betBadge.hide{display:none!important}
 #game .betBadge.foldedBet{background:#4b5052;color:#fff;opacity:.78}#game .betBadge.foldedBet b{color:#fff}
 @media(max-width:800px){#game .betBadge{font-size:8px!important;padding:3px 5px!important;margin-top:2px!important}#game .betBadge b{font-size:11px!important}}
+
+/* final bet display: one clear source */
+#game .seatContribution{display:none!important}
+#game .seat .betBadge{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;max-width:none!important;margin:4px auto 0!important}
+#game .seat .betBadge:not(.hide){display:inline-flex!important}
+@media(max-width:800px){#game .seat .betBadge{margin-top:2px!important;font-size:8px!important}#game .seat .betBadge b{font-size:12px!important}}
