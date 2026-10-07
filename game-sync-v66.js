@@ -111,7 +111,21 @@ function patchSvara(s){
 }
 function patchCritical(s){
   const g=s?.round,r=s?.room;if(!r)return;
+  const seatedCount=(s.players||[]).filter(x=>x.seat_no!=null).length;
+  const idleSingle=!s?.svara&&r.game_status==='waiting'&&seatedCount<2;
   patchSvara(s);
+  if(idleSingle){
+    if($('potBig'))$('potBig').textContent='БАНК: 0 ◉';
+    if($('roundPot'))$('roundPot').textContent='Банк: 0 ◉';
+    if($('roundBet'))$('roundBet').textContent='';
+    if($('tableRoundLabel'))$('tableRoundLabel').textContent='';
+    if($('roundTurn'))$('roundTurn').textContent='';
+    if($('countdown'))$('countdown').textContent='';
+    if($('turnStatus'))$('turnStatus').textContent='';
+    if($('lastActionFlash')){$('lastActionFlash').classList.add('hide');$('lastActionFlash').innerHTML=''}
+    $('gameActions')?.classList.add('hide');
+    return;
+  }
   if(!g)return;
   if(!s?.svara&&$('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
   if($('roundPot'))$('roundPot').textContent='Банк: '+Number(g.pot||0)+' ◉';
@@ -136,7 +150,7 @@ function patchCritical(s){
     document.body.classList.add('chipBalanceWarning');
   }else document.body.classList.remove('chipBalanceWarning');
 }
-function sig(s){const g=s?.round||{},sv=s?.svara||{};return [g.id,g.status,g.turn_user_id,g.turn_started_at,g.round_no,g.current_bet,g.pot,g.is_svara,s?.room?.game_status,s?.room?.carried_pot,sv.source_round_id,sv.entry_fee,sv.closes_at,sv.joined,(sv.members||[]).length].join('|')}
+function sig(s){const g=s?.round||{},sv=s?.svara||{},seated=(s?.players||[]).filter(x=>x.seat_no!=null).length;return [g.id,g.status,g.turn_user_id,g.turn_started_at,g.round_no,g.current_bet,g.pot,g.is_svara,s?.room?.game_status,s?.room?.carried_pot,seated,sv.source_round_id,sv.entry_fee,sv.closes_at,sv.joined,(sv.members||[]).length].join('|')}
 async function sync(force=false){
   if($('game')?.classList.contains('hide'))return;
   if(busy){if(force)syncQueued=true;return}
