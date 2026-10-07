@@ -138,7 +138,6 @@ function paintSeats(ps,turnUser,lastAction=null,presence=[]){
 
   document.querySelectorAll('#seats .seat').forEach(s=>{
     s.classList.remove('turnActive','foldedSeat','lastRaiser','revealPairSeat');
-    s.querySelector('.betBadge')?.remove();
     s.querySelector('.seatActionPop')?.remove();
     s.querySelector('.seatContribution')?.remove();
     s.querySelector('.connectionState')?.remove();
@@ -153,15 +152,17 @@ function paintSeats(ps,turnUser,lastAction=null,presence=[]){
     if(p.user_id===turnUser&&!p.folded)seat.classList.add('turnActive');
 
     const body=seat.querySelector('.seatBody')||seat;
-    let contribution=seat.querySelector('.seatContribution');
+    let contribution=seat.querySelector('.betBadge');
     if(!contribution){
       contribution=document.createElement('div');
-      contribution.className='seatContribution';
+      contribution.className='betBadge hide';
       const state=seat.querySelector('.seatState');
       if(state&&state.parentNode===body)body.insertBefore(contribution,state);else body.appendChild(contribution);
     }
-    contribution.textContent='ДАВ: '+Number(p.contributed||0)+' ◉';
-    contribution.classList.toggle('zero',Number(p.contributed||0)<=0);
+    const paid=Number(p.contributed||0);
+    contribution.innerHTML=(p.folded?'ВПАВ · ДАВ ':'ДАВ ')+'<b>'+paid+'</b> ◉';
+    contribution.classList.toggle('hide',paid<=0);
+    contribution.classList.toggle('foldedBet',!!p.folded);
 
     let connection=seat.querySelector('.connectionState');
     if(!connection){
