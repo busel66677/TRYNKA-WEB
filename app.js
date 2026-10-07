@@ -532,7 +532,17 @@ async function renderRoom(){
     }
 
     const r=snapshot.room;
-    const ps=(snapshot.players||[]).map(p=>({
+    const guard=window.TRYNKA_STANDUP_GUARD;
+    let snapshotPlayers=snapshot.players||[];
+    if(guard&&Number(guard.roomId)===Number(roomId)&&guard.userId===user.id){
+      const serverShowsSeated=snapshotPlayers.some(x=>x.user_id===user.id&&x.seat_no!=null);
+      if(Date.now()<Number(guard.until||0)&&serverShowsSeated){
+        snapshotPlayers=snapshotPlayers.filter(x=>x.user_id!==user.id);
+      }else if(!serverShowsSeated||Date.now()>=Number(guard.until||0)){
+        window.TRYNKA_STANDUP_GUARD=null;
+      }
+    }
+    const ps=snapshotPlayers.map(p=>({
       user_id:p.user_id,
       seat_no:p.seat_no,
       table_chips:p.table_chips,
@@ -651,6 +661,7 @@ async function takeSeat(i,r){
   if(!buyin)return;
   const {error}=await sb.rpc('take_room_seat',{p_room:currentRoom,p_seat:i,p_buyin:buyin});
   if(error)return alert(error.message);
+  window.TRYNKA_STANDUP_GUARD=null;
   const {data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
   if(p)profile=p;
   if($('gameBalance'))$('gameBalance').textContent='Гаманець: ◉ '+Number(profile?.chips||0).toLocaleString('uk-UA');
