@@ -197,7 +197,7 @@ function updateSupportUi(g,ps,r,mySeat){
   const mine=(ps||[]).find(p=>p.user_id===me?.id);
   const contributed=Number(mine?.contributed||0);
   const currentBet=Number(g?.current_bet||0);
-  const need=Math.max(0,currentBet-contributed);
+  const need=Math.max(1,currentBet||Number(r?.ante||1));
   const tableStack=Number(mySeat?.table_chips||0);
   const maxBet=Math.max(1,Number(r?.ante||1)*100);
   const myTurn=g?.status==='playing'&&g.turn_user_id===me?.id&&!mine?.folded;
@@ -212,14 +212,14 @@ function updateSupportUi(g,ps,r,mySeat){
 
   const call=document.querySelector('#gameActions button[data-action="call"]');
   if(call){
-    call.textContent=need>0?'ДАВ '+need+' ◉':'ПІДТРИМАТИ';
+    call.textContent='ПІДТРИМАТИ '+need+' ◉';
     call.dataset.need=String(need);
     call.title=short?'Не вистачає '+(need-tableStack)+' ◉. Для повної підтримки монет недостатньо.':'';
   }
 
   const raise=document.querySelector('#gameActions button[data-action="raise"]');
   if(raise){
-    raise.title='Максимальна загальна ставка: '+maxBet+' ◉';
+    raise.title='Максимальна ставка: '+maxBet+' ◉';
   }
 
   if($('bankInfo')){
@@ -302,6 +302,7 @@ function applyCentralState(state){
 
   if(!g){
     timerState=null;
+    paintOpenHands([]);
     return;
   }
 
@@ -322,6 +323,13 @@ function applyCentralState(state){
   }else{
     timerState=null;
   }
+
+  const openRows=[];
+  const actor=ps.find(p=>p.user_id===g.reveal_actor);
+  const target=ps.find(p=>p.user_id===g.reveal_target);
+  if(actor&&Array.isArray(g.reveal_actor_cards)&&g.reveal_actor_cards.length)openRows.push({user_id:actor.user_id,seat_no:actor.seat_no,cards:g.reveal_actor_cards});
+  if(target&&Array.isArray(g.reveal_cards)&&g.reveal_cards.length)openRows.push({user_id:target.user_id,seat_no:target.seat_no,cards:g.reveal_cards});
+  paintOpenHands(openRows);
 
   const mine=ps.find(p=>p.user_id===me?.id);
   $('myHand')?.classList.toggle('handRevealed',!!mine?.revealed);
