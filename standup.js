@@ -2,6 +2,7 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
 const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
+const dockEsc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
 let me=null,busy=false,standing=false,currentRoom=null;
 let timerState=null,lastSeatState='',lastOpenState='',lastTimerText='',lastSeated=null,lastTurnNoticeKey='',audioCtx=null;
@@ -237,7 +238,7 @@ function paintOpenHands(rows){
 
   const clean=(rows||[]).filter(r=>Array.isArray(r.cards)&&r.cards.length);
   const sig=JSON.stringify(clean.map(r=>[r.user_id,r.nickname,r.cards]));
-  if(sig===lastOpenState&&dock.querySelectorAll('.revealDockRow').length===clean.length)return;
+  if(clean.length&&sig===lastOpenState&&dock.querySelectorAll('.revealDockRow').length===clean.length)return;
   lastOpenState=sig;
 
   if(!clean.length){
@@ -249,9 +250,9 @@ function paintOpenHands(rows){
 
   dock.innerHTML=clean.map(r=>
     '<div class="revealDockRow">'+
-      '<span>'+escapeHtml(r.user_id===me?.id?'ВИ':(r.nickname||'СУПЕРНИК'))+'</span>'+
+      '<span>'+dockEsc(r.user_id===me?.id?'ВИ':(r.nickname||'СУПЕРНИК'))+'</span>'+
       '<div class="revealDockCards">'+r.cards.map(card=>
-        '<b class="'+((card.includes('♥')||card.includes('♦'))?'red':'')+'">'+escapeHtml(card)+'</b>'
+        '<b class="'+((card.includes('♥')||card.includes('♦'))?'red':'')+'">'+dockEsc(card)+'</b>'
       ).join('')+'</div>'+
     '</div>'
   ).join('');
