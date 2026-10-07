@@ -590,38 +590,9 @@ async function renderRoom(){
 }
 window.TRYNKA_FORCE_RENDER=renderRoom;
 function positionOwnHandNearSeat(){
-  const table=document.querySelector('#game .table');
-  const seat=document.querySelector('#seats .seat.mine');
   const hand=$('myHand');
-  if(!table||!seat||!hand)return;
-
-  if(window.innerWidth<=650){
-    ['left','top','right','bottom','transform'].forEach(k=>hand.style.removeProperty(k));
-    return;
-  }
-
-  const tr=table.getBoundingClientRect();
-  const sr=seat.getBoundingClientRect();
-  if(!tr.width||!tr.height||!sr.width||!sr.height)return;
-
-  const tableCx=tr.left+tr.width/2;
-  const tableCy=tr.top+tr.height/2;
-  const seatCx=sr.left+sr.width/2;
-  const seatCy=sr.top+sr.height/2;
-
-  let dx=seatCx-tableCx,dy=seatCy-tableCy;
-  const len=Math.hypot(dx,dy)||1;
-  dx/=len;dy/=len;
-
-  const inward=Math.min(120,Math.max(82,Math.min(tr.width,tr.height)*0.18));
-  const x=seatCx-tr.left-dx*inward;
-  const y=seatCy-tr.top-dy*inward;
-
-  hand.style.setProperty('left',x+'px','important');
-  hand.style.setProperty('top',y+'px','important');
-  hand.style.setProperty('right','auto','important');
-  hand.style.setProperty('bottom','auto','important');
-  hand.style.setProperty('transform','translate(-50%,-50%)','important');
+  if(!hand)return;
+  ['left','top','right','bottom','transform'].forEach(k=>hand.style.removeProperty(k));
 }
 function visualSeatSlot(seatNo,maxPlayers,mineSeat=null){
   const max=Math.max(2,Math.min(8,Number(maxPlayers)||8));
@@ -843,11 +814,13 @@ async function doGameAction(action){
 document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.onclick=()=>doGameAction(b.dataset.action));
 async function renderHand(roomArg,snapshotArg=null){
   if(!currentRoom)return;
-  if(spectatorMode){$('myHand').innerHTML='';lastHandPaint='';return;}
+  if(spectatorMode){$('myHand').innerHTML='';$('cardDock')?.classList.add('hide');lastHandPaint='';return;}
   const snapshot=snapshotArg||window.TRYNKA_GAME_STATE||null;
   const r=roomArg?.id?roomArg:snapshot?.room||((await sb.from('rooms').select('*').eq('id',currentRoom).single()).data);
   if(!r||r.game_status!=='playing'){
     $('myHand').innerHTML='';
+    $('cardDock')?.classList.add('hide');
+    $('revealDock')?.classList.add('hide');
     lastHandPaint='';handPullKey='';handPullY=[0,0,0];
     ownDealActive=false;ownDealtCount=3;
     clearInterval(dealTimer);
@@ -859,7 +832,8 @@ async function renderHand(roomArg,snapshotArg=null){
     const {data:h}=await sb.from('room_hands').select('cards').eq('room_id',currentRoom).eq('user_id',user.id).maybeSingle();
     cards=h?.cards||[];
   }
-  if(!cards?.length)return;
+  if(!cards?.length){$('cardDock')?.classList.add('hide');return}
+  $('cardDock')?.classList.remove('hide');
   clearInterval(dealTimer);
 
   const dealKey=currentRoom+'|'+(r.deal_started_at||'')+'|'+cards.join('|');
