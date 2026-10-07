@@ -110,6 +110,7 @@ function mountStand(){
         alert(error.message);
         return;
       }
+      window.TRYNKA_STANDUP_GUARD={roomId:rid,userId:me?.id,until:Date.now()+10000};
       lastSeatState='';
       lastOpenState='';
       lastSeated=false;
@@ -334,7 +335,16 @@ function applyCentralState(state){
   currentRoom=Number(r.id);
   mountStand();mountGameInfo();
 
-  const presence=state.players||[];
+  const guard=window.TRYNKA_STANDUP_GUARD;
+  let presence=state.players||[];
+  if(guard&&Number(guard.roomId)===Number(r.id)&&guard.userId===me?.id){
+    const serverShowsSeated=presence.some(x=>x.user_id===me.id&&x.seat_no!=null);
+    if(Date.now()<Number(guard.until||0)&&serverShowsSeated){
+      presence=presence.filter(x=>x.user_id!==me.id);
+    }else if(!serverShowsSeated||Date.now()>=Number(guard.until||0)){
+      window.TRYNKA_STANDUP_GUARD=null;
+    }
+  }
   const ps=state.round_players||[];
   const mySeat=presence.find(x=>x.user_id===me?.id);
   const seated=mySeat?.seat_no!=null;
