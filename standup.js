@@ -318,7 +318,10 @@ async function syncUi(){
       const actionBox=$('gameActions');
       if(actionBox)actionBox.classList.toggle('hide',!canStillPlay);
       if($('roundPot'))$('roundPot').textContent='Банк: '+Number(g.pot||0)+' ◉';
-      if($('roundBet'))$('roundBet').textContent='Ставка: '+Number(g.current_bet||r?.ante||0)+' ◉';
+      if($('roundBet')){
+        const toCall=Math.max(0,Number(g.current_bet||0)-Number(mineRound?.contributed||0));
+        $('roundBet').textContent='Ставка: '+Number(g.current_bet||r?.ante||0)+' ◉ · Вам дати: '+toCall+' ◉';
+      }
       if($('tableRoundLabel'))$('tableRoundLabel').textContent='Коло '+Number(g.round_no||1);
       if(canStillPlay){
         const myTurn=g.turn_user_id===me?.id;
