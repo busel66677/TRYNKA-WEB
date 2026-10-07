@@ -275,75 +275,10 @@ async function syncUi(){
       return;
     }
 
-    const [{data:r},{data:g}]=await Promise.all([
-      sb.from('rooms').select('turn_seconds,ante,game_status').eq('id',currentRoom).maybeSingle(),
-      sb.from('game_rounds').select('id,status,pot,current_bet,round_no,turn_user_id,turn_started_at,created_at').eq('room_id',currentRoom).order('id',{ascending:false}).limit(1).maybeSingle()
-    ]);
-
-    if(!g){
-      timerState=null;
-      if($('potBig'))$('potBig').textContent='БАНК: 0 ◉';
-      return;
-    }
-
-    const [{data:ps},{data:lastAction},{data:presence}]=await Promise.all([
-      sb.from('round_players').select('user_id,seat_no,contributed,folded,revealed').eq('round_id',g.id),
-      sb.from('round_actions').select('id,user_id,action,amount,created_at').eq('round_id',g.id).order('created_at',{ascending:false}).limit(1).maybeSingle(),
-      sb.from('room_players').select('user_id,seat_no,last_seen_at,disconnected_at').eq('room_id',currentRoom).not('seat_no','is',null)
-    ]);
-    const activePs=g.status==='playing'
-      ?(ps||[]).filter(p=>(presence||[]).some(x=>x.user_id===p.user_id&&x.seat_no===p.seat_no))
-      :[];
-    paintSeats(activePs,g.status==='playing'?g.turn_user_id:null,g.status==='playing'?(lastAction||null):null,presence||[]);
-    updateSupportUi(g,activePs,r,rp);
-
-    if(g.status==='playing'){
-      notifyMyTurn(g);
-      let nick='Гравець';
-      if(g.turn_user_id===me?.id)nick='Ви';
-      else{
-        const {data:p}=await sb.from('profiles').select('nickname').eq('id',g.turn_user_id).maybeSingle();
-        nick=p?.nickname||'Гравець';
-      }
-      timerState={
-        turnUser:g.turn_user_id,
-        nick,
-        started:new Date(g.turn_started_at||g.created_at).getTime(),
-        seconds:Number(r?.turn_seconds||30)
-      };
-
-      // Fallback UI sync: do not rely only on Realtime for the active turn.
-      const mineRound=(ps||[]).find(p=>p.user_id===me?.id);
-      const canStillPlay=!!mineRound&&!mineRound.folded;
-      const actionBox=$('gameActions');
-      if(actionBox)actionBox.classList.toggle('hide',!canStillPlay);
-      if($('roundPot'))$('roundPot').textContent='Банк: '+Number(g.pot||0)+' ◉';
-      if($('roundBet')){
-        const toCall=Math.max(0,Number(g.current_bet||0)-Number(mineRound?.contributed||0));
-        $('roundBet').textContent='Ставка: '+Number(g.current_bet||r?.ante||0)+' ◉ · Вам дати: '+toCall+' ◉';
-      }
-      if($('tableRoundLabel'))$('tableRoundLabel').textContent='Коло '+Number(g.round_no||1);
-      if(canStillPlay){
-        const myTurn=g.turn_user_id===me?.id;
-        const maxBet=Math.max(1,Number(r?.ante||1)*100);
-        document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
-          let disabled=!myTurn;
-          if(b.dataset.action==='reveal'&&Number(g.round_no||1)<2)disabled=true;
-          if(b.dataset.action==='raise'&&Number(g.current_bet||0)>=maxBet)disabled=true;
-          b.disabled=disabled;
-        });
-      }
-
-      if($('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
-      if($('countdown'))$('countdown').textContent='КОЛО '+Number(g.round_no||1);
-    }else{
-      timerState=null;
-      $('gameActions')?.classList.add('hide');
-      if($('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
-    }
-
-    const mine=(ps||[]).find(p=>p.user_id===me?.id);
-    $('myHand')?.classList.toggle('handRevealed',!!mine?.revealed);
+    // The protected room snapshot is the single source of truth.
+    // If it is not available yet, leave the last known UI intact instead of
+    // rebuilding the table from several independently-timed direct queries.
+    return;
   }finally{busy=false}
 }
 function tickTimer(){
