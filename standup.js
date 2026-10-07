@@ -238,7 +238,8 @@ function paintOpenHands(rows){
   document.querySelectorAll('#seats .seat.revealPairSeat').forEach(x=>x.classList.remove('revealPairSeat'));
 
   for(const r of rows||[]){
-    const seat=document.querySelector('#seats .seat[data-seat-no="'+r.seat_no+'"]');
+    const seat=document.querySelector('#seats .seat[data-user-id="'+CSS.escape(String(r.user_id))+'"]')||
+      document.querySelector('#seats .seat[data-seat-no="'+r.seat_no+'"]');
     if(!seat||!r.cards?.length)continue;
     seat.classList.add('revealPairSeat');
     const box=document.createElement('div');
@@ -338,12 +339,21 @@ function applyCentralState(state){
   const openRows=[];
   const actor=ps.find(p=>p.user_id===g.reveal_actor);
   const target=ps.find(p=>p.user_id===g.reveal_target);
-  if(actor&&Array.isArray(g.reveal_actor_cards)&&g.reveal_actor_cards.length)openRows.push({user_id:actor.user_id,seat_no:actor.seat_no,cards:g.reveal_actor_cards});
-  if(target&&Array.isArray(g.reveal_cards)&&g.reveal_cards.length)openRows.push({user_id:target.user_id,seat_no:target.seat_no,cards:g.reveal_cards});
+  const amRevealPlayer=me?.id===g.reveal_actor||me?.id===g.reveal_target;
+  if(amRevealPlayer){
+    const actorCards=Array.isArray(g.reveal_actor_cards)&&g.reveal_actor_cards.length
+      ?g.reveal_actor_cards
+      :(me?.id===g.reveal_actor&&Array.isArray(state.my_hand)?state.my_hand:[]);
+    const targetCards=Array.isArray(g.reveal_cards)&&g.reveal_cards.length
+      ?g.reveal_cards
+      :(me?.id===g.reveal_target&&Array.isArray(state.my_hand)?state.my_hand:[]);
+    if(actor&&actorCards.length)openRows.push({user_id:actor.user_id,seat_no:actor.seat_no,cards:actorCards});
+    if(target&&targetCards.length)openRows.push({user_id:target.user_id,seat_no:target.seat_no,cards:targetCards});
+  }
   paintOpenHands(openRows);
 
   const mine=ps.find(p=>p.user_id===me?.id);
-  $('myHand')?.classList.toggle('handRevealed',!!mine?.revealed);
+  $('myHand')?.classList.toggle('handRevealed',amRevealPlayer&&openRows.some(x=>x.user_id===me?.id));
 }
 
 document.addEventListener('click',async e=>{
