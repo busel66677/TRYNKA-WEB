@@ -1012,3 +1012,24 @@
 #game .seat .betBadge{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;max-width:none!important;margin:4px auto 0!important}
 #game .seat .betBadge:not(.hide){display:inline-flex!important}
 @media(max-width:800px){#game .seat .betBadge{margin-top:2px!important;font-size:8px!important}#game .seat .betBadge b{font-size:12px!important}}
+
+
+/* v94: keep bottom reveal cards clear of the player's paid amount */
+#game .seat.s0 .betBadge{
+  right:calc(100% + 22px);
+  bottom:2px;
+  z-index:70;
+}
+#game .seat.s0 .openHand{
+  bottom:calc(100% + 24px);
+  z-index:50;
+}
+@media(max-width:800px){
+  #game .seat.s0 .betBadge{
+    right:calc(100% + 14px);
+    bottom:0;
+  }
+  #game .seat.s0 .openHand{
+    bottom:calc(100% + 18px);
+  }
+}
