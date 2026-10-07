@@ -298,7 +298,18 @@ function applyCentralState(state){
   const ps=state.round_players||[];
   const mySeat=presence.find(x=>x.user_id===me?.id);
   const seated=mySeat?.seat_no!=null;
+  const seatedCount=presence.filter(x=>x.seat_no!=null).length;
   if(lastSeated!==seated){lastSeated=seated;syncStand(seated)}
+
+  if(r.game_status==='waiting'&&seatedCount<2){
+    timerState=null;
+    lastTurnNoticeKey='';
+    paintOpenHands([]);
+    paintSeats([],null,null,presence);
+    if($('supportSummary'))$('supportSummary').innerHTML='';
+    $('myHand')?.classList.remove('handRevealed');
+    return;
+  }
 
   if(!g){
     timerState=null;
