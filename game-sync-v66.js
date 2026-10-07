@@ -116,9 +116,8 @@ function patchCritical(s){
   if(!s?.svara&&$('potBig'))$('potBig').textContent='БАНК: '+Number(g.pot||0)+' ◉';
   if($('roundPot'))$('roundPot').textContent='Банк: '+Number(g.pot||0)+' ◉';
   if($('roundBet')){
-    const mineBet=(s.round_players||[]).find(x=>x.user_id===me?.id);
-    const toCall=Math.max(0,Number(g.current_bet||0)-Number(mineBet?.contributed||0));
-    $('roundBet').textContent='Ставка: '+Number(g.current_bet||r.ante||0)+' ◉ · Вам дати: '+toCall+' ◉';
+    const toCall=Math.max(1,Number(g.current_bet||r.ante||1));
+    $('roundBet').textContent='Ставка: '+Number(g.current_bet||r.ante||1)+' ◉ · Підтримати: '+toCall+' ◉';
   }
   if($('tableRoundLabel'))$('tableRoundLabel').textContent=(g.is_svara?'СВАРА · ':'Коло ')+Number(g.round_no||1);
   const mine=(s.round_players||[]).find(x=>x.user_id===me?.id);
