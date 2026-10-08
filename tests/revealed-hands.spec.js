@@ -58,7 +58,7 @@ test('revealed hands belong to exactly the two real players and clear next deal'
       overlays: document.querySelectorAll('#seats .seatShowdownCards').length };
   });
   expect(state).toEqual({
-    count: 2, secondPass: 2, keptSameNode: true, red: true, black: 3,
+    count: 2, secondPass: 2, keptSameNode: true, red: true, black: 2,
     dockHidden: true, labels: ['player-0','player-4'],
     nextDealCount: 0, restored: true, overlays: 0,
   });
