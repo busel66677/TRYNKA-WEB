@@ -187,7 +187,7 @@ body:has(#game:not(.hide)){
  border-radius:14px!important;box-shadow:0 8px 24px #000a!important;
 }
 #game:not(.casinoSocialOpen) #socialQuickBar{display:none!important}
-#game:not(.casinoChatOpen) .gameSide{display:none!important}
+@media(max-width:800px){#game:not(.casinoChatOpen) .gameSide{display:none!important}}
 @media(min-width:801px){
  #game .gamegrid{grid-template-columns:minmax(0,1fr) 300px!important}
  #game .tableWrap{padding:20px 19px 34px!important}
