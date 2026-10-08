@@ -43,7 +43,7 @@
   border-top:1px solid rgba(221,191,115,.25)!important;
   z-index:auto!important;
 }
-#game #premiumGameMenu #tableExtras>button{
+#game #premiumGameMenu #tableExtras>button:not(.hide){
   display:flex!important;
   width:100%!important;
   justify-content:flex-start!important;
