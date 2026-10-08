@@ -1,4 +1,5 @@
 import { paintRevealedHands } from './revealed-hands-v99.js';
+import {authorizedReveals} from './authorized-reveals-v116.js';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
@@ -358,22 +359,9 @@ function applyCentralState(state){
     timerState=null;
   }
 
-  const openRows=[];
-  const actor=ps.find(p=>p.user_id===g.reveal_actor);
-  const target=ps.find(p=>p.user_id===g.reveal_target);
+  // Share the exact same per-participant privacy rules as the main room renderer.
+  const openRows=authorizedReveals(state,me?.id);
   const amRevealPlayer=me?.id===g.reveal_actor||me?.id===g.reveal_target;
-  if(amRevealPlayer){
-    const actorCards=Array.isArray(g.reveal_actor_cards)&&g.reveal_actor_cards.length
-      ?g.reveal_actor_cards
-      :(me?.id===g.reveal_actor&&Array.isArray(state.my_hand)?state.my_hand:[]);
-    const targetCards=Array.isArray(g.reveal_cards)&&g.reveal_cards.length
-      ?g.reveal_cards
-      :(me?.id===g.reveal_target&&Array.isArray(state.my_hand)?state.my_hand:[]);
-    const actorPresence=presence.find(p=>p.user_id===actor?.user_id);
-    const targetPresence=presence.find(p=>p.user_id===target?.user_id);
-    if(actor&&actorCards.length)openRows.push({user_id:actor.user_id,nickname:actorPresence?.nickname||'',cards:actorCards});
-    if(target&&targetCards.length)openRows.push({user_id:target.user_id,nickname:targetPresence?.nickname||'',cards:targetCards});
-  }
   paintOpenHands(openRows);
 
   const mine=ps.find(p=>p.user_id===me?.id);
@@ -395,6 +383,12 @@ async function init(){
   await syncUi();
   await touchPresence();
   document.addEventListener('trynka:game-state',e=>applyCentralState(e.detail));
+  // A membership/stack update can rebuild the seat DOM after the snapshot
+  // event. Reapply local badges and protected showdown overlays immediately.
+  document.addEventListener('trynka:seats-rebuilt',e=>{
+    lastSeatState='';
+    applyCentralState(e.detail);
+  });
   setInterval(syncUi,15000);
   setInterval(tickTimer,200);
   setInterval(touchPresence,10000);
