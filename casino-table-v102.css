@@ -1,0 +1,367 @@
+/* TRYNKA v102 — faithful dark-mahogany / emerald-felt table inspired by the approved reference. */
+/* Overrides the accumulated legacy skins; strictly presentational. */
+#game{--casino-brass:#d8b46d;--casino-wood:#53280f;--casino-felt:#096744;color:#f6f0df}
+body:has(#game:not(.hide)){
+ background:
+ radial-gradient(ellipse 95% 48% at 50% 0%,#153524 0%,transparent 82%),
+ repeating-linear-gradient(130deg,#fff1b103 0 1px,transparent 1px 28px),
+ #050b08!important;
+}
+#game .gameTop{
+ background:linear-gradient(180deg,#091711f7,#06100cfb)!important;
+ border:1px solid #45604794!important;border-radius:15px!important;
+ box-shadow:0 8px 23px #0009,inset 0 1px 0 #d9c4912b!important;
+}
+#game .gameIdentity h2{font:800 23px/1.15 Georgia,serif!important;color:#efd48e!important}
+#game .gameIdentity::after{content:'♠  TRYNKA  •  PREMIUM';display:block;
+ font:700 8px/1.3 Arial,sans-serif;letter-spacing:1.8px;color:#c2a268;text-align:center;margin-top:2px}
+#game .gameWallet{background:#071811!important;border:1px solid #af925c!important;
+ color:#eed09a!important}
+#game .tableWrap{
+ position:relative!important;
+ background:radial-gradient(ellipse at 50% 0%,#2b38222a,transparent 64%),#070f0bcf!important;
+ border:1px solid #3f442e88!important;border-radius:22px!important;
+ box-shadow:0 15px 40px #000c,inset 0 1px #d9ba6a17!important;
+}
+#game .table{
+ position:relative!important;isolation:isolate!important;
+ border:18px solid #663315!important;
+ border-radius:47% / 48%!important;
+ background:
+ radial-gradient(ellipse at 48% 48%,#177e58 0%,#0c6847 50%,#08442c 90%,#052f20 100%),
+ repeating-linear-gradient(30deg,#ffffff05 0 1px,transparent 1px 3px)!important;
+ box-shadow:
+ 0 0 0 2px #1e1007,0 0 0 5px #a36330,
+ 0 0 0 8px #3a1b0c,0 0 0 10px #160f0a,
+ 0 13px 0 #180c08,0 25px 36px #000e,
+ inset 0 0 0 2px #deb679,inset 0 0 0 7px #361c0c,
+ inset 0 0 0 11px #163827,inset 0 0 78px #001f14d9!important;
+ overflow:hidden!important;
+}
+#game .table::before{
+ content:''!important;position:absolute!important;inset:11px!important;
+ border:1px solid #d5c08970!important;border-radius:46% / 48%!important;
+ box-shadow:inset 0 0 0 1px #163e29aa,inset 0 0 27px #041c12bb!important;
+ background:
+ repeating-linear-gradient(115deg,transparent 0 3px,#e0d8a003 3px 4px),
+ radial-gradient(ellipse 52% 33% at 50% 51%,#7fd8ae0a,transparent)!important;
+ pointer-events:none!important;z-index:0!important;
+}
+#game .table::after{
+ content:'♠ TRYNKA'!important;position:absolute!important;
+ inset:auto!important;top:64%!important;left:50%!important;
+ transform:translate(-50%,-50%)!important;
+ font:800 19px/1 Georgia,serif!important;white-space:nowrap!important;
+ letter-spacing:5px!important;color:#e0cf9040!important;
+ text-shadow:0 2px 2px #00190e!important;border:0!important;
+ background:none!important;box-shadow:none!important;z-index:0!important;pointer-events:none!important;
+}
+#game .tableGlow{position:absolute!important;inset:14px!important;border-radius:46% / 48%!important;
+ background:radial-gradient(ellipse at 50% 36%,#96ffd313,transparent 65%)!important;
+ pointer-events:none!important;z-index:0!important}
+#game .dealerBadge{
+ background:radial-gradient(circle at 35% 20%,#3a5136,#071711 76%)!important;
+ border:2px solid #d7b775!important;color:#ffdfa0!important;
+ box-shadow:0 5px 12px #000c!important;opacity:.89!important;
+}
+#game .deckStack{filter:drop-shadow(0 5px 4px #000c)!important}
+#game .seat{
+ position:absolute!important;z-index:20!important;
+ overflow:visible!important;display:grid!important;
+ align-items:center!important;
+ border:1px solid #426849!important;border-radius:28px!important;
+ background:linear-gradient(180deg,#09261dda,#051710f5)!important;
+ box-shadow:0 8px 18px #000c,inset 0 1px 0 #d5e1cb25!important;
+ color:#f9f3e0!important;backdrop-filter:blur(5px);
+}
+#game .seat:not(.free){padding:5px 7px!important}
+#game .seat .seatAvatar{
+ background:radial-gradient(circle at 36% 22%,#6b8063,#1a412d 60%,#071d14)!important;
+ border:2px solid #ba9e62!important;box-shadow:0 3px 7px #0009!important;
+ color:#ffdd9c!important;
+}
+#game .seatName{font-weight:900!important;color:#fff7e8!important}
+#game .seatStack{font-weight:900!important;color:#ffd58d!important}
+#game .seat.free{
+ opacity:.9!important;background:linear-gradient(160deg,#0f4e37a8,#06261cbb)!important;
+ border:1px dashed #bba66b88!important;box-shadow:inset 0 0 15px #0003!important;
+}
+#game .seat.free .seatFreePlus{
+ background:#0e3829!important;border:1px solid #b5a26cb5!important;color:#dfc68f!important;
+ box-shadow:inset 0 0 8px #0005!important;
+}
+#game .seat.mine,#game .seat.turnActive,#game .seat.uxTurn{
+ border:2px solid #f2cc75!important;
+ box-shadow:0 0 0 2px #edc36b25,0 0 16px #d5b86965,0 7px 18px #000c!important;
+}
+#game .seat.foldedSeat,#game .seat.premiumFolded{opacity:.54!important;filter:saturate(.55)!important}
+#game .betBadge:not(.hide){
+ position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+ transform:none!important;margin-top:3px!important;
+ display:inline-flex!important;padding:2px 5px!important;
+ border:1px solid #a88a4c5f!important;background:#08140fcf!important;
+ border-radius:8px!important;font-size:8px!important;box-shadow:none!important;
+}
+#game .betBadge b{color:#ffd78a!important}
+#game .seatBacks{
+ position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+ display:flex;gap:3px;z-index:24;pointer-events:none;white-space:nowrap;
+}
+#game .seatBacks i{
+ position:relative;display:block;flex:0 0 auto;width:30px;height:43px;
+ background:repeating-linear-gradient(45deg,#ae202b 0 2px,#d24c51 2px 4px,#9b1b29 4px 6px);
+ border:2px solid #f3e1bd;border-radius:4px;box-shadow:0 4px 6px #0009,inset 0 0 0 3px #a52732;
+}
+#game .seatBacks i::after{content:'♠';position:absolute;inset:7px 6px;
+ border:1px solid #ffdecb9a;border-radius:2px;color:#f4dacf;font:12px/19px Georgia,serif;text-align:center}
+#game .seat.showdownSeat>.seatBacks,#game .seat.foldedSeat>.seatBacks{display:none!important}
+#game .centerInfo{
+ position:absolute!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+ top:48%!important;left:50%!important;transform:translate(-50%,-50%)!important;
+ width:198px!important;max-width:198px!important;padding:9px 11px!important;
+ background:linear-gradient(180deg,#06170fcf,#062216c4)!important;
+ border:1px solid #9bbb7f55!important;border-radius:24px!important;
+ box-shadow:0 7px 18px #0008,inset 0 1px #eacb7722!important;
+ z-index:6!important;backdrop-filter:blur(4px);
+}
+#game .centerInfo #potBig{
+ order:1;display:block!important;margin:0 0 4px!important;
+ color:#f5d18b!important;font:900 21px/24px Georgia,serif!important;
+ white-space:nowrap!important;text-transform:uppercase!important;
+ text-shadow:0 2px 4px #000a!important;
+}
+#game .centerInfo .potPile{
+ position:relative!important;order:2;display:block!important;flex:0 0 auto!important;
+ width:125px!important;max-width:125px!important;height:48px!important;min-height:48px!important;
+ margin:1px auto 3px!important;padding:0!important;transform:none!important;
+ filter:drop-shadow(0 5px 2px #0008)!important;
+}
+#game .centerInfo .potPile i,
+#game .centerInfo .potPile .uxPotChip{
+ position:absolute!important;display:block!important;
+ width:24px!important;height:13px!important;
+ margin:0!important;left:var(--ux-x,38px)!important;top:var(--ux-y,13px)!important;
+ border-radius:50%!important;
+ border:3px dotted #fce5c4!important;
+ background:radial-gradient(ellipse at 38% 21%,#e2bd77 0%,#b82023 30%,#7b121a 65%,#490d16 100%)!important;
+ box-shadow:0 4px 0 #72181c,0 7px 0 #3b0d12,0 9px 5px #000b!important;
+}
+#game .centerInfo .potPile i:nth-child(3n){background:radial-gradient(ellipse at 40% 20%,#f6d999,#235ca4 36%,#0b3060 88%)!important}
+#game .centerInfo .potPile i:nth-child(2n){background:radial-gradient(ellipse at 40% 20%,#ffe9a9,#cf342b 36%,#7a131d 85%)!important}
+#game .centerInfo #bankInfo{
+ order:3;display:block!important;width:100%!important;
+ padding:4px 6px!important;margin:0!important;
+ color:#e7cca0!important;font:800 10px/13px Arial,sans-serif!important;
+ background:#04150fac!important;border:1px solid #b39a614a!important;border-radius:9px!important;
+}
+#game .centerInfo #countdown{
+ order:4;display:block!important;margin-top:4px!important;
+ font-size:9px!important;min-height:12px!important;letter-spacing:0!important;
+ padding:3px 6px!important;border-radius:11px!important;background:#081f15b9!important;
+}
+#game .centerInfo #fairDealBadge{order:5;margin-top:4px!important;font-size:7px!important}
+#game #turnStatus,#game #contributionBoard{display:none!important}
+#game .gameActions{
+ background:linear-gradient(180deg,#08130ff9,#06100dfa)!important;
+ border:1px solid #7860448a!important;border-radius:15px!important;
+ box-shadow:0 10px 26px #000c!important;
+}
+#game .actionButtons{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}
+#game .actionButtons button{font-size:13px!important;min-height:53px!important;border-radius:10px!important;
+ border:1px solid #ffffff46!important;color:#fff!important;box-shadow:0 4px 9px #000a,inset 0 1px 0 #fff5!important}
+#game .actionButtons button[data-action="fold"]{background:linear-gradient(#b72a31,#74151c)!important}
+#game .actionButtons button[data-action="call"]{background:linear-gradient(#0f9b72,#056048)!important}
+#game .actionButtons button[data-action="raise"]{background:linear-gradient(#d6aa46,#966517)!important;color:#1c1609!important;text-shadow:none!important}
+#game .actionButtons button[data-action="reveal"]{background:linear-gradient(#287cbb,#104878)!important}
+#game .gameSide .panel{background:#061510f2!important;border:1px solid #45694d9a!important}
+#game .gameSide .panel h3{color:#e7c781!important}
+#game #seats .seat>.seatShowdownCards{
+ border:1px solid #dfc28b!important;background:#071a12f4!important;
+ box-shadow:0 5px 15px #000b!important;z-index:65!important;
+}
+#game #casinoToggleSocial,#game #casinoToggleChat{border:1px solid #87704499!important;background:#0a291c!important;color:#edd5ab!important}
+#game #socialQuickBar{
+ position:relative!important;z-index:30!important;
+ border:1px solid #3f604bcc!important;background:#061710f5!important;
+ border-radius:14px!important;box-shadow:0 8px 24px #000a!important;
+}
+#game:not(.casinoSocialOpen) #socialQuickBar{display:none!important}
+#game:not(.casinoChatOpen) .gameSide{display:none!important}
+@media(min-width:801px){
+ #game .gamegrid{grid-template-columns:minmax(0,1fr) 300px!important}
+ #game .tableWrap{padding:20px 19px 34px!important}
+ #game .table{
+  width:100%!important;max-width:none!important;
+  min-height:530px!important;height:clamp(530px,53vw,640px)!important;
+  border-radius:46% / 48%!important;
+ }
+ #game .seat{width:132px!important;min-height:53px!important}
+ #game .seatBacks i{width:37px;height:54px}
+ #game .seat.s4>.seatBacks{top:calc(100% + 4px)}
+ #game .seat.s0>.seatBacks{display:none}
+ #game .gameActions{bottom:-80px!important}
+ #game .tableWrap{margin-bottom:105px!important}
+ #game .gameSide{display:grid!important}
+ #game #casinoToggleChat{display:none!important}
+}
+@media(max-width:800px){
+ body:has(#game:not(.hide))>main{padding:4px 4px 14px!important;margin:0!important}
+ #game{overflow-x:clip!important}
+ #game .gameTop{
+  display:grid!important;grid-template-columns:75px minmax(0,1fr) 120px!important;
+  grid-template-rows:auto!important;gap:5px!important;
+  padding:6px 7px!important;margin:0 4px 7px!important;min-height:70px!important;
+  align-items:center!important;
+ }
+ #game #leaveRoom{
+  grid-column:1!important;grid-row:1!important;
+  width:74px!important;max-width:74px!important;height:36px!important;min-height:36px!important;
+  font-size:0!important;padding:0!important;
+  border-radius:10px!important;
+ }
+ #game #leaveRoom::after{content:'← Лобі';font-size:11px!important;font-weight:800!important;color:#e6d6b4!important}
+ #game .gameIdentity{grid-column:2!important;grid-row:1!important;min-width:0!important;
+  margin:0!important;text-align:center!important}
+ #game .gameIdentity .eyebrow{display:none!important}
+ #game .gameIdentity h2{font:800 18px/21px Georgia,serif!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ #game .gameIdentity::after{font-size:6px!important;letter-spacing:.7px!important;white-space:nowrap!important}
+ #game .gameTopActions{
+  grid-column:3!important;grid-row:1!important;
+  display:grid!important;grid-template-columns:1fr 32px!important;
+  gap:3px!important;width:120px!important;max-width:120px!important;
+  justify-items:end!important;align-items:center!important;margin:0!important;
+ }
+ #game #gameBalance{
+  grid-column:1!important;grid-row:1!important;padding:5px 4px!important;
+  font-size:10px!important;min-height:30px!important;max-width:86px!important;
+  overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important
+ }
+ #game #premiumMoreBtn{grid-column:2!important;grid-row:1!important;width:31px!important;
+   height:31px!important;min-width:31px!important}
+ #game #standUpBtn{grid-column:1/-1!important;grid-row:2!important;
+  justify-self:end!important;width:115px!important;max-width:115px!important;
+  min-height:29px!important;height:29px!important;font-size:9px!important;padding:3px 6px!important;
+  border-radius:9px!important}
+ #game .tableWrap{
+  padding:16px 11px 24px!important;
+  margin:0 3px 8px!important;width:calc(100% - 6px)!important;
+  border-radius:20px!important;min-height:0!important;overflow:visible!important;
+ }
+ #game .table{
+  width:calc(100% - 10px)!important;min-height:530px!important;
+  height:clamp(545px,68svh,625px)!important;max-height:none!important;
+  border:11px solid #663315!important;border-radius:51px!important;
+  margin:0 auto 5px!important;
+  box-shadow:
+   0 0 0 2px #281407,0 0 0 5px #af713f,
+   0 0 0 8px #321608,0 0 0 9px #140c08,
+   0 11px 0 #180b08,0 21px 28px #000e,
+   inset 0 0 0 2px #ddb075,inset 0 0 0 6px #371b0d,
+   inset 0 0 0 10px #0d3826,inset 0 0 45px #001a10c9!important;
+ }
+ #game .table::before{inset:9px!important;border-radius:38px!important}
+ #game .tableGlow{inset:11px!important;border-radius:35px!important}
+ #game .table::after{top:64%!important;font-size:12px!important;letter-spacing:4px!important}
+ #game .dealerBadge{top:8px!important;left:50%!important;transform:translateX(-50%) scale(.78)!important;
+  width:40px!important;height:40px!important}
+ #game .deckStack{top:46px!important;left:50%!important;transform:translateX(-50%) scale(.57)!important}
+ #game .seat{
+  width:88px!important;min-height:49px!important;
+  grid-template-columns:28px minmax(0,1fr)!important;
+  gap:4px!important;padding:4px 5px!important;
+  border-radius:16px!important;
+ }
+ #game .seat.free{
+  width:60px!important;min-height:43px!important;
+  grid-template-columns:1fr!important;justify-items:center!important;
+  gap:1px!important;padding:3px!important;
+ }
+ #game .seat.free .seatFreePlus{width:21px!important;height:21px!important;font-size:14px!important}
+ #game .seat.free .seatName{font-size:8px!important;text-align:center!important}
+ #game .seatAvatar{width:28px!important;height:28px!important;font-size:13px!important}
+ #game .seatName{font-size:9px!important;line-height:11px!important}
+ #game .seatStack{font-size:8px!important;line-height:10px!important}
+ #game .seat.p4{top:79px!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
+ #game .seat.p3{top:102px!important;bottom:auto!important;left:8px!important;right:auto!important;transform:none!important}
+ #game .seat.p5{top:102px!important;bottom:auto!important;right:8px!important;left:auto!important;transform:none!important}
+ #game .seat.p2{top:48%!important;bottom:auto!important;left:4px!important;right:auto!important;transform:translateY(-50%)!important}
+ #game .seat.p6{top:48%!important;bottom:auto!important;right:4px!important;left:auto!important;transform:translateY(-50%)!important}
+ #game .seat.p1{top:auto!important;bottom:124px!important;left:8px!important;right:auto!important;transform:none!important}
+ #game .seat.p7{top:auto!important;bottom:124px!important;right:8px!important;left:auto!important;transform:none!important}
+ #game .seat.p0{top:auto!important;bottom:108px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
+ #game .seatBacks{gap:2px!important}
+ #game .seatBacks i{width:21px!important;height:31px!important;border-width:2px!important}
+ #game .seatBacks i::after{inset:4px 3px!important;font-size:8px!important;line-height:15px!important}
+ #game .seat.p3>.seatBacks,#game .seat.p4>.seatBacks,#game .seat.p5>.seatBacks{
+  top:calc(100% + 4px)!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
+ #game .seat.p1>.seatBacks,#game .seat.p2>.seatBacks{
+  top:auto!important;bottom:calc(100% + 4px)!important;left:0!important;right:auto!important;transform:none!important}
+ #game .seat.p6>.seatBacks,#game .seat.p7>.seatBacks{
+  top:auto!important;bottom:calc(100% + 4px)!important;right:0!important;left:auto!important;transform:none!important}
+ #game .seat.p0>.seatBacks{display:none!important}
+ #game .centerInfo{
+  width:123px!important;max-width:123px!important;
+  top:48%!important;left:50%!important;
+  transform:translate(-50%,-50%)!important;
+  padding:6px 5px!important;border-radius:16px!important;
+  box-shadow:0 5px 14px #000a!important;
+ }
+ #game .centerInfo #potBig{font:800 16px/20px Georgia,serif!important;
+  margin-bottom:3px!important;letter-spacing:0!important}
+ #game .centerInfo .potPile{
+  width:103px!important;max-width:103px!important;height:45px!important;min-height:45px!important;
+  margin:0 auto 2px!important;
+ }
+ #game .centerInfo .potPile .uxPotChip{width:22px!important;height:12px!important}
+ #game .centerInfo #bankInfo{font-size:8px!important;line-height:11px!important;padding:3px!important}
+ #game .centerInfo #countdown{font-size:8px!important;padding:2px 3px!important;min-height:0!important}
+ #game .centerInfo #fairDealBadge{font-size:6px!important}
+ #game .table.seatRevealActive .centerInfo{top:48%!important;width:118px!important;max-width:118px!important}
+ #game .table.seatRevealActive #bankInfo,#game .table.seatRevealActive #countdown{display:none!important}
+ #game .table #cardDock,#game .table #cardDock:not(.hide){
+  bottom:178px!important;top:auto!important;
+  width:max-content!important;max-width:69%!important;min-height:67px!important;
+  left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+  padding:3px 5px!important;z-index:55!important;
+  background:#071b14e5!important;border-radius:10px!important;
+  border:1px solid #bba272a8!important;
+ }
+ #game .table #cardDock #myHand .card{width:43px!important;height:60px!important;min-width:43px!important;max-width:43px!important}
+ #game .gameActions{
+  width:calc(100% - 10px)!important;
+  left:50%!important;bottom:5px!important;transform:translateX(-50%)!important;
+  padding:5px!important;z-index:105!important;
+ }
+ #game .actionButtons{gap:4px!important}
+ #game .actionButtons button{
+  min-height:44px!important;padding:5px 2px!important;
+  font-size:clamp(9px,2.8vw,11px)!important;line-height:1.1!important;
+  white-space:normal!important;border-radius:7px!important;
+ }
+ #game #roundTurn{min-width:0!important;font-size:9px!important}
+ #game .gameSide{margin-top:8px!important;grid-template-columns:1fr!important}
+ #game .gameSide.casinoChatOpen,#game.casinoChatOpen .gameSide{display:grid!important}
+ #game #socialQuickBar{width:100%!important;padding:6px!important;margin:0 auto 7px!important;
+  grid-template-columns:1fr!important;gap:5px!important}
+ #game #socialQuickBar .socialBarLabel{display:none!important}
+ #game #socialQuickBar .emojiQuick,#game #socialQuickBar .phraseQuick{justify-content:center!important}
+ #game #socialQuickBar .phraseQuick{display:grid!important;grid-template-columns:repeat(2,1fr)!important}
+ #game #socialQuickBar .phraseQuick button{min-height:30px!important}
+ #game #casinoToggleChat{display:inline-flex!important}
+ #game .gameSide .tableHistory{max-height:170px!important}
+}
+@media(max-width:390px){
+ #game .table{height:552px!important;min-height:552px!important}
+ #game .seat{width:82px!important}
+ #game .seat.free{width:57px!important}
+ #game .centerInfo{width:112px!important;max-width:112px!important}
+ #game .table.seatRevealActive .centerInfo{width:108px!important;max-width:108px!important}
+ #game .centerInfo #potBig{font-size:15px!important}
+ #game .centerInfo .potPile{width:98px!important;max-width:98px!important}
+ #game .table #cardDock #myHand .card{width:40px!important;min-width:40px!important;max-width:40px!important;height:56px!important}
+ #game .table.seatRevealActive .centerInfo{top:46%!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #game .seatBacks,#game .actionButtons button{animation:none!important;transition:none!important}
+}
