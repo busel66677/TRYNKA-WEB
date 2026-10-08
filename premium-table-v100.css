@@ -400,6 +400,9 @@ body:has(#game:not(.hide)){
   }
 }
 @media(max-width:390px){
+  /* At 360px the left-middle opened hand ended 2px inside the bank.
+     Lower the pot by 2% only during showdown. */
+  #game .table.seatRevealActive .centerInfo{top:50%!important}
   #game .table{
     min-height:525px!important;
     height:clamp(525px,65svh,600px)!important;
