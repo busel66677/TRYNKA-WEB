@@ -1,0 +1,352 @@
+/* TRYNKA landscape v104: gameplay DOM stays authoritative; visual layout only.
+   The approved reference uses a wide mahogany oval and three card backs by every rival. */
+
+/* Rotate prompt is only for active game on a narrow portrait handset. */
+#trynkaRotateNotice{display:none}
+@media (orientation:portrait) and (max-width:700px){
+ #game:not(.hide):not(.portraitAllowed) #trynkaRotateNotice{
+  position:fixed!important;inset:0!important;z-index:99999!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  gap:14px!important;padding:25px!important;text-align:center!important;
+  color:#fff0c9!important;background:radial-gradient(circle at 50% 30%,#126344,#040d09 80%)!important;
+ }
+ #trynkaRotateNotice .rotateSymbol{font-size:68px;line-height:1.1;filter:drop-shadow(0 5px 9px #0007)}
+ #trynkaRotateNotice h2{font:800 26px/1.2 Georgia,serif;margin:0;color:#ffdc86}
+ #trynkaRotateNotice p{max-width:320px;font-size:15px;line-height:1.5;margin:0;color:#d1e3d4}
+ #trynkaRotateNotice button{min-height:44px;padding:10px 18px;border:1px solid #d9b775;background:#113b2b;color:#fff1c7;border-radius:12px}
+ #trynkaRotateNotice .rotateFallback{font-size:12px;opacity:.8}
+}
+
+@media (orientation:landscape) and (max-height:700px) and (max-width:1100px){
+ body:has(#game:not(.hide))>header{display:none!important}
+ body:has(#game:not(.hide)){
+  background:
+   radial-gradient(ellipse 90% 130% at 50% -20%,#294432 0%,#08130d 62%,#030704 100%)!important;
+  overflow-x:hidden!important;
+ }
+ body:has(#game:not(.hide))>main{
+  width:100%!important;max-width:none!important;min-width:0!important;
+  margin:0!important;padding:3px 5px 4px!important;overflow:visible!important;
+ }
+ #game{width:100%!important;overflow:visible!important}
+ #game .gameTop{
+  display:flex!important;position:relative!important;align-items:center!important;justify-content:space-between!important;
+  gap:6px!important;min-height:0!important;
+  width:100%!important;height:clamp(35px,11svh,49px)!important;
+  margin:0 auto 4px!important;padding:3px 7px!important;
+  border-radius:13px!important;
+  background:linear-gradient(180deg,#081712f9,#04100cf9)!important;
+  border:1px solid #a2804c80!important;
+ }
+ #game #leaveRoom{
+  position:relative!important;display:block!important;
+  flex:0 0 auto!important;width:65px!important;max-width:65px!important;
+  min-width:0!important;height:29px!important;min-height:29px!important;
+  padding:3px 5px!important;margin:0!important;
+  font-size:0!important;border-radius:8px!important;grid-column:auto!important;grid-row:auto!important;
+ }
+ #game #leaveRoom::after{content:'← Лобі';font-size:10px!important;color:#f5e2b8!important;white-space:nowrap}
+ #game .gameIdentity{
+  position:static!important;min-width:0!important;flex:1 1 auto!important;
+  width:auto!important;max-width:none!important;
+  grid-column:auto!important;grid-row:auto!important;text-align:center!important;
+  margin:0!important;white-space:nowrap!important;
+ }
+ #game .gameIdentity .eyebrow{display:none!important}
+ #game .gameIdentity h2{
+  font:900 clamp(14px,3.3svh,23px)/1.05 Georgia,serif!important;
+  text-overflow:ellipsis!important;overflow:hidden!important;max-width:100%!important;
+  color:#edce88!important;
+ }
+ #game .gameIdentity::after{
+  content:'♠  TRYNKA  PREMIUM TABLE'!important;
+  display:block!important;text-align:center!important;
+  font:800 clamp(6px,1.55svh,10px)/1.2 Arial,sans-serif!important;
+  letter-spacing:1.1px!important;color:#dcb66b!important;margin:0!important;
+ }
+ #game .gameTopActions{
+  grid-column:auto!important;grid-row:auto!important;position:static!important;
+  display:flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:flex-end!important;
+  gap:4px!important;max-width:none!important;width:auto!important;min-width:0!important;margin:0!important;
+ }
+ #game .gameWallet,#game #gameBalance{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:29px!important;max-height:29px!important;min-width:0!important;max-width:105px!important;
+  font-size:clamp(9px,2.1svh,12px)!important;white-space:nowrap!important;
+  border-radius:8px!important;padding:5px 8px!important;
+  background:#081c14!important;border:1px solid #c39e5e96!important;color:#ffd88e!important;
+ }
+ #game #standUpBtn:not(.hide){
+  position:static!important;grid-column:auto!important;grid-row:auto!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  width:75px!important;max-width:75px!important;height:29px!important;min-height:29px!important;
+  font-size:9px!important;white-space:nowrap!important;margin:0!important;padding:4px!important;border-radius:8px!important;
+ }
+ #game #premiumMoreBtn{position:relative!important;grid-column:auto!important;grid-row:auto!important;
+  display:inline-grid!important;place-items:center!important;width:29px!important;min-width:29px!important;height:29px!important;padding:0!important}
+ #game #landscapeFullscreenBtn{display:inline-grid!important;place-items:center!important;flex:0 0 auto!important;
+  width:29px!important;height:29px!important;min-height:29px!important;min-width:29px!important;
+  border:1px solid #ba985db0!important;border-radius:8px!important;
+  padding:0!important;background:#0c281c!important;color:#fae1a6!important;font-size:14px!important}
+ #game .premiumGameMenu{z-index:900!important;top:calc(100% + 3px)!important}
+ #game .gamegrid{display:block!important;width:100%!important;margin:0!important}
+ #game .tableWrap{
+  position:relative!important;
+  display:block!important;width:100%!important;
+  height:calc(100svh - clamp(35px,11svh,49px) - 74px)!important;
+  min-height:182px!important;max-height:none!important;
+  padding:9px 17px 7px!important;
+  margin:0 auto 68px!important;
+  background:radial-gradient(ellipse at center,#19352645,#040a07dd 75%)!important;
+  border:1px solid #66512e40!important;border-radius:14px!important;
+  overflow:visible!important;
+ }
+ #game .table{
+  display:block!important;position:relative!important;
+  width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;
+  margin:0!important;isolation:isolate!important;
+  border:clamp(8px,2.2svh,17px) solid #6b3417!important;
+  border-radius:48% / 48%!important;
+  background:
+   radial-gradient(ellipse 74% 92% at 49% 43%,#168861 0%,#086947 51%,#08412f 100%),
+   repeating-linear-gradient(38deg,transparent 0 3px,#ffffff07 3px 4px)!important;
+  box-shadow:0 0 0 2px #281508,0 0 0 4px #c28748,0 0 0 7px #42200d,
+    0 8px 0 #1c0c06,0 15px 19px #000d,
+    inset 0 0 0 2px #e9bc73,inset 0 0 0 5px #321809,
+    inset 0 0 0 9px #0c4530,inset 0 0 45px #00170cba!important;
+  overflow:hidden!important;
+ }
+ #game .table::before{inset:clamp(6px,1.5svh,12px)!important;
+  border:1px solid #c0d6a34a!important;border-radius:48% / 47%!important;
+  background:repeating-linear-gradient(70deg,transparent 0 7px,#c8ddbf04 7px 8px)!important;
+  box-shadow:inset 0 0 0 1px #0a46343b,inset 0 0 22px #03140db0!important}
+ #game .table::after{
+  content:'♠   T R Y N K A'!important;
+  position:absolute!important;inset:auto!important;top:53%!important;left:30%!important;
+  transform:translate(-50%,-50%)!important;font:900 clamp(8px,2.4svh,16px) Georgia,serif!important;
+  white-space:nowrap!important;color:#e9d5a626!important;text-shadow:0 1px #002418!important;
+  background:none!important;border:0!important;pointer-events:none!important;
+ }
+ #game .tableGlow{inset:9px!important;border-radius:48% / 48%!important;
+  background:radial-gradient(ellipse at 50% 48%,#e9ffc009,transparent 77%)!important}
+ #game .dealerBadge{display:none!important}
+ #game .deckStack{display:none!important}
+ #game .seat{
+  position:absolute!important;z-index:24!important;
+  width:clamp(70px,11.3vw,116px)!important;min-height:27px!important;height:auto!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  padding:2px 6px!important;gap:5px!important;
+  grid-template-columns:none!important;
+  border-radius:999px!important;border:1px solid #c4a56a96!important;
+  background:linear-gradient(120deg,#09271cf6,#030f0af5)!important;
+  box-shadow:0 3px 9px #000a,inset 0 1px #ffe6a52b!important;
+  text-align:left!important;transform:none!important;opacity:1!important;
+ }
+ #game .seat:not(.free){padding:2px 5px!important}
+ #game .seatAvatar{
+  width:clamp(22px,7svh,34px)!important;height:clamp(22px,7svh,34px)!important;
+  min-width:22px!important;flex:0 0 auto!important;
+  border-radius:50%!important;font-size:12px!important;border:1px solid #e7be70!important;
+ }
+ #game .seatBody{min-width:0!important;flex:1!important}
+ #game .seatName{
+  color:#fff8e6!important;font-weight:850!important;
+  font-size:clamp(8px,2.2svh,12px)!important;line-height:1.1!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+ }
+ #game .seatStack{font-size:clamp(7px,2svh,11px)!important;line-height:1.2!important;margin:0!important;color:#ffcf76!important}
+ #game .seatState,#game .connectionState,#game .seatMeta,#game .youTag,
+ #game .adminTag,#game .streakTag,#game .awayBadge,#game .uxDealer{display:none!important}
+ #game .seat.p4{left:50%!important;right:auto!important;top:0!important;bottom:auto!important;transform:translateX(-50%)!important}
+ #game .seat.p0{left:50%!important;right:auto!important;top:auto!important;
+  bottom:clamp(52px,15svh,69px)!important;transform:translateX(-50%)!important}
+ #game .seat.p3{left:16%!important;right:auto!important;top:13%!important;bottom:auto!important;transform:translateX(-50%)!important}
+ #game .seat.p5{left:auto!important;right:16%!important;top:13%!important;bottom:auto!important;transform:translateX(50%)!important}
+ #game .seat.p2{left:3%!important;right:auto!important;top:43%!important;bottom:auto!important;transform:translateY(-50%)!important}
+ #game .seat.p6{left:auto!important;right:3%!important;top:43%!important;bottom:auto!important;transform:translateY(-50%)!important}
+ #game .seat.p1{left:17%!important;right:auto!important;top:auto!important;bottom:18%!important;transform:translateX(-50%)!important}
+ #game .seat.p7{left:auto!important;right:17%!important;top:auto!important;bottom:18%!important;transform:translateX(50%)!important}
+ #game .seat.mine{border:2px solid #ffdf95!important;
+  box-shadow:0 0 0 2px #daa75d55,0 0 15px #dbad55a1,0 3px 9px #000a!important}
+ #game .seat.free{
+  width:clamp(39px,5.5vw,61px)!important;min-height:23px!important;
+  display:grid!important;grid-template-columns:1fr!important;justify-items:center!important;
+  border:1px dashed #ceb6806e!important;padding:3px!important;background:#123b2bb9!important;
+ }
+ #game .seat.free .seatBody{display:none!important}
+ #game .seat.free .seatFreePlus{width:20px!important;height:20px!important;font-size:14px!important}
+ #game .seat.free .inviteSeatMini{display:none!important}
+ #game .seatBacks{position:absolute!important;display:flex!important;gap:2px!important;
+  width:max-content!important;left:50%!important;right:auto!important;
+  top:calc(100% + 3px)!important;bottom:auto!important;transform:translateX(-50%)!important;
+  z-index:28!important;pointer-events:none!important}
+ #game .seatBacks i{width:clamp(19px,3vw,30px)!important;height:clamp(26px,8svh,42px)!important;
+  border:2px solid #f2e3bf!important;border-radius:3px!important;
+  background:repeating-linear-gradient(45deg,#991c28 0 2px,#d3474e 2px 4px,#a3212d 4px 6px)!important;
+  box-shadow:0 2px 4px #000b,inset 0 0 0 2px #a12229!important}
+ #game .seatBacks i::after{font-size:9px!important;line-height:13px!important;inset:4px!important}
+ #game .seat.p4>.seatBacks{left:50%!important;right:auto!important;
+  top:calc(100% + 3px)!important;transform:translateX(-50%)!important}
+ #game .seat.p0>.seatBacks{display:none!important}
+ #game .seat.p1>.seatBacks,#game .seat.p2>.seatBacks,#game .seat.p3>.seatBacks{
+  left:0!important;right:auto!important;top:calc(100% + 3px)!important;transform:none!important}
+ #game .seat.p5>.seatBacks,#game .seat.p6>.seatBacks,#game .seat.p7>.seatBacks{
+  left:auto!important;right:0!important;top:calc(100% + 3px)!important;transform:none!important}
+ #game .centerInfo{
+  position:absolute!important;z-index:8!important;
+  left:50%!important;right:auto!important;top:44%!important;
+  width:clamp(120px,24%,215px)!important;min-width:0!important;max-width:215px!important;
+  max-height:clamp(58px,20svh,87px)!important;
+  min-height:0!important;margin:0!important;padding:5px 7px!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  transform:translate(-50%,-50%)!important;
+  border-radius:clamp(18px,5svh,31px)!important;
+  border:1px solid #cba5608f!important;
+  background:linear-gradient(180deg,#011910ef,#032219e9)!important;
+  box-shadow:0 5px 13px #000a,inset 0 1px #dec18a29!important;
+ }
+ #game .centerInfo #potBig{order:1!important;margin:0!important;padding:0!important;
+  font:900 clamp(11px,3.4svh,19px)/1.05 Georgia,serif!important;
+  color:#f8d78e!important;text-shadow:0 2px 3px #0009!important}
+ #game .centerInfo .potPile{
+  order:2!important;position:relative!important;display:block!important;
+  flex:0 0 auto!important;height:clamp(18px,5svh,29px)!important;
+  min-height:0!important;max-height:29px!important;width:92px!important;
+  margin:0 auto!important;transform:scale(.66)!important;transform-origin:50% 50%!important;
+ }
+ #game .centerInfo .potPile i,#game .centerInfo .potPile .uxPotChip{
+  width:22px!important;height:12px!important;border-width:2px!important;
+ }
+ #game .centerInfo #bankInfo{order:3!important;display:block!important;
+  width:auto!important;max-width:100%!important;margin:0!important;padding:1px 6px!important;
+  border-radius:8px!important;border:1px solid #c19d654d!important;
+  color:#ffe1a4!important;background:#06130ecf!important;
+  font-size:clamp(7px,2svh,11px)!important;line-height:1.2!important;white-space:nowrap!important;
+ }
+ #game .centerInfo #countdown,#game .centerInfo #fairDealBadge,#game .centerInfo #turnStatus,#game #contributionBoard,
+ #game .centerInfo .supportSummary{display:none!important}
+ #game .centerInfo .svaraJoinBar{max-width:100%!important;max-height:65px!important;overflow:auto!important;
+  min-width:0!important;margin:2px auto!important;padding:2px!important}
+ #game .table #cardDock,#game .table #cardDock:not(.hide){
+  position:absolute!important;z-index:56!important;
+  left:50%!important;right:auto!important;top:auto!important;bottom:clamp(2px,1svh,7px)!important;
+  transform:translateX(-50%)!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:max-content!important;max-width:34%!important;min-width:0!important;
+  min-height:0!important;height:auto!important;margin:0!important;padding:0!important;
+  gap:2px!important;overflow:visible!important;pointer-events:auto!important;
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;grid-area:auto!important;order:initial!important;
+ }
+ #game .table #cardDock.hide,#game .table #cardDock.revealMode{display:none!important}
+ #game #cardDock .cardDockLabel{display:none!important}
+ #game .table #cardDock #myHand,#game .table #cardDock #myHand[class*="handSeat"]{
+  position:static!important;display:flex!important;justify-content:center!important;align-items:center!important;
+  inset:auto!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;
+  width:auto!important;height:auto!important;min-height:0!important;max-width:none!important;
+  margin:0!important;gap:3px!important;transform:none!important;pointer-events:auto!important;
+ }
+ #game .table #cardDock #myHand .card{
+  flex:0 0 auto!important;width:clamp(31px,5vw,50px)!important;
+  min-width:clamp(31px,5vw,50px)!important;max-width:clamp(31px,5vw,50px)!important;
+  height:clamp(41px,13svh,64px)!important;
+  margin:0!important;padding:3px!important;min-height:0!important;
+  border-radius:5px!important;border:2px solid #fff0cf!important;
+  background:linear-gradient(140deg,#fffef7,#e8dfcd)!important;box-shadow:0 3px 7px #000c!important;
+ }
+ #game .table #cardDock #myHand .cardFace{font-size:clamp(11px,4svh,20px)!important}
+ #game .gameActions{
+  position:absolute!important;z-index:130!important;
+  display:block;left:50%!important;right:auto!important;top:auto!important;
+  bottom:clamp(-67px,-17svh,-53px)!important;
+  width:min(92vw,760px)!important;max-width:calc(100vw - 90px)!important;
+  padding:3px!important;margin:0!important;transform:translateX(-50%)!important;
+  border:1px solid #8d674797!important;border-radius:11px!important;
+  background:#040f0bed!important;box-shadow:0 6px 17px #000c!important;
+ }
+ #game .gameActions.hide{display:none!important}
+ #game #roundTurn{display:block!important;min-width:0!important;width:100%!important;
+  font-size:clamp(7px,1.8svh,10px)!important;padding:1px!important;line-height:1.2!important}
+ #game #roundPot,#game #roundBet{display:none!important}
+ #game .roundMeta{padding:0!important;margin:0 0 2px!important;min-height:0!important}
+ #game .gameActions #supportSummary{display:none!important}
+ #game .gameActions .actionButtons{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:clamp(3px,1.4vw,9px)!important;align-items:stretch!important;flex-wrap:nowrap!important;
+ }
+ #game .actionButtons button{
+  display:flex!important;justify-content:center!important;align-items:center!important;
+  min-height:clamp(39px,11svh,55px)!important;
+  padding:3px 2px!important;margin:0!important;
+  white-space:normal!important;word-break:normal!important;
+  font-size:clamp(10px,3svh,16px)!important;line-height:1.05!important;
+  font-weight:900!important;text-align:center!important;
+  border-radius:9px!important;
+  text-shadow:0 1px 2px #0007!important;box-shadow:0 3px 7px #0008,inset 0 1px #ffffff45!important;
+ }
+ #game .actionButtons button[data-action="fold"]{grid-column:1!important;grid-row:1!important;
+  background:linear-gradient(160deg,#b52f36,#72151b)!important;color:#fff0ed!important}
+ #game .actionButtons button[data-action="call"]{grid-column:2!important;grid-row:1!important;
+  background:linear-gradient(160deg,#0fb878,#086847)!important;color:white!important}
+ #game .actionButtons button[data-action="raise"]{grid-column:3!important;grid-row:1!important;
+  background:linear-gradient(160deg,#ffdc79,#b88427)!important;color:#281809!important;text-shadow:none!important}
+ #game .actionButtons button[data-action="reveal"]{grid-column:4!important;grid-row:1!important;
+  background:linear-gradient(160deg,#268ee4,#0e4d92)!important;color:white!important}
+ #game:not(.casinoChatOpen) .gameSide{display:none!important}
+ #game.casinoChatOpen .gameSide{
+  display:grid!important;grid-template-columns:1fr!important;
+  position:relative!important;max-width:780px!important;margin:7px auto!important;
+ }
+ #game .gameSide .tableHistory{max-height:135px!important}
+ #game:not(.casinoSocialOpen) #socialQuickBar{display:none!important}
+ #game.casinoSocialOpen #socialQuickBar{
+  display:flex!important;position:absolute!important;top:38px!important;left:50%!important;
+  transform:translateX(-50%)!important;z-index:500!important;
+  min-width:280px!important;width:max-content!important;max-width:95vw!important;
+  padding:5px!important;
+  flex-wrap:wrap!important;align-items:center!important;justify-content:center!important;
+  background:#05140fec!important;border:1px solid #a88b50!important;border-radius:10px!important;
+ }
+ #game #socialQuickBar .phraseQuick{display:none!important}
+ #game #seats .seat>.seatShowdownCards{
+  position:absolute!important;z-index:72!important;
+  display:flex!important;gap:2px!important;align-items:center!important;
+  width:max-content!important;max-width:none!important;
+  min-height:0!important;margin:0!important;padding:2px!important;
+  top:calc(100% + 4px)!important;bottom:auto!important;
+  left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+  background:#05180ef9!important;border:1px solid #dbba83!important;border-radius:7px!important;
+ }
+ #game #seats .seat>.seatShowdownCards b{
+  flex:0 0 auto!important;width:clamp(18px,3.2vw,26px)!important;
+  min-width:clamp(18px,3.2vw,26px)!important;
+  height:clamp(25px,8svh,35px)!important;font-size:clamp(8px,2.5svh,12px)!important;
+  border-radius:3px!important;
+ }
+ #game #seats .seat.p0>.seatShowdownCards{
+  top:calc(100% + 3px)!important;bottom:auto!important;
+  left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+ }
+ #game #seats .seat.p4>.seatShowdownCards{top:calc(100% + 3px)!important}
+ #game #seats .seat.p1>.seatShowdownCards,#game #seats .seat.p2>.seatShowdownCards,
+ #game #seats .seat.p3>.seatShowdownCards{
+  left:0!important;right:auto!important;top:calc(100% + 3px)!important;transform:none!important
+ }
+ #game #seats .seat.p5>.seatShowdownCards,#game #seats .seat.p6>.seatShowdownCards,
+ #game #seats .seat.p7>.seatShowdownCards{
+  right:0!important;left:auto!important;top:calc(100% + 3px)!important;transform:none!important
+ }
+ #game .table.seatRevealActive .centerInfo{top:44%!important}
+ #game #lastActionFlash{z-index:150!important}
+}
+@media (orientation:landscape) and (max-height:370px) and (max-width:1100px){
+ #game .tableWrap{height:calc(100svh - 111px)!important;min-height:153px!important}
+ #game .table #cardDock #myHand .card{height:clamp(35px,12svh,48px)!important}
+ #game .seat.p0{bottom:44px!important}
+ #game .centerInfo{top:43%!important}
+ #game .seatBacks i{height:clamp(24px,7svh,32px)!important}
+ #game .gameActions{bottom:-61px!important}
+}
+@media (prefers-reduced-motion:reduce){
+ #game #trynkaRotateNotice *,#game .actionButtons button{transition:none!important;animation:none!important}
+}
