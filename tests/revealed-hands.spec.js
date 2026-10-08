@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  */
 test.beforeEach(async ({ page }) => {
   await page.route(/\.js(?:\?|$)/, route => {
-    if (new URL(route.request().url()).pathname.endsWith('/revealed-hands-v99.js')) return route.continue();
+    if (['/revealed-hands-v99.js','/mobile-clean-v107.js','/premium-table-v100.js','/landscape-table-v104.js'].some(p=>new URL(route.request().url()).pathname.endsWith(p))) return route.continue();
     return route.fulfill({ status: 200, contentType: 'application/javascript', body: '' });
   });
   await page.goto('/index.html', { waitUntil: 'load' });
@@ -23,6 +23,8 @@ test.beforeEach(async ({ page }) => {
       '<div class="seatStack">СТІЛ: 339</div><div class="betBadge">ДАВ <b>20</b> ◉</div>' +
       '</div></div>'
     ).join('');
+    window.TRYNKA_ARRANGE_LANDSCAPE_TABLE?.();
+    window.TRYNKA_ARRANGE_ACTIONS_V107?.();
   });
 });
 
