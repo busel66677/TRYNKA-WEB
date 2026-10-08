@@ -1,5 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {bindPullCards} from './card-pull-v109.js';
+import {validateActionSnapshot,uncertainActionError,actionResolvedBySnapshot,pendingActionStorage} from './action-safety-v113.js';
 import {createRoomRecovery} from './room-recovery-v110.js';
 const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
@@ -8,6 +9,26 @@ let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,count
 let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null,gameActionBusy=false;
 let roomRefreshTimer=null,lobbyRefreshTimer=null,roomRenderBusy=false,roomRenderQueued=false,lastTableHistoryAt=0,lastHistoryRoundId=null;
 let releaseCardPull=()=>{};
+const pendingActionStore=pendingActionStorage(window.sessionStorage);
+let pendingAction=pendingActionStore.read();
+function clearPendingAction(){
+  pendingAction=null;
+  pendingActionStore.clear();
+  window.TRYNKA_ACTION_PENDING=false;
+}
+function guardPendingActionButtons(){
+  window.TRYNKA_ACTION_PENDING=Boolean(pendingAction);
+  if(pendingAction)document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
+    b.disabled=true;b.classList.add('actionLocked');
+  });
+}
+function reconcilePendingAction(snapshot){
+  if(!pendingAction||!pendingAction.uncertain)return;
+  if(pendingAction.userId&&user?.id!==pendingAction.userId)return;
+  if(actionResolvedBySnapshot(pendingAction,snapshot,user?.id))clearPendingAction();
+  else guardPendingActionButtons();
+}
+document.addEventListener('trynka:game-state',e=>reconcilePendingAction(e.detail));
 const roomRecovery=createRoomRecovery({
   isOnline:()=>navigator.onLine,
   onRetry:async(rid,token)=>{
@@ -294,6 +315,7 @@ async function acceptSession(session,{restore=true}={}){
   authRestoring=true;
   try{
     user=session.user;
+    if(pendingAction?.userId&&pendingAction.userId!==user.id)clearPendingAction();
     lastAuthUserId=user.id;
     await loadProfile();
     if(restore)await restoreNavState();
@@ -316,6 +338,7 @@ sb.auth.onAuthStateChange((event,session)=>{
     clearTimeout(roomRefreshTimer);
     if(channel){const old=channel;channel=null;sb.removeChannel(old).catch(()=>{});}
     currentRoom=null;currentRound=null;window.TRYNKA_GAME_STATE=null;clearNavState();
+    clearPendingAction();
     lastAuthUserId=null;user=null;profile=null;
     $('logoutBtn')?.classList.add('hide');$('profileBtn')?.classList.add('hide');
     $('me').textContent='Гість';show('login');authView('login');
@@ -532,6 +555,7 @@ function subscribeRoomChannel(id){
 }
 async function openRoom(id){
   id=Number(id);
+  if(pendingAction&&Number(pendingAction.roomId)!==id)clearPendingAction();
   currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';lastTableHistoryAt=0;lastHistoryRoundId=null;
   clearTimeout(roomRefreshTimer);
   const [memberRes,watcherRes]=await Promise.all([
@@ -606,6 +630,7 @@ async function renderRoom(){
     }));
 
     window.TRYNKA_GAME_STATE=snapshot;
+    reconcilePendingAction(snapshot);
     document.dispatchEvent(new CustomEvent('trynka:room-snapshot',{detail:snapshot}));
 
     const mineMember=ps.some(p=>p.user_id===user.id);
@@ -629,6 +654,7 @@ async function renderRoom(){
     }
 
     await renderHand(r,snapshot);
+    guardPendingActionButtons();
     if(version!==roomRenderVersion||currentRoom!==roomId)return;
 
     const finishedRoundId=snapshot.round?.status==='finished'?snapshot.round?.id:null;
@@ -926,7 +952,7 @@ async function renderHand(roomArg,snapshotArg=null){
   if(trail){trail.classList.remove('dealing');trail.innerHTML=''}
 }
 async function renderTableHistory(force=false){if(!$('tableGameHistory')||!user)return;if(!force&&Date.now()-lastTableHistoryAt<30000)return;lastTableHistoryAt=Date.now();const {data:g}=await sb.from('game_history').select('room_name,result,pot,chip_change,finished_at').eq('player_id',user.id).order('finished_at',{ascending:false}).limit(8);$('tableGameHistory').innerHTML=(g||[]).map(x=>{const label=x.result==='win'?'Перемога':x.result==='loss'?'Поразка':x.result==='draw'?'Свара':'Скасовано',cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';return '<div class="sideHistoryRow"><span class="resultDot '+cls+'"></span><div><b>'+label+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</small></div><strong class="'+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉</strong></div>'}).join('')||'<div class="sideHistoryEmpty">Зіграні партії<br>з’являться тут</div>'}
-async function leaveRoom(){roomRecovery.stop();clearCardPull();++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;if(spectatorMode)await sb.rpc('unwatch_room',{p_room:rid});else await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null;spectatorMode=false}if(channel){await sb.removeChannel(channel);channel=null}syncSpectatorUi();show('lobby');await refreshLobby()}
+async function leaveRoom(){clearPendingAction();roomRecovery.stop();clearCardPull();++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;if(spectatorMode)await sb.rpc('unwatch_room',{p_room:rid});else await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null;spectatorMode=false}if(channel){await sb.removeChannel(channel);channel=null}syncSpectatorUi();show('lobby');await refreshLobby()}
 $('leaveRoom').onclick=leaveRoom;
 $('chatForm').onsubmit=async e=>{e.preventDefault();const body=$('chatInput').value.trim();if(!body)return;const {error}=await sb.rpc('send_chat_message',{p_room:currentRoom,p_body:body});if(error)return alert(error.message);$('chatInput').value=''}
 function addMessage(m){if(window.TRYNKA_BLOCKED_USERS?.has?.(m.user_id))return;const p=document.createElement('p');p.dataset.userId=m.user_id||'';p.textContent=(m.profiles?.nickname||profile?.nickname||'Гравець')+': '+m.body;$('messages').appendChild(p);$('messages').scrollTop=$('messages').scrollHeight}
