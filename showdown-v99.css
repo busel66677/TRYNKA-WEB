@@ -1,5 +1,7 @@
 /* v99 — cards that were legally revealed belong to the actual player seat. */
 #game #cardDock.revealMode{display:none!important}
+/* The desktop pot sits too high for cards under the top chair. */
+#game .table.seatRevealActive .centerInfo{top:35%!important}
 #game #seats .seat.showdownSeat{
   overflow:visible!important;
   border-color:rgba(241,212,122,.85)!important;
