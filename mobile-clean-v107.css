@@ -1,0 +1,324 @@
+/* v107 — compact, playable portrait table. No overlapping controls.
+   Fixes real screenshot: tall empty pot, giant wooden rim over buttons, and
+   bottom player/cards collisions. All data remains owned by existing scripts. */
+@media (orientation:portrait) and (max-width:700px){
+ body:has(#game:not(.hide)) > main{
+   padding:5px 5px 18px!important;
+ }
+ #game .gameTop{
+   margin:0 auto 6px!important;
+   min-height:60px!important;
+   max-width:100%!important;
+ }
+ #game .tableWrap{
+   display:flex!important;
+   flex-direction:column!important;
+   align-items:center!important;
+   gap:0!important;
+   padding:12px 11px 10px!important;
+   margin:0 auto 8px!important;
+   width:100%!important;
+   min-height:0!important;
+   height:auto!important;
+   overflow:visible!important;
+   border-radius:19px!important;
+   background:linear-gradient(165deg,#081b13,#040b08)!important;
+ }
+ #game .table{
+   position:relative!important;
+   flex:0 0 auto!important;
+   width:calc(100% - 8px)!important;
+   max-width:490px!important;
+   min-height:450px!important;
+   height:clamp(450px,56svh,494px)!important;
+   max-height:494px!important;
+   margin:2px auto 0!important;
+   border-width:9px!important;
+   border-color:#76401f!important;
+   border-radius:38% / 34%!important;
+   overflow:hidden!important;
+   box-shadow:
+      0 0 0 2px #1b100a,
+      0 0 0 4px #bf8b4d,
+      0 0 0 6px #3e2414,
+      0 8px 0 #180e09,
+      0 12px 20px #000a,
+      inset 0 0 0 2px #ebc782,
+      inset 0 0 0 5px #361c11,
+      inset 0 0 0 8px #824b23,
+      inset 0 0 28px #00150ac9!important;
+ }
+ #game .table::before{
+   inset:10px!important;
+   border-radius:37% / 32%!important;
+ }
+ #game .tableGlow{inset:11px!important;border-radius:37%/32%!important}
+ #game .table::after{
+   top:61%!important;
+   font-size:13px!important;
+   opacity:.7!important;
+   pointer-events:none!important;
+ }
+ #game .dealerBadge{
+   top:8px!important;
+   transform:translateX(-50%) scale(.73)!important;
+   opacity:.8!important;
+ }
+ #game .deckStack{
+   top:37px!important;
+   transform:translateX(-50%) scale(.45)!important;
+ }
+ /* Keep room for folded hands, reveals, and the pot. */
+ #game .seat.p4{
+   top:51px!important;
+   bottom:auto!important;
+ }
+ #game .seat.p3,#game .seat.p5{
+   top:94px!important;
+   bottom:auto!important;
+ }
+ #game .seat.p2,#game .seat.p6{
+   top:49%!important;
+   bottom:auto!important;
+ }
+ #game .seat.p1,#game .seat.p7{
+   top:auto!important;
+   bottom:75px!important;
+ }
+ #game .seat.p0{
+   top:auto!important;
+   bottom:17px!important;
+   left:50%!important;
+   transform:translateX(-50%)!important;
+ }
+ #game .seat:not(.free){
+   min-height:39px!important;
+   padding:3px 5px!important;
+ }
+ #game .seat.free{
+   width:52px!important;
+   min-height:36px!important;
+   padding:3px!important;
+ }
+ #game .seatBacks{
+   gap:2px!important;
+ }
+ #game .seatBacks i{
+   width:19px!important;height:27px!important;
+ }
+ #game .seat.p1>.seatBacks,#game .seat.p2>.seatBacks{
+   bottom:calc(100% + 3px)!important;
+ }
+ #game .seat.p6>.seatBacks,#game .seat.p7>.seatBacks{
+   bottom:calc(100% + 3px)!important;
+ }
+ /* Bank is a small chip tray, not a 250px-tall dark billboard. */
+ #game .centerInfo{
+   top:43%!important;left:50%!important;
+   transform:translate(-50%,-50%)!important;
+   display:flex!important;
+   flex-direction:column!important;
+   justify-content:center!important;
+   align-items:center!important;
+   box-sizing:border-box!important;
+   width:clamp(118px,36%,140px)!important;
+   max-width:140px!important;
+   height:116px!important;
+   min-height:0!important;
+   max-height:116px!important;
+   padding:5px 6px!important;
+   gap:1px!important;
+   border-radius:17px!important;
+   overflow:hidden!important;
+   z-index:7!important;
+ }
+ #game .centerInfo #potBig{
+   display:block!important;
+   order:1!important;
+   width:100%!important;
+   font:900 15px/18px Georgia,serif!important;
+   padding:0!important;margin:0!important;
+   white-space:nowrap!important;
+   text-align:center!important;
+ }
+ #game .centerInfo .potPile{
+   display:block!important;
+   order:2!important;
+   position:relative!important;
+   width:100px!important;
+   height:31px!important;min-height:31px!important;max-height:31px!important;
+   padding:0!important;margin:0 auto!important;
+   flex:0 0 31px!important;
+   transform:scale(.76)!important;
+   transform-origin:center center!important;
+ }
+ #game .centerInfo #bankInfo{
+   display:block!important;
+   order:3!important;
+   width:100%!important;
+   height:auto!important;min-height:0!important;max-height:20px!important;
+   margin:0!important;padding:2px 3px!important;
+   font:700 8px/11px Arial,sans-serif!important;
+   border-radius:6px!important;
+   text-align:center!important;
+   white-space:nowrap!important;
+   overflow:hidden!important;text-overflow:ellipsis!important;
+ }
+ #game .centerInfo #countdown{
+   display:block!important;
+   order:4!important;
+   width:100%!important;
+   min-height:0!important;max-height:18px!important;
+   margin:0!important;padding:1px 2px!important;
+   font:750 8px/12px Arial,sans-serif!important;
+   border-radius:7px!important;
+   white-space:nowrap!important;
+   text-align:center!important;
+   overflow:hidden!important;text-overflow:ellipsis!important;
+ }
+ #game .centerInfo #fairDealBadge{
+   order:5!important;
+   font-size:7px!important;
+   min-height:0!important;
+   margin:0!important;
+   padding:1px 0!important;
+   white-space:nowrap!important;
+ }
+ #game .centerInfo #contributionBoard,
+ #game .centerInfo #revealShowdown{
+   max-height:18px!important;
+ }
+ /* Three actual dealt cards stay between the pot and the owner's chair. */
+ #game .table #cardDock,
+ #game .table #cardDock:not(.hide){
+   position:absolute!important;
+   top:auto!important;
+   bottom:96px!important;
+   left:50%!important;
+   right:auto!important;
+   transform:translateX(-50%)!important;
+   display:flex!important;
+   flex-direction:column!important;
+   align-items:center!important;
+   justify-content:center!important;
+   width:max-content!important;
+   max-width:70%!important;
+   height:64px!important;
+   min-height:64px!important;
+   margin:0!important;
+   padding:2px 5px!important;
+   border-radius:10px!important;
+   overflow:visible!important;
+   z-index:54!important;
+   background:#051a13e8!important;
+ }
+ #game .table #cardDock.hide,
+ #game .table #cardDock.revealMode{display:none!important}
+ #game .table #cardDock #myHand,
+ #game .table #cardDock #myHand[class*="handSeat"]{
+   display:flex!important;
+   align-items:center!important;
+   justify-content:center!important;
+   position:static!important;
+   inset:auto!important;
+   transform:none!important;
+   width:auto!important;
+   height:auto!important;
+   min-height:0!important;
+   gap:3px!important;
+   margin:0!important;
+ }
+ #game .table #cardDock #myHand .card{
+   flex:0 0 42px!important;
+   position:relative!important;
+   transform:none!important;
+   rotate:0deg!important;
+   left:auto!important;top:auto!important;bottom:auto!important;
+   width:42px!important;min-width:42px!important;max-width:42px!important;
+   height:58px!important;min-height:58px!important;max-height:58px!important;
+   margin:0!important;
+   z-index:auto!important;
+ }
+ /* Physical rim ENDS ABOVE the wagering controls. */
+ #game .tableWrap > #gameActions{
+   position:relative!important;
+   display:block!important;
+   box-sizing:border-box!important;
+   inset:auto!important;
+   top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+   transform:none!important;
+   float:none!important;
+   width:100%!important;
+   max-width:490px!important;
+   min-width:0!important;
+   height:auto!important;
+   min-height:0!important;
+   margin:19px auto 0!important;
+   padding:7px!important;
+   border:1px solid #cbaa6b9e!important;
+   border-radius:12px!important;
+   box-shadow:0 7px 19px #000b,inset 0 1px 0 #fff3d01c!important;
+   background:linear-gradient(180deg,#10382b,#061811)!important;
+   overflow:visible!important;
+   z-index:6!important;
+ }
+ #game .tableWrap > #gameActions.hide{display:none!important}
+ #game .tableWrap > #gameActions .roundMeta{
+   position:relative!important;
+   height:auto!important;
+   min-height:21px!important;
+   margin:0 0 6px!important;
+   padding:0!important;
+   display:flex!important;
+   flex-wrap:wrap!important;
+   align-items:center!important;
+   justify-content:space-between!important;
+   gap:4px!important;
+   font-size:10px!important;
+ }
+ #game .tableWrap > #gameActions .actionButtons{
+   display:grid!important;
+   grid-template-columns:repeat(4,minmax(0,1fr))!important;
+   gap:4px!important;
+ }
+ #game .tableWrap > #gameActions .actionButtons button{
+   position:relative!important;
+   width:100%!important;
+   min-width:0!important;
+   min-height:43px!important;
+   height:auto!important;
+   padding:5px 2px!important;
+   border-radius:9px!important;
+   font:850 clamp(9px,2.55vw,11px)/1.2 Arial,sans-serif!important;
+   white-space:normal!important;
+   text-align:center!important;
+   word-break:normal!important;
+   z-index:1!important;
+   pointer-events:auto!important;
+ }
+ #game .tableWrap > #gameActions .supportSummary{
+   margin:0 0 4px!important;
+ }
+ #game .seat>.seatShowdownCards b{
+   width:21px!important;min-width:21px!important;
+   height:30px!important;font-size:9px!important;
+ }
+ #game .table.seatRevealActive .centerInfo{
+   top:43%!important;
+   height:90px!important;max-height:90px!important;
+ }
+ #game .table.seatRevealActive #bankInfo,
+ #game .table.seatRevealActive #countdown,
+ #game .table.seatRevealActive #fairDealBadge{
+   display:none!important;
+ }
+}
+@media (orientation:portrait) and (max-width:380px){
+ #game .table{height:456px!important;min-height:456px!important;max-height:456px!important}
+ #game .centerInfo{width:124px!important;max-width:124px!important}
+ #game .table #cardDock{bottom:96px!important}
+ #game .table #cardDock #myHand .card{
+   width:39px!important;min-width:39px!important;max-width:39px!important;
+   flex-basis:39px!important;height:56px!important;min-height:56px!important;max-height:56px!important
+ }
+}
