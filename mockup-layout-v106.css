@@ -3,7 +3,8 @@
 
 /* The approved reference was portrait-first. Never force a handset to rotate
    just to access the game; landscape/fullscreen stays optional. */
-#game #trynkaRotateNotice{display:none!important}
+#game #trynkaRotateNotice,
+#game:not(.hide):not(.portraitAllowed) #trynkaRotateNotice{display:none!important}
 #game{--reference-gold:#ebca79;--reference-felt:#085d41}
 #game .gameTop{
   isolation:isolate!important;z-index:1000!important;position:relative!important;
