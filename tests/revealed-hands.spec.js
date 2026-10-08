@@ -86,6 +86,7 @@ test('revealed cards stay beside each seat without covering the bank or controls
       expect(rect.x + rect.width).toBeLessThanOrEqual(table.x + table.width + 2);
       expect(rect.y).toBeGreaterThanOrEqual(table.y - 2);
       expect(rect.y + rect.height).toBeLessThanOrEqual(table.y + table.height + 2);
+      if (overlaps(rect, bank, 1)) console.log('BANK_COLLISION', JSON.stringify({pair:[left,right], seat:await cardsOfSeat.locator('xpath=..').getAttribute('data-user-id'), rect, bank}));
       expect(overlaps(rect, bank, 1)).toBe(false);
       expect(overlaps(rect, actions, 1)).toBe(false);
       // Must be in the immediate neighborhood of its player's badge.

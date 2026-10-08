@@ -7,9 +7,10 @@ import { test, expect } from '@playwright/test';
  * Two-player gameplay/integration tests need separate staging accounts/DB.
  */
 test.beforeEach(async ({ page }) => {
-  await page.route(/\.js(?:\?|$)/, route => route.fulfill({
-    status: 200, contentType: 'application/javascript', body: '',
-  }));
+  await page.route(/\.js(?:\?|$)/, route => {
+    if (new URL(route.request().url()).pathname.endsWith('/premium-table-v100.js')) return route.continue();
+    return route.fulfill({ status: 200, contentType: 'application/javascript', body: '' });
+  });
   await page.goto('/index.html', { waitUntil: 'load' });
   await page.evaluate(() => {
     const game = document.getElementById('game');
