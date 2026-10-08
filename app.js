@@ -1,5 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {bindPullCards} from './card-pull-v109.js';
+import {createRoomRecovery} from './room-recovery-v110.js';
 const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}});
@@ -7,6 +8,28 @@ let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,count
 let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null,gameActionBusy=false;
 let roomRefreshTimer=null,lobbyRefreshTimer=null,roomRenderBusy=false,roomRenderQueued=false,lastTableHistoryAt=0,lastHistoryRoundId=null;
 let releaseCardPull=()=>{};
+const roomRecovery=createRoomRecovery({
+  isOnline:()=>navigator.onLine,
+  onRetry:async(rid,token)=>{
+    if(currentRoom!==rid||!user||$('game')?.classList.contains('hide'))return;
+    const old=channel;
+    channel=null;
+    // Remove the stale Realtime channel before establishing a new subscription.
+    if(old){try{await sb.removeChannel(old)}catch{}}
+    if(currentRoom!==rid||roomRecovery.generation!==token)return;
+    subscribeRoomChannel(rid);
+    scheduleRoomRefresh(60);
+  }
+});
+let roomHiddenAt=0;
+window.addEventListener('online',()=>{if(currentRoom)roomRecovery.retryNow()});
+window.addEventListener('pageshow',e=>{if(e.persisted&&currentRoom)roomRecovery.retryNow()});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){roomHiddenAt=Date.now();return}
+  if(currentRoom&&roomHiddenAt&&Date.now()-roomHiddenAt>25000)roomRecovery.retryNow();
+  roomHiddenAt=0;
+});
+
 function clearCardPull(){releaseCardPull();releaseCardPull=()=>{}}
 const $=id=>document.getElementById(id), sections=['login','lobby','profile','create','game'];
 window.addEventListener('trynka:deal-start',()=>{
@@ -311,6 +334,7 @@ async function loadProfile(){
 let moderationCheckBusy=false;
 async function forceSessionExit(message){
   clearTimeout(roomRefreshTimer);clearInterval(heartbeat);clearInterval(lobbyPollTimer);
+  roomRecovery.stop();
   if(channel){try{await sb.removeChannel(channel)}catch{} channel=null}
   currentRoom=null;currentRound=null;window.TRYNKA_GAME_STATE=null;clearNavState();
   if(message)alert(message);
@@ -483,6 +507,25 @@ function scheduleRoomRefresh(delay=120){
   clearTimeout(roomRefreshTimer);
   roomRefreshTimer=setTimeout(()=>renderRoom(),delay);
 }
+function subscribeRoomChannel(id){
+  const token=roomRecovery.activate(id);
+  const ch=sb.channel('room-'+id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(100))
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(100))
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(1800))
+    .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+id},()=>scheduleRoomRefresh(120))
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_hands',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(80))
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+id},p=>addMessage(p.new))
+    .on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(80));
+  channel=ch;
+  ch.subscribe(status=>{
+    const isSubscribed=roomRecovery.onStatus(id,token,status);
+    if(isSubscribed&&currentRoom===id){
+      document.dispatchEvent(new CustomEvent('trynka:room-channel-ready',{detail:{roomId:id}}));
+      scheduleRoomRefresh(70);
+    }
+  });
+}
 async function openRoom(id){
   id=Number(id);
   currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';lastTableHistoryAt=0;lastHistoryRoundId=null;
@@ -498,17 +541,10 @@ async function openRoom(id){
   setSpectatorMode(!memberRes.data&&!!watcherRes.data,{persist:false});
   show('game');
   setSpectatorMode(spectatorMode);
-  if(channel)await sb.removeChannel(channel);
+  roomRecovery.stop();
+  if(channel){const old=channel;channel=null;try{await sb.removeChannel(old)}catch{}}
   if(currentRoom!==id)return;
-  channel=sb.channel('room-'+id)
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(100))
-    .on('postgres_changes',{event:'DELETE',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(100))
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'room_players',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(1800))
-    .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+id},()=>scheduleRoomRefresh(120))
-    .on('postgres_changes',{event:'*',schema:'public',table:'room_hands',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(80))
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+id},p=>addMessage(p.new))
-    .on('postgres_changes',{event:'*',schema:'public',table:'game_rounds',filter:'room_id=eq.'+id},()=>scheduleRoomRefresh(80))
-    .subscribe();
+  subscribeRoomChannel(id);
   await renderRoom();
 }
 async function renderRoom(){
@@ -524,6 +560,7 @@ async function renderRoom(){
       const msg=String(error?.message||'');
       if(msg.includes('Not at this table')||(!error&&!snapshot?.room)){
         clearTimeout(roomRefreshTimer);
+        roomRecovery.stop();
         if(channel){try{await sb.removeChannel(channel)}catch{} channel=null}
         currentRoom=null;currentRound=null;window.TRYNKA_GAME_STATE=null;clearNavState();
         show('lobby');
@@ -885,7 +922,7 @@ async function renderHand(roomArg,snapshotArg=null){
   if(trail){trail.classList.remove('dealing');trail.innerHTML=''}
 }
 async function renderTableHistory(force=false){if(!$('tableGameHistory')||!user)return;if(!force&&Date.now()-lastTableHistoryAt<30000)return;lastTableHistoryAt=Date.now();const {data:g}=await sb.from('game_history').select('room_name,result,pot,chip_change,finished_at').eq('player_id',user.id).order('finished_at',{ascending:false}).limit(8);$('tableGameHistory').innerHTML=(g||[]).map(x=>{const label=x.result==='win'?'Перемога':x.result==='loss'?'Поразка':x.result==='draw'?'Свара':'Скасовано',cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';return '<div class="sideHistoryRow"><span class="resultDot '+cls+'"></span><div><b>'+label+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</small></div><strong class="'+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉</strong></div>'}).join('')||'<div class="sideHistoryEmpty">Зіграні партії<br>з’являться тут</div>'}
-async function leaveRoom(){clearCardPull();++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;if(spectatorMode)await sb.rpc('unwatch_room',{p_room:rid});else await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null;spectatorMode=false}if(channel){await sb.removeChannel(channel);channel=null}syncSpectatorUi();show('lobby');await refreshLobby()}
+async function leaveRoom(){roomRecovery.stop();clearCardPull();++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;if(spectatorMode)await sb.rpc('unwatch_room',{p_room:rid});else await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null;spectatorMode=false}if(channel){await sb.removeChannel(channel);channel=null}syncSpectatorUi();show('lobby');await refreshLobby()}
 $('leaveRoom').onclick=leaveRoom;
 $('chatForm').onsubmit=async e=>{e.preventDefault();const body=$('chatInput').value.trim();if(!body)return;const {error}=await sb.rpc('send_chat_message',{p_room:currentRoom,p_body:body});if(error)return alert(error.message);$('chatInput').value=''}
 function addMessage(m){if(window.TRYNKA_BLOCKED_USERS?.has?.(m.user_id))return;const p=document.createElement('p');p.dataset.userId=m.user_id||'';p.textContent=(m.profiles?.nickname||profile?.nickname||'Гравець')+': '+m.body;$('messages').appendChild(p);$('messages').scrollTop=$('messages').scrollHeight}
