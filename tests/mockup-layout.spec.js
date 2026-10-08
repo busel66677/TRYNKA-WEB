@@ -58,7 +58,8 @@ for(const [width,height] of [[360,800],[393,873],[430,932]]){
     expect(table.width).toBeLessThan(width-10);
     expect(table.height).toBeGreaterThan(440);
     expect(table.height).toBeLessThanOrEqual(500);
-    expect(table.height).toBeGreaterThan(table.width*1.25);
+    // The updated premium rail is deliberately flatter, not a vertical egg.
+    expect(table.height).toBeGreaterThan(table.width*1.18);
     expect(bank.y).toBeGreaterThan(table.y+45);
     expect(dock.y).toBeGreaterThan(actions.y+actions.height);
     expect(await page.locator('#cardDock').evaluate(el=>el.parentElement.id)).toBe('playerHandTray');

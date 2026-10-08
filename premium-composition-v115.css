@@ -1,0 +1,355 @@
+/* TRYNKA v115 | Casino editorial pass — coherent emerald / walnut / champagne-gold.
+ * Cosmetic only. Existing DOM movers own #gameActions / #cardDock, existing
+ * state code owns turns, stakes, hands and revealed rivals. */
+#game {
+ --casino-gold:#e9c982;
+ --casino-ivory:#fff1cd;
+ --casino-emerald:#086343;
+ --casino-dark:#051711;
+ --casino-walnut:#6c3217;
+ color:#fff3d4;
+}
+body:has(#game:not(.hide)){
+ background:
+   radial-gradient(ellipse 75% 46% at 50% 8%,rgba(25,95,66,.35),transparent 84%),
+   repeating-linear-gradient(100deg,rgba(236,195,112,.02) 0 1px,transparent 1px 26px),
+   linear-gradient(145deg,#020a08,#0b1f17 46%,#030806)!important;
+}
+#game .gameTop{
+ background:linear-gradient(105deg,#0b271d,#082018 48%,#04130f)!important;
+ border:1px solid #ddbb7c8a!important;
+ box-shadow:inset 0 1px 0 #ffe6a928,0 9px 27px #000c!important;
+}
+#game .gameIdentity h2{
+ font-family:Georgia,'Times New Roman',serif!important;
+ color:#ffe1a0!important;
+ letter-spacing:.045em!important;
+ text-shadow:0 2px 6px #000d!important;
+}
+#game #leaveRoom,#game #premiumMoreBtn{
+ background:linear-gradient(150deg,#214333,#071b13)!important;
+ border:1px solid #d6b8738f!important;
+ color:#ffdead!important;
+ box-shadow:inset 0 1px 0 #fff0c32c,0 2px 7px #0007!important;
+}
+#game #premiumMoreBtn:hover,#game #leaveRoom:hover{filter:brightness(1.15)!important}
+#game .gameWallet{
+ color:#ffe3a5!important;
+ background:linear-gradient(140deg,#173d2b,#04180f)!important;
+ border:1px solid #c6a15f!important;
+ box-shadow:inset 0 1px 0 #fff9ce2c,0 2px 7px #0008!important;
+}
+#game .tableWrap{
+ background:
+   radial-gradient(ellipse 68% 30% at 50% 12%,#1773522a,transparent),
+   linear-gradient(165deg,#0c251b,#07140e 65%,#030c08)!important;
+ border:1px solid #8d784d55!important;
+ box-shadow:inset 0 1px 0 #ffe1a51b,0 14px 30px #0009!important;
+}
+/* Subtle woven felt, real wood rail and recessed gilded inner ring. */
+#game .table{
+ background:
+   radial-gradient(ellipse 70% 65% at 50% 40%,#18855e 0%,#0b6d4b 44%,#065239 72%,#032c21 100%),
+   repeating-linear-gradient(26deg,#ffffff05 0 1px,transparent 1px 5px)!important;
+ border-color:#713518!important;
+ box-shadow:
+   0 0 0 2px #2c160e,
+   0 0 0 5px #c99355,
+   0 0 0 8px #4b2715,
+   0 0 0 10px #1d100a,
+   0 10px 0 #150d09,
+   0 18px 32px #000d,
+   inset 0 0 0 2px #fae1a9,
+   inset 0 0 0 5px #40210d,
+   inset 0 0 0 8px #d0a76b,
+   inset 0 0 35px #001a12bd,
+   inset 0 2px 36px #75ffd316!important;
+}
+#game .table::before{
+ border:1px solid #f4d99a6e!important;
+ background:
+   radial-gradient(ellipse 58% 52% at 48% 38%,#e0faba0a,transparent 83%),
+   repeating-linear-gradient(68deg,transparent 0 5px,#fff9c703 5px 6px)!important;
+ box-shadow:
+   inset 0 0 0 2px #063625db,
+   inset 0 0 0 4px #c8ab533a,
+   inset 0 0 30px #00170db8!important;
+ pointer-events:none!important;
+}
+#game .tableGlow{pointer-events:none!important;opacity:.6!important}
+#game .table::after{
+ content:'♠   T R Y N K A'!important;
+ font-family:Georgia,'Times New Roman',serif!important;
+ color:#f9e2a337!important;
+ text-shadow:0 2px 4px #002314!important;
+ letter-spacing:.11em!important;
+ pointer-events:none!important;
+}
+#game .dealerBadge{
+ filter:drop-shadow(0 3px 6px #000a)!important;
+ color:#fbe3a4!important;
+}
+#game .seat:not(.free){
+ background:linear-gradient(145deg,#1b4733f5,#0a2d20f7 61%,#03160ff5)!important;
+ border:1px solid #efce8abf!important;
+ box-shadow:0 5px 12px #000c,inset 0 1px 0 #fff4c02c!important;
+ color:#fff1cc!important;
+}
+#game .seat .seatAvatar{
+ background:radial-gradient(circle at 30% 25%,#8caa7a,#2f6445 38%,#0c2c1d 79%)!important;
+ border:1px solid #f1d590!important;
+ color:#fff0c6!important;
+ box-shadow:0 2px 5px #000a,inset 0 1px 0 #ffffff4a!important;
+}
+#game .seatName{
+ color:#fff9e8!important;
+ font-weight:900!important;
+ text-shadow:0 1px 2px #001510!important;
+}
+#game .seatStack{color:#f0c976!important;font-weight:800!important}
+#game .seat.turnActive,#game .seat.mine,#game .seat.premiumTurn{
+ border-color:#ffe5a4!important;
+ box-shadow:0 0 0 2px #f4ce6d4b,0 0 15px #efc75f7c,0 5px 12px #000c!important;
+}
+#game .seat.free{
+ background:linear-gradient(140deg,#206547b6,#0a3b2ab0)!important;
+ border:1px dashed #ddbf80aa!important;
+ box-shadow:inset 0 0 16px #041a11a5!important;
+ opacity:.95!important;
+}
+#game .seat.free .seatFreePlus{
+ background:radial-gradient(circle at 30% 20%,#346d4d,#103523)!important;
+ color:#ffdf9d!important;
+ border:1px solid #dbc182!important;
+}
+#game .seat .betBadge:not(.hide){
+ background:#041e15e8!important;
+ border:1px solid #ceb16e96!important;
+ color:#e8debf!important;
+}
+#game #seats .seat>.seatShowdownCards{
+ background:#031912f5!important;
+ border:1px solid #e8ca8c!important;
+ box-shadow:0 3px 9px #000d!important;
+}
+/* The bank is an inset chip display, not a solid black popup. */
+#game .centerInfo{
+ background:linear-gradient(155deg,#15553dce,#05291ddc 78%,#031a13e8)!important;
+ border:1px solid #f2d79ba8!important;
+ box-shadow:inset 0 1px 0 #fff5cf3d,inset 0 0 14px #166b4a54,0 5px 14px #00140db9!important;
+ backdrop-filter:blur(3px)!important;
+}
+#game .centerInfo #potBig{
+ color:#ffe3a2!important;
+ font-family:Georgia,'Times New Roman',serif!important;
+ font-weight:900!important;
+ text-shadow:0 2px 3px #000c!important;
+}
+#game .centerInfo #bankInfo{
+ background:#03211797!important;
+ border:1px solid #cba86c76!important;
+ color:#e9e1cc!important;
+}
+#game .centerInfo #countdown{
+ color:#f5e2ad!important;
+ font-weight:800!important;
+ text-shadow:0 1px 2px #000b!important;
+}
+#game .centerInfo .potPile{
+ filter:drop-shadow(0 3px 3px #0009)!important;
+}
+#game .centerInfo .potPile i,
+#game .centerInfo .potPile .uxPotChip{
+ border-color:#f5dcb8!important;
+ box-shadow:0 3px 0 #531b1e,0 6px 0 #3a1116,0 8px 4px #000a!important;
+}
+#game .gameActions{
+ background:linear-gradient(160deg,#133d2df9,#061b13fc 71%,#03110b)!important;
+ border:1px solid #d9b976ad!important;
+ box-shadow:inset 0 1px 0 #fff0c127,0 8px 18px #000c!important;
+}
+#game .roundMeta{
+ color:#f3ddb0!important;
+}
+#game .actionButtons button{
+ min-height:46px!important;
+ border:1px solid #ffe6b46b!important;
+ border-radius:11px!important;
+ box-shadow:inset 0 1px 0 #ffffff50,0 4px 8px #000b!important;
+ text-shadow:0 1px 2px #000a!important;
+ transition:filter .16s ease,box-shadow .16s ease!important;
+}
+#game .actionButtons button:not(:disabled):active{
+ filter:brightness(1.15)!important;
+ box-shadow:inset 0 2px 5px #0009!important;
+}
+#game .actionButtons button:disabled{opacity:.51!important;filter:saturate(.55)!important}
+#game .actionButtons button[data-action="call"]{
+ background:linear-gradient(160deg,#219d73,#06583f)!important;
+}
+#game .actionButtons button[data-action="raise"]{
+ background:linear-gradient(160deg,#f3ce79,#b17d2c)!important;
+ color:#231409!important;
+ text-shadow:none!important;
+}
+#game .actionButtons button[data-action="reveal"]{
+ background:linear-gradient(160deg,#346fb0,#173f73)!important;
+}
+#game .actionButtons button[data-action="fold"]{
+ background:linear-gradient(160deg,#ac4547,#662025)!important;
+}
+#game #playerHandTray{
+ background:linear-gradient(160deg,#124432,#06271c 59%,#04160e)!important;
+ border:1px solid #d9be80ab!important;
+ box-shadow:inset 0 1px 0 #fff6d42d,0 8px 19px #000c!important;
+}
+#game #playerHandTray .cardDockLabel{
+ color:#f8da9e!important;
+ text-shadow:0 2px 3px #00140c!important;
+ letter-spacing:.12em!important;
+}
+#game #playerHandTray .pullCard{
+ border-color:#f9ebc6!important;
+ background:#fffaf0!important;
+ box-shadow:0 7px 13px #000a,0 0 0 1px #af8a4f!important;
+}
+#game #playerHandTray .pullCard.pulling{
+ box-shadow:0 10px 20px #000c,0 0 0 2px #f0d887!important;
+}
+#game .gameSide .panel{
+ border-color:#9f88544d!important;
+ background:#081c14f2!important;
+ box-shadow:inset 0 1px 0 #ffe4a30a!important;
+}
+#game .gameSide .panel h3{color:#f2cc80!important}
+
+/* Proportional Android-first composition. The three-card tray remains BELOW
+   the wagering panel; neither gets absorbed into the felt. */
+@media (orientation:portrait) and (max-width:700px){
+ #game .gameTop{
+   min-height:62px!important;
+   margin:0 auto 8px!important;
+   border-radius:14px!important;
+ }
+ #game .gameTop .gameIdentity h2{font-size:clamp(13px,3.9vw,17px)!important}
+ #game .tableWrap{
+   padding:13px 9px 11px!important;
+   border-radius:18px!important;
+   gap:0!important;
+ }
+ #game .table{
+   width:calc(100% - 7px)!important;
+   min-height:450px!important;
+   height:clamp(452px,56svh,482px)!important;
+   max-height:482px!important;
+   border-width:9px!important;
+   border-radius:42% / 34%!important;
+ }
+ #game .table::before{
+   inset:10px!important;
+   border-radius:41%/33%!important;
+ }
+ #game .tableGlow{inset:10px!important;border-radius:41%/33%!important}
+ #game .table::after{top:65%!important;font-size:11px!important;opacity:.67!important}
+ #game .dealerBadge{top:8px!important;opacity:.95!important}
+ #game .seat:not(.free){
+   width:clamp(79px,24vw,100px)!important;
+   min-height:40px!important;
+   padding:3px 5px!important;
+   border-radius:12px!important;
+ }
+ #game .seat.free{
+   width:51px!important;
+   min-height:36px!important;
+   border-radius:12px!important;
+ }
+ #game .seatAvatar{
+   width:25px!important;height:25px!important;min-width:25px!important;
+ }
+ #game .seat.p0{bottom:13px!important}
+ #game .seat.p1,#game .seat.p7{bottom:79px!important}
+ #game .seat.p3,#game .seat.p5{top:94px!important}
+ #game .seat.p4{top:53px!important}
+ #game .seat.p2,#game .seat.p6{top:51%!important}
+ #game .centerInfo{
+   top:42.5%!important;
+   height:105px!important;
+   max-height:105px!important;
+   min-height:0!important;
+   width:clamp(120px,35.5%,142px)!important;
+   max-width:142px!important;
+   padding:6px 5px!important;
+   gap:1px!important;
+   border-radius:19px!important;
+   overflow:hidden!important;
+ }
+ #game .table.seatRevealActive .centerInfo{
+   top:46%!important;
+   height:90px!important;
+   max-height:90px!important;
+ }
+ #game .centerInfo #potBig{
+   font-size:14px!important;
+   line-height:18px!important;
+   letter-spacing:-.01em!important;
+ }
+ #game .centerInfo .potPile{
+   flex:0 0 30px!important;
+   height:30px!important;
+   max-height:30px!important;
+   transform:scale(.7)!important;
+ }
+ #game .centerInfo #bankInfo{
+   font-size:8px!important;
+   min-height:0!important;
+ }
+ #game .centerInfo #countdown{
+   font-size:8px!important;
+ }
+ #game .tableWrap > #gameActions{
+   order:1!important;
+   position:relative!important;
+   margin:18px auto 0!important;
+   padding:8px 6px!important;
+   border-radius:12px!important;
+   width:100%!important;
+ }
+ #game .tableWrap > #gameActions .actionButtons{
+   grid-template-columns:repeat(4,minmax(0,1fr))!important;
+   gap:5px!important;
+ }
+ #game .tableWrap > #gameActions .actionButtons button{
+   min-height:47px!important;
+   padding:6px 2px!important;
+   font-size:clamp(9px,2.55vw,11px)!important;
+   line-height:1.18!important;
+   white-space:normal!important;
+   word-break:normal!important;
+   border-radius:10px!important;
+ }
+ #game .tableWrap > #playerHandTray{
+   order:10!important;
+   margin:10px auto 2px!important;
+   padding:7px 5px 8px!important;
+   border-radius:15px!important;
+ }
+ #game .tableWrap > #playerHandTray #myHand{
+   gap:clamp(7px,2vw,13px)!important;
+   min-height:122px!important;
+ }
+ #game .tableWrap > #playerHandTray #myHand .pullCard{
+   transform-origin:50% 90%!important;
+ }
+ #game .tableWrap > #playerHandTray #cardDock .cardDockLabel{
+   font-size:10px!important;
+   letter-spacing:.10em!important;
+ }
+}
+@media (orientation:portrait) and (max-width:375px){
+ #game .centerInfo{top:43%!important;width:120px!important}
+ #game .table{height:452px!important;min-height:452px!important}
+ #game .tableWrap > #gameActions .actionButtons{gap:3px!important}
+}
+@media (prefers-reduced-motion:reduce){
+ #game .actionButtons button{transition:none!important}
+}
