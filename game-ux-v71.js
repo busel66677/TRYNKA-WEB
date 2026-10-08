@@ -115,18 +115,8 @@ async function paintReveal(state){
     if(tFold&&!aFold){targetSeat?.classList.add('uxRevealLoser');actorSeat?.classList.add('uxRevealWinner')}
   }
 
-  try{
-    const {data,error}=await sb.rpc('get_revealed_hands',{p_room:Number(state.room?.id)});
-    if(!error){
-      for(const row of data||[]){
-        const seat=document.querySelector('#seats .seat.s'+row.seat_no);if(!seat||!row.cards?.length)continue;
-        const box=document.createElement('div');box.className='uxRevealHand';
-        box.innerHTML=row.cards.map(c=>'<b class="'+(/[♥♦]/.test(c)?'red':'black')+'">'+esc(c)+'</b>').join('');
-        seat.appendChild(box);
-        requestAnimationFrame(()=>box.classList.add('show'));
-      }
-    }
-  }catch{}
+  // The single seat-bound renderer in revealed-hands-v99.js owns the cards.
+  // Keep only turn/win/tie highlighting here; no second overlay or RPC.
   revealTimer=setTimeout(clearReveal,g.status==='finished'?6500:4300);
 }
 function paintSvaraTheme(state){

@@ -1,0 +1,119 @@
+/* v99 — cards that were legally revealed belong to the actual player seat. */
+#game #cardDock.revealMode{display:none!important}
+/* The desktop pot sits too high for cards under the top chair. */
+#game .table.seatRevealActive .centerInfo{top:35%!important}
+#game #seats .seat.showdownSeat{
+  overflow:visible!important;
+  border-color:rgba(241,212,122,.85)!important;
+  z-index:58!important;
+}
+#game #seats .seat > .seatShowdownCards{
+  position:absolute!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:max-content!important;
+  max-width:none!important;
+  height:auto!important;
+  gap:3px!important;
+  padding:4px!important;
+  margin:0!important;
+  border:1px solid rgba(245,213,122,.88)!important;
+  border-radius:9px!important;
+  background:#07130fe8!important;
+  box-shadow:0 7px 18px rgba(0,0,0,.6),0 0 11px rgba(228,199,98,.18)!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  z-index:75!important;
+  white-space:nowrap!important;
+}
+#game #seats .seat > .seatShowdownCards b{
+  position:static!important;
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 auto!important;
+  width:31px!important;
+  height:43px!important;
+  min-width:31px!important;
+  margin:0!important;
+  padding:1px!important;
+  border-radius:5px!important;
+  border:1px solid #e1d6c5!important;
+  background:linear-gradient(145deg,#fffef9,#eee9dd)!important;
+  box-shadow:0 3px 6px #0005!important;
+  color:#101615!important;
+  font:bold 12px/1 Arial,sans-serif!important;
+}
+#game #seats .seat > .seatShowdownCards b.red{color:#c42235!important}
+/* Desktop table: cards radiate inwards from each matching chair. */
+#game #seats .seat.s0 > .seatShowdownCards{
+  left:50%!important;right:auto!important;
+  bottom:calc(100% + 5px)!important;top:auto!important;
+  transform:translateX(-50%)!important;
+}
+#game #seats .seat.s3 > .seatShowdownCards{
+  left:50%!important;right:auto!important;
+  top:calc(100% + 5px)!important;bottom:auto!important;
+  transform:translateX(-50%)!important;
+}
+#game #seats .seat.s1 > .seatShowdownCards,
+#game #seats .seat.s2 > .seatShowdownCards,
+#game #seats .seat.s6 > .seatShowdownCards{
+  left:calc(100% + 5px)!important;right:auto!important;
+  top:50%!important;bottom:auto!important;
+  transform:translateY(-50%)!important;
+}
+#game #seats .seat.s4 > .seatShowdownCards,
+#game #seats .seat.s5 > .seatShowdownCards,
+#game #seats .seat.s7 > .seatShowdownCards{
+  right:calc(100% + 5px)!important;left:auto!important;
+  top:50%!important;bottom:auto!important;
+  transform:translateY(-50%)!important;
+}
+@media(max-width:650px){
+  #game #seats .seat > .seatShowdownCards{
+    padding:3px!important;gap:2px!important;
+    border-radius:7px!important;
+  }
+  #game #seats .seat > .seatShowdownCards b{
+    width:23px!important;height:33px!important;min-width:23px!important;
+    font-size:10px!important;border-radius:4px!important;
+  }
+  /* Avoid top and bottom revealed rows touching the centre bank. */
+  #game .table.seatRevealActive .centerInfo{top:48%!important}
+  /* Lower centre. */
+  #game #seats .seat.p0 > .seatShowdownCards{
+    left:50%!important;right:auto!important;top:auto!important;
+    bottom:calc(100% + 5px)!important;transform:translateX(-50%)!important;
+  }
+  /* Bottom-left and middle-left — inside the left felt margin. */
+  #game #seats .seat.p1 > .seatShowdownCards,
+  #game #seats .seat.p2 > .seatShowdownCards{
+    left:0!important;right:auto!important;top:auto!important;
+    bottom:calc(100% + 5px)!important;transform:none!important;
+  }
+  /* Upper left / upper right — directly below the nameplate. */
+  #game #seats .seat.p3 > .seatShowdownCards{
+    left:0!important;right:auto!important;
+    top:calc(100% + 5px)!important;bottom:auto!important;
+    transform:none!important;
+  }
+  #game #seats .seat.p4 > .seatShowdownCards{
+    left:50%!important;right:auto!important;
+    top:calc(100% + 5px)!important;bottom:auto!important;
+    transform:translateX(-50%)!important;
+  }
+  #game #seats .seat.p5 > .seatShowdownCards{
+    right:0!important;left:auto!important;
+    top:calc(100% + 5px)!important;bottom:auto!important;
+    transform:none!important;
+  }
+  /* Middle-right and bottom-right — inside the right felt margin. */
+  #game #seats .seat.p6 > .seatShowdownCards,
+  #game #seats .seat.p7 > .seatShowdownCards{
+    right:0!important;left:auto!important;top:auto!important;
+    bottom:calc(100% + 5px)!important;transform:none!important;
+  }
+}

@@ -1,11 +1,11 @@
+import { paintRevealedHands } from './revealed-hands-v99.js';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('Missing config');
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
-const dockEsc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
 let me=null,busy=false,standing=false,currentRoom=null;
-let timerState=null,lastSeatState='',lastOpenState='',lastTimerText='',lastSeated=null,lastTurnNoticeKey='',audioCtx=null;
+let timerState=null,lastSeatState='',lastTimerText='',lastSeated=null,lastTurnNoticeKey='',audioCtx=null;
 
 async function getMe(){
   if(me)return me;
@@ -112,7 +112,7 @@ function mountStand(){
       }
       window.TRYNKA_STANDUP_GUARD={roomId:rid,userId:me?.id,until:Date.now()+10000};
       lastSeatState='';
-      lastOpenState='';
+      
       lastSeated=false;
       syncStand(false);
       paintOpenHands([]);
@@ -264,35 +264,7 @@ function updateSupportUi(g,ps,r,mySeat){
 }
 
 function paintOpenHands(rows){
-  const dock=$('revealDock');
-  const cardDock=$('cardDock');
-  document.querySelectorAll('#seats .openHand').forEach(x=>x.remove());
-  document.querySelectorAll('#seats .seat.revealPairSeat').forEach(x=>x.classList.remove('revealPairSeat'));
-  if(!dock)return;
-
-  const clean=(rows||[]).filter(r=>Array.isArray(r.cards)&&r.cards.length);
-  const sig=JSON.stringify(clean.map(r=>[r.user_id,r.nickname,r.cards]));
-  if(clean.length&&sig===lastOpenState&&dock.querySelectorAll('.revealDockRow').length===clean.length)return;
-  lastOpenState=sig;
-
-  if(!clean.length){
-    dock.innerHTML='';
-    dock.classList.add('hide');
-    cardDock?.classList.remove('revealMode');
-    return;
-  }
-
-  dock.innerHTML=clean.map(r=>
-    '<div class="revealDockRow">'+
-      '<span>'+dockEsc(r.user_id===me?.id?'ВИ':(r.nickname||'СУПЕРНИК'))+'</span>'+
-      '<div class="revealDockCards">'+r.cards.map(card=>
-        '<b class="'+((card.includes('♥')||card.includes('♦'))?'red':'')+'">'+dockEsc(card)+'</b>'
-      ).join('')+'</div>'+
-    '</div>'
-  ).join('');
-  dock.classList.remove('hide');
-  cardDock?.classList.remove('hide');
-  cardDock?.classList.add('revealMode');
+  paintRevealedHands(rows);
 }
 async function syncUi(){
   if(busy||$('game')?.classList.contains('hide'))return;
@@ -306,7 +278,7 @@ async function syncUi(){
     mountGameInfo();
 
     if(!currentRoom){
-      timerState=null;lastSeatState='';lastOpenState='';
+      timerState=null;lastSeatState='';
       return;
     }
 
