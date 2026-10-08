@@ -737,3 +737,161 @@
     height:65px!important;
   }
 }
+
+
+/* v97 — mobile play layout: header dock must win against legacy handSeat positions. */
+@media (max-width:650px){
+  /* The public site header belongs to the lobby, not an active table. */
+  body:has(#game:not(.hide)) > header{display:none!important}
+  body:has(#game:not(.hide)) > main{
+    margin-top:0!important;
+    padding:6px 3px max(12px,env(safe-area-inset-bottom))!important;
+    max-width:100%!important;
+  }
+  #game{width:100%!important;overflow-x:clip!important}
+  #game .gameTop{
+    display:grid!important;
+    grid-template-columns:minmax(65px,auto) minmax(0,1fr) 38px!important;
+    grid-template-rows:36px 31px auto!important;
+    align-items:center!important;
+    gap:5px 6px!important;
+    padding:7px 8px!important;
+    margin:0 3px 7px!important;
+    min-width:0!important;
+    overflow:visible!important;
+  }
+  #game #leaveRoom{
+    grid-column:1!important;grid-row:1!important;
+    align-self:stretch!important;
+    min-width:0!important;
+    min-height:36px!important;
+    padding:5px 7px!important;
+    font-size:10px!important;
+  }
+  #game .gameIdentity{
+    grid-column:2!important;grid-row:1!important;
+    width:auto!important;min-width:0!important;
+  }
+  #game .gameIdentity h2{font-size:14px!important}
+  #game .gameTopActions{
+    grid-column:3!important;grid-row:1!important;
+    min-width:0!important;
+    display:flex!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+  #game .gameTopActions > .premiumMoreBtn{
+    width:36px!important;height:36px!important;
+    min-width:36px!important;padding:0!important;
+  }
+  /* Wallet and stand-up live in their own clear toolbar row. */
+  #game #standUpBtn:not(.hide){
+    position:absolute!important;
+    left:8px!important;top:48px!important;
+    right:auto!important;bottom:auto!important;
+    width:auto!important;max-width:59%!important;
+    min-height:29px!important;
+    padding:5px 9px!important;
+    font-size:10px!important;
+    line-height:15px!important;
+    white-space:nowrap!important;
+    z-index:3!important;
+  }
+  #game .gameTopActions > .gameWallet{
+    position:absolute!important;
+    top:48px!important;bottom:auto!important;
+    left:auto!important;right:8px!important;
+    width:auto!important;max-width:38%!important;
+    min-height:29px!important;
+    padding:5px 9px!important;
+    font-size:10px!important;
+    line-height:17px!important;
+    z-index:3!important;
+  }
+  #game .gameTopActions > .netQualityBadge{display:none!important}
+  /* Full-width card dock, never a free-floating absolute card hand. */
+  #game #cardDock{
+    grid-column:1/-1!important;grid-row:3!important;
+    order:0!important;
+    position:relative!important;
+    width:100%!important;max-width:100%!important;
+    min-width:0!important;
+    min-height:76px!important;
+    margin:0!important;
+    padding:5px 7px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:9px!important;
+    overflow:hidden!important;
+  }
+  #game #cardDock.hide{display:none!important}
+  #game #cardDock #myHand,
+  #game #cardDock #myHand[class*="handSeat"]{
+    position:static!important;
+    inset:auto!important;
+    left:auto!important;right:auto!important;
+    top:auto!important;bottom:auto!important;
+    transform:none!important;
+    width:auto!important;max-width:100%!important;
+    height:auto!important;
+    display:flex!important;
+    gap:4px!important;
+    margin:0!important;
+    padding:0!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 1 auto!important;
+    z-index:auto!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  #game #cardDock #myHand .card{
+    width:47px!important;height:66px!important;
+    min-width:47px!important;max-width:47px!important;
+    margin:0!important;
+    padding:5px!important;
+    font-size:14px!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  #game #cardDock #myHand .pullCard .cardFace{font-size:15px!important}
+  #game #cardDock #myHand .pullCard .cardCover i{font-size:16px!important}
+  #game #cardDock.revealMode #myHand{display:none!important}
+  #game #cardDock .cardDockLabel{font-size:9px!important;flex:0 0 auto!important}
+  #game #cardDock .revealDock{
+    width:auto!important;max-width:100%!important;
+    justify-content:flex-start!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  /* Expand the options beneath the toolbar instead of covering controls. */
+  #game .premiumGameMenu{
+    grid-column:1/-1!important;
+    grid-row:4!important;
+    position:static!important;
+    inset:auto!important;
+    transform:none!important;
+    width:100%!important;max-width:100%!important;
+    margin:2px 0 0!important;
+    padding:5px!important;
+    box-shadow:0 6px 15px #0007!important;
+  }
+  #game .premiumGameMenu.hide{display:none!important}
+  #game .premiumGameMenu button{min-height:36px!important;font-size:11px!important}
+  #game .tableWrap{margin-top:0!important;padding-top:4px!important}
+  #game .actionButtons button{
+    min-height:37px!important;
+    font-size:clamp(9px,2.7vw,11px)!important;
+    line-height:1.15!important;
+    padding:5px 2px!important;
+  }
+}
+@media (max-width:390px){
+  #game #cardDock #myHand .card{
+    width:43px!important;height:61px!important;
+    min-width:43px!important;max-width:43px!important;
+  }
+  #game #cardDock{min-height:71px!important}
+}
