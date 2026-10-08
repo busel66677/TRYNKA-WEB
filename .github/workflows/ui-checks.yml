@@ -25,8 +25,14 @@ jobs:
         run: find . -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Install Playwright test runner
         run: npm install --no-audit --no-fund
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Use system Chrome or install Chromium
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PLAYWRIGHT_BROWSER_CHANNEL=chrome" >> "$GITHUB_ENV"
+            google-chrome --version
+          else
+            npx playwright install --with-deps chromium
+          fi
       - name: Run layout regression checks (360px, 393px, desktop)
         run: npm run test:ui
       - name: Upload screenshots, trace, and report on failure
