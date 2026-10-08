@@ -15,6 +15,11 @@ function clearPendingAction(){
   pendingAction=null;
   pendingActionStore.clear();
   window.TRYNKA_ACTION_PENDING=false;
+  // Do not leave stale "actionLocked" classes after a confirmed round change.
+  // Realtime sync is then free to recompute button permissions for the next turn.
+  document.querySelectorAll('#gameActions button[data-action]').forEach(button=>
+    button.classList.remove('actionLocked')
+  );
 }
 function guardPendingActionButtons(){
   window.TRYNKA_ACTION_PENDING=Boolean(pendingAction);
