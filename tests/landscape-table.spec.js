@@ -69,18 +69,21 @@ for(const [width,height] of [[873,393],[740,360],[932,430]]){
  });
 }
 
-test('rotate mode suggests landscape and still allows portrait fallback',async({page})=>{
+test('portrait opens immediately and can switch to landscape without losing cards',async({page})=>{
  await populate(page,393,873);
- const el=page.locator('#trynkaRotateNotice');
- await expect(el).toBeVisible();
- await expect(el).toContainText('Поверніть телефон');
- await el.getByRole('button',{name:'Продовжити вертикально'}).click();
- await expect(el).toBeHidden();
+ const notice=page.locator('#trynkaRotateNotice');
+ await expect(notice).toBeHidden();
  const parent=await page.locator('#cardDock').evaluate(d=>d.parentElement.className);
  expect(parent.split(' ')).toContain('table');
+ expect(await page.locator('#myHand .card').count()).toBe(3);
  await page.setViewportSize({width:873,height:393});
  await page.evaluate(()=>window.TRYNKA_ARRANGE_LANDSCAPE_TABLE());
- await expect(el).toBeHidden();
+ await expect(notice).toBeHidden();
+ await expect(page.locator('#landscapeFullscreenBtn')).toBeVisible();
+ expect(await page.locator('#myHand .card').count()).toBe(3);
+ await page.setViewportSize({width:393,height:873});
+ await page.evaluate(()=>window.TRYNKA_ARRANGE_LANDSCAPE_TABLE());
+ await expect(notice).toBeHidden();
  expect(await page.locator('#myHand .card').count()).toBe(3);
 });
 test('authorized revealed cards remain at exact rival seats after rotation',async({page})=>{
