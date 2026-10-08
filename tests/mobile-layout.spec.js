@@ -108,7 +108,23 @@ test('mobile header is compact and the game does not overflow horizontally', asy
 });
 
 test('opening the three-dot menu pushes the table down instead of covering it', async ({ page }, testInfo) => {
-  await page.locator('#premiumMoreBtn').click();
+  const diagnosis = await page.evaluate(() => {
+    const button = document.getElementById('premiumMoreBtn');
+    const rect = button.getBoundingClientRect();
+    const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
+    const hit = document.elementFromPoint(x, y);
+    const gameTop = document.querySelector('#game .gameTop').getBoundingClientRect();
+    return {
+      buttonRect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      hitTag: hit?.tagName,
+      hitId: hit?.id,
+      hitClass: hit?.className,
+      gameTopRect: { x: gameTop.x, y: gameTop.y, width: gameTop.width, height: gameTop.height },
+      parentDisplay: getComputedStyle(button.parentElement).display,
+    };
+  });
+  console.log('MENU_DIAG', testInfo.project.name, JSON.stringify(diagnosis));
+  await page.locator('#premiumMoreBtn').click({ timeout: 5000 });
   await expect(page.locator('#premiumGameMenu')).toBeVisible();
   if (!testInfo.project.name.startsWith('android')) return;
   const menu = await page.locator('#premiumGameMenu').boundingBox();
