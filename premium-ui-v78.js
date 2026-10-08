@@ -84,9 +84,13 @@ function ensureMenu(){
     btn.onclick=e=>{
       e.preventDefault();e.stopPropagation();
       menu.classList.toggle('hide');
+      btn.setAttribute('aria-expanded',String(!menu.classList.contains('hide')));
     };
     document.addEventListener('click',e=>{
-      if(!menu.contains(e.target)&&e.target!==btn)menu.classList.add('hide');
+      if(!menu.contains(e.target)&&e.target!==btn){
+        menu.classList.add('hide');
+        btn.setAttribute('aria-expanded','false');
+      }
     });
   }
 
@@ -100,6 +104,14 @@ function ensureMenu(){
     el.textContent=label;
     menu.appendChild(el);
   });
+  // v105: legacy owner/spectator/rules/reaction controls were appended as a
+  // loose extra flex item to the game header and fell *behind* the table.
+  // Keep their original buttons and event listeners; move the existing node
+  // into this accessible dropdown instead of cloning or hiding the controls.
+  const extras=$('tableExtras');
+  if(extras&&extras.parentElement!==menu)menu.appendChild(extras);
+  btn.setAttribute('aria-expanded',String(!menu.classList.contains('hide')));
+
 }
 
 function cleanExtraUi(){
