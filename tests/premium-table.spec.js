@@ -125,6 +125,7 @@ test('real DOM mover preserves exact hand DOM and supports phone-desktop resize'
   await page.setViewportSize({ width: 393, height: 873 });
   const mobile = await page.evaluate(() => {
     window.TRYNKA_ARRANGE_PREMIUM_TABLE();
+    window.TRYNKA_ARRANGE_BOTTOM_HAND_V108();
     return {
       parent:document.getElementById('cardDock').parentElement.className,
       same:document.getElementById('myHand').dataset.testIdentity,
