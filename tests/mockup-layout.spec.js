@@ -7,7 +7,8 @@ test.beforeEach(async ({page}) => {
     const path = new URL(route.request().url()).pathname;
     if(path.endsWith('landscape-table-v104.js') ||
        path.endsWith('premium-table-v100.js') ||
-       path.endsWith('mobile-clean-v107.js'))
+       path.endsWith('mobile-clean-v107.js') ||
+       path.endsWith('bottom-cards-v108.js'))
       return route.continue();
     return route.fulfill({status:200,contentType:'application/javascript',body:''});
   });
@@ -31,6 +32,7 @@ test.beforeEach(async ({page}) => {
         '<span class="seatStack">◉ 317</span></div></div>').join('');
     window.TRYNKA_ARRANGE_LANDSCAPE_TABLE?.();
     window.TRYNKA_ARRANGE_ACTIONS_V107?.();
+    window.TRYNKA_ARRANGE_BOTTOM_HAND_V108?.();
   });
 });
 
@@ -58,8 +60,9 @@ for(const [width,height] of [[360,800],[393,873],[430,932]]){
     expect(table.height).toBeLessThanOrEqual(500);
     expect(table.height).toBeGreaterThan(table.width*1.25);
     expect(bank.y).toBeGreaterThan(table.y+45);
-    expect(dock.y).toBeGreaterThan(bank.y+bank.height);
-    expect(dock.y+dock.height).toBeLessThan(seat.y);
+    expect(dock.y).toBeGreaterThan(actions.y+actions.height);
+    expect(await page.locator('#cardDock').evaluate(el=>el.parentElement.id)).toBe('playerHandTray');
+    expect(dock.y).toBeGreaterThan(seat.y+seat.height);
     expect(actions.y).toBeGreaterThan(seat.y+seat.height);
     expect(actions.y).toBeGreaterThanOrEqual(table.y+table.height+4);
     expect(await page.locator('#gameActions').evaluate(el=>el.parentElement.classList.contains('tableWrap'))).toBe(true);
