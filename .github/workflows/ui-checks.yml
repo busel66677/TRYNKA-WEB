@@ -24,7 +24,7 @@ jobs:
       - name: Check JavaScript syntax
         run: find . -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Test room reconnection policy (offline, retry, stale sessions)
-        run: node --test tests/room-recovery.test.mjs
+        run: node --test tests/room-recovery.test.mjs tests/turn-effects.test.mjs
       - name: Install Playwright test runner
         run: npm install --no-audit --no-fund
       - name: Use system Chrome or install Chromium
