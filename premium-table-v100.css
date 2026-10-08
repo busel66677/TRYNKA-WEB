@@ -1,0 +1,408 @@
+/* TRYNKA v100 — Premium emerald and brass table. UI only; game rules unchanged. */
+#game{
+  --pt-gold:#e4c16a;
+  --pt-gold-dark:#977239;
+  --pt-felt:#07563b;
+  --pt-ink:#06110d;
+  --pt-cream:#fff5d7;
+  color:#f4f5e9;
+}
+body:has(#game:not(.hide)){
+  background:
+    radial-gradient(ellipse 85% 58% at 50% 11%,rgba(66,89,49,.2),transparent 75%),
+    repeating-linear-gradient(115deg,rgba(208,177,102,.018) 0 2px,transparent 2px 26px),
+    linear-gradient(155deg,#100e0b 0%,#081811 27%,#030a08 74%,#050c08 100%)!important;
+}
+#game .gameTop{
+  background:linear-gradient(135deg,rgba(4,26,19,.98),rgba(12,36,26,.94) 55%,rgba(4,17,13,.99))!important;
+  border:1px solid rgba(215,187,108,.4)!important;
+  box-shadow:inset 0 1px 0 rgba(255,236,184,.14),0 8px 25px #0008!important;
+  border-radius:16px!important;
+}
+#game .gameIdentity .eyebrow{
+  color:#c9a659!important;
+  font-weight:750!important;
+  letter-spacing:2px!important;
+}
+#game .gameIdentity h2{
+  color:#fff8e5!important;
+  letter-spacing:.2px!important;
+  text-shadow:0 1px 3px #0008!important;
+}
+#game #leaveRoom{
+  background:linear-gradient(150deg,#142e25,#071b14)!important;
+  color:#e9e2cc!important;
+  border:1px solid #97733c77!important;
+  border-radius:12px!important;
+  box-shadow:inset 0 1px 0 #ffffff12!important;
+}
+#game .gameWallet{
+  background:linear-gradient(130deg,#162820,#0a1510)!important;
+  color:#ffdb7c!important;
+  border:1px solid rgba(239,196,92,.52)!important;
+  box-shadow:inset 0 1px 0 #ffffff17,0 3px 9px #0007!important;
+}
+#game .premiumMoreBtn{
+  background:linear-gradient(145deg,#163228,#071810)!important;
+  color:#f3d58a!important;
+  border:1px solid rgba(237,204,122,.6)!important;
+  border-radius:11px!important;
+}
+#game .tableWrap{
+  background:
+    radial-gradient(ellipse 88% 70% at 50% 30%,rgba(65,88,43,.2),transparent 85%),
+    linear-gradient(155deg,#1b1a13,#080f0b 55%,#050907)!important;
+  border:1px solid rgba(200,160,85,.2)!important;
+  border-radius:24px!important;
+  box-shadow:inset 0 1px 0 #ffffff0a,0 12px 35px #0009!important;
+}
+#game .table{
+  position:relative!important;
+  isolation:isolate!important;
+  border:9px solid #bd9754!important;
+  border-radius:44% / 37%!important;
+  background:
+    radial-gradient(ellipse 60% 56% at 47% 42%,rgba(18,125,87,.75),transparent 86%),
+    radial-gradient(ellipse 110% 94% at 50% 36%,#126f4d 0%,#09583d 47%,#033824 82%,#022216 100%),
+    repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 4px)!important;
+  box-shadow:
+    0 0 0 3px #151715,
+    0 0 0 5px #6e532b,
+    0 0 0 7px #171b17,
+    0 14px 0 #090c0a,
+    0 25px 38px #000c,
+    inset 0 0 0 2px #f3d58c,
+    inset 0 0 0 6px #392c1f,
+    inset 0 0 0 9px #ab8846,
+    inset 0 0 42px rgba(0,0,0,.6),
+    inset 0 2px 25px rgba(74,221,151,.12)!important;
+  overflow:hidden!important;
+}
+#game .table::before{
+  content:''!important;
+  position:absolute!important;
+  inset:18px!important;
+  pointer-events:none!important;
+  z-index:0!important;
+  border:1px solid rgba(234,203,123,.35)!important;
+  border-radius:43% / 37%!important;
+  background:
+    radial-gradient(ellipse 50% 45% at 50% 45%,rgba(226,193,103,.032),transparent 80%),
+    repeating-linear-gradient(92deg,transparent 0 5px,#ffffff03 5px 6px)!important;
+  box-shadow:inset 0 0 0 1px #071e14a8,inset 0 0 30px #0005!important;
+}
+#game .table::after{
+  content:'♠   T R Y N K A'!important;
+  position:absolute!important;
+  inset:auto!important;
+  top:62%!important;
+  left:50%!important;
+  width:max-content!important;
+  transform:translate(-50%,-50%)!important;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:rgba(226,195,115,.25)!important;
+  font:bold 17px/1.25 Georgia,serif!important;
+  text-shadow:0 1px 1px #002115b8!important;
+  letter-spacing:3px!important;
+  white-space:nowrap!important;
+  z-index:0!important;
+  pointer-events:none!important;
+}
+#game .tableGlow{
+  position:absolute!important;
+  inset:8px!important;
+  border-radius:43% / 37%!important;
+  background:radial-gradient(ellipse at 50% 26%,#a4f4b00f,transparent 65%)!important;
+  pointer-events:none!important;
+  z-index:0!important;
+}
+#game .dealerBadge{
+  background:radial-gradient(circle at 40% 25%,#264b3b,#06140e 71%)!important;
+  border:2px solid #d6b46b!important;
+  box-shadow:inset 0 0 0 2px #13261e,0 5px 12px #000a!important;
+  color:#ffe4a0!important;
+}
+#game .dealerBadge span{color:#e7c778!important}
+#game .seat{
+  background:linear-gradient(150deg,#173b2b 0%,#081e17 57%,#06130f 100%)!important;
+  border:1px solid rgba(227,194,114,.6)!important;
+  color:#f7f2dc!important;
+  box-shadow:inset 0 1px 0 #ffffff1c,0 6px 13px #0009!important;
+  backdrop-filter:blur(6px);
+  border-radius:14px!important;
+}
+#game .seat.mine,
+#game .seat.showdownSeat{
+  border:2px solid #f4d987!important;
+  background:linear-gradient(155deg,#20573f,#071c16)!important;
+  box-shadow:0 0 0 2px #eac5753c,0 0 17px #d8a83d75,0 6px 14px #0009!important;
+}
+#game .seat.turnActive,
+#game .seat.uxTurn{
+  border:2px solid #ffe49d!important;
+  box-shadow:0 0 0 3px #ffd77735,0 0 23px #ffd477a0,0 5px 13px #0008!important;
+}
+#game .seat.foldedSeat{opacity:.55!important;filter:saturate(.5)}
+#game .seatAvatar{
+  border:1px solid #ebcc77!important;
+  background:radial-gradient(circle at 35% 20%,#557a61,#103023 65%,#041710)!important;
+  color:#fff1bd!important;
+  box-shadow:inset 0 1px 2px #ffffff46,0 2px 7px #0009!important;
+}
+#game .seatName{font-weight:900!important;color:#fff9e5!important;text-shadow:0 1px 2px #000a!important}
+#game .seatStack{color:#f6d883!important}
+#game .seat.free{
+  border-style:dashed!important;
+  border-color:#d9b96577!important;
+  background:#091d16dc!important;
+}
+#game .betBadge:not(.hide){
+  background:linear-gradient(145deg,#d2ae58,#f1d588)!important;
+  border:1px solid #fff0c1!important;
+  color:#1a170f!important;
+  box-shadow:0 3px 9px #0008!important;
+  font-weight:900!important;
+}
+#game .centerInfo{
+  background:linear-gradient(175deg,rgba(4,53,36,.93),rgba(1,26,19,.94))!important;
+  border:1px solid rgba(216,184,103,.46)!important;
+  box-shadow:inset 0 1px 0 #ffffff16,0 9px 25px #0006,0 0 0 7px #dfb86609!important;
+  border-radius:38px!important;
+}
+#game .potPile{
+  display:flex!important;
+  align-items:center!important;justify-content:center!important;
+  gap:0!important;
+  height:25px!important;
+  min-height:25px!important;
+  margin:0 auto 4px!important;
+  transform:none!important;
+  filter:drop-shadow(0 4px 3px #0009)!important;
+}
+#game .centerInfo .potPile i,
+#game .potPile .uxPotChip{
+  display:inline-block!important;
+  position:relative!important;
+  width:19px!important;height:19px!important;
+  margin-left:-5px!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 30% 28%,#e9d381 0 10%,#da8f2d 12% 30%,#783616 33% 52%,#e6c46b 56% 62%,#432a1c 65%)!important;
+  border:2px dotted #ffe0a0!important;
+  box-shadow:0 3px 0 #3b2818,0 5px 6px #0007!important;
+}
+#game .potPile .uxPotChip{
+  position:absolute!important;
+  width:35px!important;height:12px!important;
+}
+#game #potBig{
+  color:#ffe2a1!important;
+  text-shadow:0 2px 5px #000!important;
+  letter-spacing:.4px!important;
+  font-weight:950!important;
+}
+#game #countdown{
+  color:#edf7ec!important;
+  background:rgba(4,15,11,.58)!important;
+  border:1px solid rgba(240,208,142,.2)!important;
+  border-radius:40px!important;
+}
+#game #turnStatus{color:#cef2d9!important}
+#game #bankInfo{color:#c1d7bd!important}
+#game .seat > .seatShowdownCards{
+  border-color:#f5d992!important;
+  background:linear-gradient(170deg,#0b2419f5,#050d09f5)!important;
+  box-shadow:0 5px 19px #000b,0 0 10px #e8c46f55!important;
+}
+#game .gameActions{
+  background:linear-gradient(180deg,rgba(8,32,24,.98),rgba(3,18,14,.99))!important;
+  border:1px solid rgba(216,185,113,.55)!important;
+  box-shadow:0 9px 27px #000c,inset 0 1px 0 #ffffff12!important;
+  border-radius:16px!important;
+}
+#game .roundMeta{
+  color:#e7d8a7!important;
+}
+#game #roundTurn{color:#a1f3c6!important;background:#063d2980!important;border:1px solid #46946d55!important;border-radius:9px!important}
+#game .actionButtons{
+  gap:6px!important;
+}
+#game .actionButtons button{
+  border-radius:11px!important;
+  border:1px solid rgba(245,232,197,.35)!important;
+  min-height:43px!important;
+  font-weight:950!important;
+  letter-spacing:.1px!important;
+  text-shadow:0 1px 2px #0005!important;
+  box-shadow:inset 0 1px 0 #ffffff3b,0 4px 9px #0006!important;
+  transition:filter .15s ease,transform .15s ease!important;
+}
+#game .actionButtons button:active{transform:translateY(1px)!important;filter:brightness(1.1)!important}
+#game .actionButtons button[data-action="call"]{
+  background:linear-gradient(155deg,#22a774,#086445 78%,#064b32)!important;
+  color:#f8fff8!important;
+  border-color:#56dea8!important;
+}
+#game .actionButtons button[data-action="fold"]{
+  background:linear-gradient(150deg,#8e3536,#531d24 80%,#34191b)!important;
+  color:#fff5ef!important;
+  border-color:#db7579!important;
+}
+#game .actionButtons button[data-action="raise"]{
+  background:linear-gradient(145deg,#f0d17f,#bd8d3d 65%,#886328)!important;
+  color:#211608!important;
+  border-color:#ffeba7!important;
+  text-shadow:none!important;
+}
+#game .actionButtons button[data-action="reveal"]{
+  background:linear-gradient(155deg,#374843,#172724 72%,#101b1a)!important;
+  color:#f6ead1!important;
+  border-color:#b1b8a6!important;
+}
+#game #cardDock{
+  background:linear-gradient(160deg,#183429,#061911)!important;
+  border:1px solid rgba(219,192,114,.55)!important;
+  box-shadow:inset 0 1px 0 #ffffff1a,0 4px 12px #0008!important;
+  border-radius:14px!important;
+}
+#game #cardDock .cardDockLabel{color:#dec78c!important;font-weight:800!important;letter-spacing:1px!important}
+#game #cardDock #myHand .card{
+  border:2px solid #f5eacb!important;
+  border-radius:7px!important;
+  background:linear-gradient(145deg,#fffef9,#e9dfc9)!important;
+  box-shadow:0 3px 6px #0009!important;
+}
+/* Bigger phones and small tablets get a proper table instead of a tiny strip. */
+@media(max-width:650px){
+  body:has(#game:not(.hide)) > main{
+    padding:5px 4px 15px!important;
+  }
+  #game .gameTop{
+    margin:1px 4px 8px!important;
+    padding:6px 8px!important;
+  }
+  #game .gameTop > #cardDock{display:none!important}
+  #game .tableWrap{
+    width:100%!important;
+    padding:11px 8px 18px!important;
+    margin:0 auto!important;
+    overflow:visible!important;
+  }
+  #game .table{
+    width:calc(100% - 12px)!important;
+    min-height:535px!important;
+    height:clamp(535px,65svh,635px)!important;
+    max-height:none!important;
+    border-width:8px!important;
+    border-radius:38% / 34%!important;
+    margin:3px auto 8px!important;
+    overflow:hidden!important;
+  }
+  #game .table::before{inset:12px!important;border-radius:39% / 33%!important}
+  #game .table::after{
+    top:58%!important;
+    font-size:11px!important;
+    letter-spacing:1.5px!important;
+    opacity:.9!important;
+  }
+  #game .centerInfo{
+    top:41%!important;
+    width:148px!important;
+    max-width:148px!important;
+    padding:8px 7px!important;
+    border-radius:24px!important;
+  }
+  #game .table.seatRevealActive .centerInfo{top:40%!important}
+  #game .potPile{min-height:24px!important}
+  #game #potBig{font-size:14px!important}
+  #game #countdown{font-size:8px!important}
+  #game .seat{
+    border-radius:12px!important;
+  }
+  #game .seatAvatar{width:26px!important;height:26px!important}
+  #game .seatName{font-size:8.5px!important;line-height:10px!important}
+  #game .seatStack{font-size:7.5px!important;line-height:9px!important}
+  #game .seat.mine{
+    box-shadow:0 0 0 2px #eac5753c,0 0 18px #e6b95b8c!important;
+  }
+  #game .table #cardDock,
+  #game .table #cardDock:not(.hide){
+    position:absolute!important;
+    grid-area:auto!important;
+    order:0!important;
+    left:50%!important;right:auto!important;
+    top:auto!important;bottom:150px!important;
+    transform:translateX(-50%)!important;
+    width:max-content!important;max-width:72%!important;
+    height:auto!important;
+    min-width:0!important;min-height:72px!important;
+    margin:0!important;
+    padding:4px 8px!important;
+    z-index:59!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:5px!important;
+    overflow:visible!important;
+    border-radius:13px!important;
+    background:linear-gradient(160deg,#0c2920d9,#04130eca)!important;
+  }
+  #game .table #cardDock.hide,
+  #game .table #cardDock.revealMode{display:none!important}
+  #game .table #cardDock #myHand,
+  #game .table #cardDock #myHand[class*="handSeat"]{
+    position:static!important;
+    display:flex!important;
+    left:auto!important;right:auto!important;
+    top:auto!important;bottom:auto!important;
+    transform:none!important;
+    gap:3px!important;
+    width:auto!important;
+    height:auto!important;
+  }
+  #game .table #cardDock #myHand .card{
+    width:43px!important;height:61px!important;
+    min-width:43px!important;max-width:43px!important;
+  }
+  #game .table #cardDock .cardDockLabel{
+    display:none!important;
+  }
+  #game .gameActions{
+    bottom:5px!important;
+    padding:6px!important;
+    width:calc(100% - 12px)!important;
+  }
+  #game .roundMeta{margin-bottom:5px!important}
+  #game .actionButtons button{
+    min-height:44px!important;
+    padding:6px 2px!important;
+    font-size:clamp(9px,2.8vw,11px)!important;
+    line-height:1.15!important;
+    white-space:normal!important;
+  }
+  #game .actionButtons{gap:4px!important}
+  #game .supportSummary{gap:3px!important}
+  #game .supportSummary>span{
+    background:rgba(239,214,152,.075)!important;
+    border:1px solid rgba(235,206,129,.17)!important;
+    border-radius:7px!important;
+  }
+}
+@media(max-width:390px){
+  #game .table{
+    min-height:525px!important;
+    height:clamp(525px,65svh,600px)!important;
+  }
+  #game .table #cardDock{bottom:159px!important}
+  #game .table #cardDock #myHand .card{
+    width:40px!important;height:57px!important;
+    min-width:40px!important;max-width:40px!important;
+  }
+  #game .seat.p0{bottom:95px!important}
+  #game .table::after{top:59%!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #game .actionButtons button,
+  #game .seat{transition:none!important;animation:none!important}
+}
