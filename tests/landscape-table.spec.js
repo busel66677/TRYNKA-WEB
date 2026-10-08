@@ -8,7 +8,9 @@ test.beforeEach(async ({page})=>{
     const path=new URL(route.request().url()).pathname;
     if(path.endsWith('/premium-table-v100.js')||
        path.endsWith('/landscape-table-v104.js')||
-       path.endsWith('/revealed-hands-v99.js'))return route.continue();
+       path.endsWith('/revealed-hands-v99.js')||
+       path.endsWith('/mobile-clean-v107.js')||
+       path.endsWith('/bottom-cards-v108.js'))return route.continue();
     return route.fulfill({status:200,contentType:'application/javascript',body:''});
   });
 });
@@ -29,6 +31,8 @@ async function populate(page,width,height){
       '<span class="seatAvatar">♠</span><span class="seatBody"><span class="seatName">Гравець '+i+'</span>'+
       '<span class="seatStack">◉ 500</span></span></div>').join('');
     window.TRYNKA_ARRANGE_LANDSCAPE_TABLE?.();
+    window.TRYNKA_ARRANGE_ACTIONS_V107?.();
+    window.TRYNKA_ARRANGE_BOTTOM_HAND_V108?.();
   });
 }
 const overlap=(a,b,p=1)=>a&&b&&a.x+a.width>b.x+p&&b.x+b.width>a.x+p&&a.y+a.height>b.y+p&&b.y+b.height>a.y+p;
@@ -74,10 +78,10 @@ test('portrait opens immediately and can switch to landscape without losing card
  const notice=page.locator('#trynkaRotateNotice');
  await expect(notice).toBeHidden();
  const parent=await page.locator('#cardDock').evaluate(d=>d.parentElement.className);
- expect(parent.split(' ')).toContain('table');
+ expect(parent).toContain('playerHandTray');
  expect(await page.locator('#myHand .card').count()).toBe(3);
  await page.setViewportSize({width:873,height:393});
- await page.evaluate(()=>window.TRYNKA_ARRANGE_LANDSCAPE_TABLE());
+ await page.evaluate(()=>{window.TRYNKA_ARRANGE_LANDSCAPE_TABLE();window.TRYNKA_ARRANGE_BOTTOM_HAND_V108();});
  await expect(notice).toBeHidden();
  await expect(page.locator('#landscapeFullscreenBtn')).toBeVisible();
  expect(await page.locator('#myHand .card').count()).toBe(3);
