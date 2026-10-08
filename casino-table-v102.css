@@ -282,7 +282,7 @@ body:has(#game:not(.hide)){
  #game .seatAvatar{width:28px!important;height:28px!important;font-size:13px!important}
  #game .seatName{font-size:9px!important;line-height:11px!important}
  #game .seatStack{font-size:8px!important;line-height:10px!important}
- #game .seat.p4{top:79px!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
+ #game .seat.p4{top:65px!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
  #game .seat.p3{top:102px!important;bottom:auto!important;left:8px!important;right:auto!important;transform:none!important}
  #game .seat.p5{top:102px!important;bottom:auto!important;right:8px!important;left:auto!important;transform:none!important}
  #game .seat.p2{top:48%!important;bottom:auto!important;left:4px!important;right:auto!important;transform:translateY(-50%)!important}
@@ -302,7 +302,7 @@ body:has(#game:not(.hide)){
  #game .seat.p0>.seatBacks{display:none!important}
  #game .centerInfo{
   width:123px!important;max-width:123px!important;
-  top:48%!important;left:50%!important;
+  top:41%!important;left:50%!important;
   transform:translate(-50%,-50%)!important;
   padding:6px 5px!important;border-radius:16px!important;
   box-shadow:0 5px 14px #000a!important;
