@@ -1,0 +1,110 @@
+/* v105 — top controls must remain in front of the casino table.
+   This is a stacking-order / hit-testing fix; no game state is modified. */
+#game .gameTop{
+  position:relative!important;
+  z-index:1000!important;
+  isolation:isolate!important;
+  overflow:visible!important;
+}
+#game .gamegrid{
+  position:relative!important;
+  z-index:0!important;
+}
+#game .tableWrap{
+  z-index:0!important;
+}
+/* The menu may overhang the table, but it must receive taps and clicks. */
+#game #premiumMoreBtn{
+  position:relative!important;
+  z-index:1002!important;
+  pointer-events:auto!important;
+}
+#game #premiumGameMenu:not(.hide){
+  z-index:1003!important;
+  pointer-events:auto!important;
+}
+#game #premiumGameMenu button{
+  cursor:pointer!important;
+  pointer-events:auto!important;
+}
+/* Old owner, spectator and rule buttons used to render underneath the felt.
+   Their original DOM node is now relocated inside this dropdown. */
+#game #premiumGameMenu #tableExtras{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:4px!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:5px 0 0!important;
+  margin:5px 0 0!important;
+  background:transparent!important;
+  border-top:1px solid rgba(221,191,115,.25)!important;
+  z-index:auto!important;
+}
+#game #premiumGameMenu #tableExtras>button:not(.hide){
+  display:flex!important;
+  width:100%!important;
+  justify-content:flex-start!important;
+  min-height:36px!important;
+}
+#game #premiumGameMenu #tableExtras .reactions{
+  display:flex!important;
+  width:100%!important;
+  justify-content:space-evenly!important;
+  gap:3px!important;
+  flex-wrap:nowrap!important;
+  margin:0!important;
+  padding:3px!important;
+  border-radius:10px!important;
+}
+#game #premiumGameMenu #tableExtras .reactions button{
+  min-width:0!important;
+  min-height:38px!important;
+  width:auto!important;
+  flex:1 1 0!important;
+  justify-content:center!important;
+  padding:4px 2px!important;
+  font-size:17px!important;
+}
+#game #premiumMoreBtn:focus-visible,
+#game #premiumGameMenu button:focus-visible{
+  outline:2px solid #ffe6a8!important;
+  outline-offset:2px!important;
+}
+@media(min-width:651px){
+  #game #premiumGameMenu{
+    position:absolute!important;
+    inset:auto 8px auto auto!important;
+    right:8px!important;
+    top:calc(100% + 6px)!important;
+    width:min(255px,calc(100vw - 24px))!important;
+    max-height:min(65vh,520px)!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+@media(max-width:650px){
+  /* Preserve v97's in-flow dropdown on portrait phones. */
+  #game #premiumGameMenu{
+    grid-column:1/-1!important;
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    max-height:56svh!important;
+    overflow-y:auto!important;
+  }
+}
+/* Landscape handsets use the compact v104 header; dropdown floats above felt. */
+@media (orientation:landscape) and (max-height:700px) and (max-width:1100px){
+  #game #premiumGameMenu{
+    position:absolute!important;
+    grid-area:auto!important;
+    right:5px!important;left:auto!important;
+    top:calc(100% + 5px)!important;bottom:auto!important;
+    width:min(240px,calc(100vw - 16px))!important;
+    max-height:calc(100svh - 65px)!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+  }
+}
