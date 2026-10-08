@@ -1,5 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {bindPullCards} from './card-pull-v109.js';
+import {validateActionSnapshot,uncertainActionError,actionResolvedBySnapshot,pendingActionStorage} from './action-safety-v113.js';
 import {createRoomRecovery} from './room-recovery-v110.js';
 const cfg=window.TRYNKA_CONFIG;
 if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div class="panel"><h2>TRYNKA ONLINE</h2><p>Немає конфігурації Supabase.</p></div></main>';throw new Error('Supabase config missing')}
@@ -8,6 +9,31 @@ let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,count
 let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null,gameActionBusy=false;
 let roomRefreshTimer=null,lobbyRefreshTimer=null,roomRenderBusy=false,roomRenderQueued=false,lastTableHistoryAt=0,lastHistoryRoundId=null;
 let releaseCardPull=()=>{};
+const pendingActionStore=pendingActionStorage(window.sessionStorage);
+let pendingAction=pendingActionStore.read();
+function clearPendingAction(){
+  pendingAction=null;
+  pendingActionStore.clear();
+  window.TRYNKA_ACTION_PENDING=false;
+  // Do not leave stale "actionLocked" classes after a confirmed round change.
+  // Realtime sync is then free to recompute button permissions for the next turn.
+  document.querySelectorAll('#gameActions button[data-action]').forEach(button=>
+    button.classList.remove('actionLocked')
+  );
+}
+function guardPendingActionButtons(){
+  window.TRYNKA_ACTION_PENDING=Boolean(pendingAction);
+  if(pendingAction)document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
+    b.disabled=true;b.classList.add('actionLocked');
+  });
+}
+function reconcilePendingAction(snapshot){
+  if(!pendingAction||!pendingAction.uncertain)return;
+  if(pendingAction.userId&&user?.id!==pendingAction.userId)return;
+  if(actionResolvedBySnapshot(pendingAction,snapshot,user?.id))clearPendingAction();
+  else guardPendingActionButtons();
+}
+document.addEventListener('trynka:game-state',e=>reconcilePendingAction(e.detail));
 const roomRecovery=createRoomRecovery({
   isOnline:()=>navigator.onLine,
   onRetry:async(rid,token)=>{
@@ -294,6 +320,7 @@ async function acceptSession(session,{restore=true}={}){
   authRestoring=true;
   try{
     user=session.user;
+    if(pendingAction?.userId&&pendingAction.userId!==user.id)clearPendingAction();
     lastAuthUserId=user.id;
     await loadProfile();
     if(restore)await restoreNavState();
@@ -316,6 +343,7 @@ sb.auth.onAuthStateChange((event,session)=>{
     clearTimeout(roomRefreshTimer);
     if(channel){const old=channel;channel=null;sb.removeChannel(old).catch(()=>{});}
     currentRoom=null;currentRound=null;window.TRYNKA_GAME_STATE=null;clearNavState();
+    clearPendingAction();
     lastAuthUserId=null;user=null;profile=null;
     $('logoutBtn')?.classList.add('hide');$('profileBtn')?.classList.add('hide');
     $('me').textContent='Гість';show('login');authView('login');
@@ -532,6 +560,7 @@ function subscribeRoomChannel(id){
 }
 async function openRoom(id){
   id=Number(id);
+  if(pendingAction&&Number(pendingAction.roomId)!==id)clearPendingAction();
   currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';lastTableHistoryAt=0;lastHistoryRoundId=null;
   clearTimeout(roomRefreshTimer);
   const [memberRes,watcherRes]=await Promise.all([
@@ -606,6 +635,7 @@ async function renderRoom(){
     }));
 
     window.TRYNKA_GAME_STATE=snapshot;
+    reconcilePendingAction(snapshot);
     document.dispatchEvent(new CustomEvent('trynka:room-snapshot',{detail:snapshot}));
 
     const mineMember=ps.some(p=>p.user_id===user.id);
@@ -629,6 +659,7 @@ async function renderRoom(){
     }
 
     await renderHand(r,snapshot);
+    guardPendingActionButtons();
     if(version!==roomRenderVersion||currentRoom!==roomId)return;
 
     const finishedRoundId=snapshot.round?.status==='finished'?snapshot.round?.id:null;
@@ -833,12 +864,21 @@ function renderRevealShowdown(){
 async function renderActionLog(roundId,ps,a=[]){if(!$('tableActionLog'))return;const rows=(a||[]).slice(0,5);const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'час вийшов — автоматично впав'};$('tableActionLog').innerHTML=rows.map(x=>'<div class="actionLogRow"><b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';const x=rows[0],flash=$('lastActionFlash');if(x&&flash&&x.action!=='ante'){const paid=x.action==='call'||x.action==='raise';flash.innerHTML='<b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';flash.classList.remove('hide');if(lastActionId!==x.id){lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop')}}}
 async function doGameAction(action){
   if(!currentRoom||spectatorMode||gameActionBusy)return;
+  if(pendingAction){
+    guardPendingActionButtons();
+    return alert('Чекаємо підтвердження попереднього ходу. Не надсилайте ставку повторно.');
+  }
+  if(!navigator.onLine)return alert('Немає інтернету. Відновіть зв’язок перед ставкою.');
+
+  const state=window.TRYNKA_GAME_STATE;
+  const issue=validateActionSnapshot(state,currentRoom,user?.id,action);
+  if(issue){scheduleRoomRefresh(0);return alert(issue);}
+  const turn=state.round;
   let raiseTo=null;
 
   if(action==='raise'){
-    const cachedRoom=window.TRYNKA_GAME_STATE?.room;
-    const r=cachedRoom||((await sb.from('rooms').select('ante').eq('id',currentRoom).single()).data);
-    const current=Number(currentRound?.current_bet||r?.ante||0);
+    const r=state.room;
+    const current=Number(turn.current_bet||r?.ante||0);
     const maxBet=Math.max(1,Number(r?.ante||1)*100);
     const suggested=Math.min(maxBet,Math.max(current+1,current*2));
     const raw=prompt('До якої ставки підняти?\nПоточна: '+current+' ◉\nМаксимум: '+maxBet+' ◉',String(suggested));
@@ -847,24 +887,52 @@ async function doGameAction(action){
     if(!raiseTo||raiseTo<=current)return alert('Ставка має бути більшою за '+current+' ◉');
     if(raiseTo>maxBet)return alert('Максимальна ставка за цим столом: '+maxBet+' ◉');
   }
+  const newest=window.TRYNKA_GAME_STATE;
+  if(validateActionSnapshot(newest,currentRoom,user?.id,action) ||
+     newest.round.id!==turn.id || newest.round.turn_started_at!==turn.turn_started_at){
+    scheduleRoomRefresh(0);
+    return alert('Під час вибору ставки хід змінився. Перевірте стан столу.');
+  }
 
   gameActionBusy=true;
   const actionStarted=Date.now();
-  document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{b.disabled=true;b.classList.add('actionLocked')});
+  const actionNonce=crypto.randomUUID();
+  pendingAction={
+    nonce:actionNonce,roomId:currentRoom,userId:user.id,
+    roundId:turn.id,turnStartedAt:turn.turn_started_at,
+    action,uncertain:false
+  };
+  pendingActionStore.write(pendingAction);
+  guardPendingActionButtons();
+
   try{
-    const actionNonce=crypto.randomUUID();const {error}=await sb.rpc('play_round_action_safe',{p_room:currentRoom,p_action:action,p_raise_to:raiseTo,p_nonce:actionNonce});
-    if(error){
-      try{await sb.rpc('log_client_error',{p_message:error.message||String(error),p_context:'round='+(currentRound?.id||'?')+' action='+action,p_room:currentRoom})}catch{}
-      alert(error.message);
-    }
+    const {error}=await sb.rpc('play_round_action_safe',{
+      p_room:pendingAction.roomId,p_action:action,p_raise_to:raiseTo,p_nonce:actionNonce
+    });
+    if(error)throw error;
+    clearPendingAction();
   }catch(e){
-    try{await sb.rpc('log_client_error',{p_message:e?.message||String(e),p_context:'round='+(currentRound?.id||'?')+' action='+action+' exception',p_room:currentRoom})}catch{}
-    throw e;
+    // A missing acknowledgement does not prove that a chip transaction failed.
+    // Never create a second payment nonce while the same turn remains unresolved.
+    if(uncertainActionError(e)){
+      if(pendingAction?.nonce===actionNonce){
+        pendingAction.uncertain=true;
+        pendingActionStore.write(pendingAction);
+      }
+      alert('Не отримано підтвердження ставки. Перевіряємо сервер, не надсилаючи хід повторно.');
+    }else{
+      clearPendingAction();
+      alert(e?.message||'Дію відхилено сервером.');
+    }
   }finally{
-    const wait=Math.max(0,450-(Date.now()-actionStarted));if(wait)await new Promise(r=>setTimeout(r,wait));
+    const wait=Math.max(0,450-(Date.now()-actionStarted));
+    if(wait)await new Promise(r=>setTimeout(r,wait));
+    // Keep the in-flight guard while reloading the authoritative turn state.
+    try{await renderRoom()}catch(e){console.warn('Action snapshot refresh failed',e)}
     gameActionBusy=false;
-    document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.classList.remove('actionLocked'));
-    await renderRoom();
+    if(!pendingAction)
+      document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.classList.remove('actionLocked'));
+    guardPendingActionButtons();
   }
 }
 document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.onclick=()=>doGameAction(b.dataset.action));
@@ -926,7 +994,7 @@ async function renderHand(roomArg,snapshotArg=null){
   if(trail){trail.classList.remove('dealing');trail.innerHTML=''}
 }
 async function renderTableHistory(force=false){if(!$('tableGameHistory')||!user)return;if(!force&&Date.now()-lastTableHistoryAt<30000)return;lastTableHistoryAt=Date.now();const {data:g}=await sb.from('game_history').select('room_name,result,pot,chip_change,finished_at').eq('player_id',user.id).order('finished_at',{ascending:false}).limit(8);$('tableGameHistory').innerHTML=(g||[]).map(x=>{const label=x.result==='win'?'Перемога':x.result==='loss'?'Поразка':x.result==='draw'?'Свара':'Скасовано',cls=x.result==='win'?'win':x.result==='loss'?'loss':'draw';return '<div class="sideHistoryRow"><span class="resultDot '+cls+'"></span><div><b>'+label+'</b><small>'+new Date(x.finished_at).toLocaleString('uk-UA',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</small></div><strong class="'+(x.chip_change>0?'plus':x.chip_change<0?'minus':'')+'">'+(x.chip_change>0?'+':'')+x.chip_change+' ◉</strong></div>'}).join('')||'<div class="sideHistoryEmpty">Зіграні партії<br>з’являться тут</div>'}
-async function leaveRoom(){roomRecovery.stop();clearCardPull();++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;if(spectatorMode)await sb.rpc('unwatch_room',{p_room:rid});else await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null;spectatorMode=false}if(channel){await sb.removeChannel(channel);channel=null}syncSpectatorUi();show('lobby');await refreshLobby()}
+async function leaveRoom(){clearPendingAction();roomRecovery.stop();clearCardPull();++roomRenderVersion;clearInterval(turnTimer);clearTimeout(nextDealTimer);clearInterval(countdownTimer);clearInterval(dealTimer);if(currentRoom&&user){const rid=currentRoom;if(spectatorMode)await sb.rpc('unwatch_room',{p_room:rid});else await sb.rpc('secure_leave_room',{p_room:rid});currentRoom=null;spectatorMode=false}if(channel){await sb.removeChannel(channel);channel=null}syncSpectatorUi();show('lobby');await refreshLobby()}
 $('leaveRoom').onclick=leaveRoom;
 $('chatForm').onsubmit=async e=>{e.preventDefault();const body=$('chatInput').value.trim();if(!body)return;const {error}=await sb.rpc('send_chat_message',{p_room:currentRoom,p_body:body});if(error)return alert(error.message);$('chatInput').value=''}
 function addMessage(m){if(window.TRYNKA_BLOCKED_USERS?.has?.(m.user_id))return;const p=document.createElement('p');p.dataset.userId=m.user_id||'';p.textContent=(m.profiles?.nickname||profile?.nickname||'Гравець')+': '+m.body;$('messages').appendChild(p);$('messages').scrollTop=$('messages').scrollHeight}

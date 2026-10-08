@@ -140,7 +140,7 @@ function patchCritical(s){
   if(canPlay){
     const myTurn=g.turn_user_id===me?.id,maxBet=Math.max(1,Number(r.ante||1)*100);
     document.querySelectorAll('#gameActions button[data-action]').forEach(b=>{
-      let dis=!myTurn||b.classList.contains('actionLocked');
+      let dis=!myTurn||b.classList.contains('actionLocked')||Boolean(window.TRYNKA_ACTION_PENDING);
       if(b.dataset.action==='reveal'&&Number(g.round_no||1)<2)dis=true;
       if(b.dataset.action==='raise'&&Number(g.current_bet||0)>=maxBet)dis=true;
       b.disabled=dis;
