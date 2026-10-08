@@ -927,10 +927,11 @@ async function doGameAction(action){
   }finally{
     const wait=Math.max(0,450-(Date.now()-actionStarted));
     if(wait)await new Promise(r=>setTimeout(r,wait));
+    // Keep the in-flight guard while reloading the authoritative turn state.
+    try{await renderRoom()}catch(e){console.warn('Action snapshot refresh failed',e)}
     gameActionBusy=false;
     if(!pendingAction)
       document.querySelectorAll('#gameActions button[data-action]').forEach(b=>b.classList.remove('actionLocked'));
-    try{await renderRoom()}catch(e){console.warn('Action snapshot refresh failed',e)}
     guardPendingActionButtons();
   }
 }
