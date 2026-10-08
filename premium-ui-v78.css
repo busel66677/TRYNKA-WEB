@@ -895,3 +895,25 @@
   }
   #game #cardDock{min-height:71px!important}
 }
+
+
+/* v98: the card dock owns the hand on desktop, too. */
+@media (min-width:651px){
+  #game #cardDock #myHand,
+  #game #cardDock #myHand[class*="handSeat"]{
+    position:static!important;
+    inset:auto!important;
+    left:auto!important;right:auto!important;
+    top:auto!important;bottom:auto!important;
+    transform:none!important;
+    width:auto!important;height:auto!important;
+    margin:0!important;display:flex!important;
+    gap:3px!important;
+    align-items:center!important;justify-content:center!important;
+  }
+  #game #cardDock #myHand .card{
+    position:relative!important;
+    width:40px!important;height:58px!important;
+    margin:0!important;
+  }
+}

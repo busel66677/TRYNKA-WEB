@@ -1,5 +1,5 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const cfg=window.TRYNKA_CONFIG;if(!cfg)return;const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);const $=id=>document.getElementById(id);let soundOn=localStorage.getItem('trynkaSound')!=='off',me=null,lastReaction=0;
+const cfg=window.TRYNKA_CONFIG;if(!cfg)throw new Error('TRYNKA_CONFIG is missing');const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);const $=id=>document.getElementById(id);let soundOn=localStorage.getItem('trynkaSound')!=='off',me=null,lastReaction=0;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function tone(f=440,d=.05,v=.018){if(!soundOn)return;try{const A=window.AudioContext||window.webkitAudioContext,a=new A(),o=a.createOscillator(),g=a.createGain();o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);o.stop(a.currentTime+d)}catch{}}
 function sound(){const h=document.querySelector('header>div');if(!h||$('soundToggle'))return;const b=document.createElement('button');b.id='soundToggle';b.className='soundToggle';b.textContent=soundOn?'🔊':'🔇';b.onclick=()=>{soundOn=!soundOn;localStorage.setItem('trynkaSound',soundOn?'on':'off');b.textContent=soundOn?'🔊':'🔇'};h.prepend(b)}

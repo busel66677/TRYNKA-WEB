@@ -1,0 +1,41 @@
+name: TRYNKA UI regression checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  responsive-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out candidate version
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: find . -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Install Playwright test runner
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run layout regression checks (360px, 393px, desktop)
+        run: npm run test:ui
+      - name: Upload screenshots, trace, and report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trynka-ui-failures
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
