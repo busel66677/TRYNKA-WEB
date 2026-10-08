@@ -6,7 +6,7 @@ import {test,expect} from '@playwright/test';
 test.beforeEach(async ({page})=>{
   await page.route(/\.js(?:\?|$)/,route=>{
     const path=new URL(route.request().url()).pathname;
-    if(['premium-table-v100.js','landscape-table-v104.js','mobile-clean-v107.js'].some(n=>path.endsWith('/'+n)))
+    if(['premium-table-v100.js','landscape-table-v104.js','mobile-clean-v107.js','bottom-cards-v108.js'].some(n=>path.endsWith('/'+n)))
       return route.continue();
     return route.fulfill({status:200,contentType:'application/javascript',body:''});
   });
@@ -43,6 +43,7 @@ async function tableFixture(page,width,height){
     document.getElementById('roundTurn').textContent='ВАШ ХІД · 25с';
     window.TRYNKA_ARRANGE_LANDSCAPE_TABLE?.();
     window.TRYNKA_ARRANGE_ACTIONS_V107?.();
+    window.TRYNKA_ARRANGE_BOTTOM_HAND_V108?.();
   });
 }
 async function rect(locator){
@@ -71,18 +72,22 @@ for(const width of [360,393,430]){
     expect(crosses(bank,mine)).toBe(false);
     expect(crosses(bank,bot)).toBe(false);
     expect(crosses(dock,mine)).toBe(false);
+    expect(dock.y).toBeGreaterThanOrEqual(actions.y+actions.height);
+    expect(await page.locator('#cardDock').evaluate(el=>el.parentElement.id)).toBe('playerHandTray');
     expect(crosses(dock,backs)).toBe(false);
     expect(crosses(actions,table)).toBe(false);
     expect(await g.locator('#gameActions').evaluate(el=>el.parentElement.classList.contains('tableWrap'))).toBe(true);
-    expect(await g.locator('#cardDock').evaluate(el=>el.parentElement.classList.contains('table'))).toBe(true);
+    expect(await g.locator('#cardDock').evaluate(el=>el.parentElement.id)).toBe('playerHandTray');
     const viewport=await page.evaluate(()=>({screen:innerWidth,scroll:document.documentElement.scrollWidth}));
     expect(viewport.scroll).toBeLessThanOrEqual(viewport.screen+2);
     for(const c of await g.locator('#cardDock .card').all()){
       const b=await rect(c);
       expect(b.x).toBeGreaterThanOrEqual(dock.x-2);
       expect(b.x+b.width).toBeLessThanOrEqual(dock.x+dock.width+2);
-      expect(b.y).toBeGreaterThanOrEqual(dock.y-2);
-      expect(b.y+b.height).toBeLessThanOrEqual(dock.y+dock.height+2);
+      expect(b.height).toBeGreaterThanOrEqual(100);
+    expect(b.width).toBeGreaterThanOrEqual(70);
+    expect(b.y).toBeGreaterThanOrEqual(dock.y-5);
+      expect(b.y+b.height).toBeLessThanOrEqual(dock.y+dock.height+8);
     }
     const controls=await g.locator('#gameActions .actionButtons button').all();
     expect(controls).toHaveLength(4);
@@ -113,11 +118,12 @@ test('DOM move preserves direct button handler and restores landscape',async({pa
  await call.click();
  await expect(call).toHaveAttribute('data-record','clicked');
  await page.setViewportSize({width:900,height:450});
- await page.evaluate(()=>window.TRYNKA_ARRANGE_ACTIONS_V107());
+ await page.evaluate(()=>{window.TRYNKA_ARRANGE_ACTIONS_V107();window.TRYNKA_ARRANGE_BOTTOM_HAND_V108();});
  expect(await page.locator('#gameActions').evaluate(el=>el.parentElement.classList.contains('table'))).toBe(true);
  await page.setViewportSize({width:393,height:873});
  await page.evaluate(()=>window.TRYNKA_ARRANGE_ACTIONS_V107());
  expect(await page.locator('#gameActions').evaluate(el=>el.parentElement.classList.contains('tableWrap'))).toBe(true);
+ expect(await page.locator('#cardDock').evaluate(el=>el.parentElement.id)).toBe('playerHandTray');
  await expect(call).toHaveAttribute('data-record','clicked');
  expect(await page.locator('#gameActions .actionButtons button').count()).toBe(4);
 });

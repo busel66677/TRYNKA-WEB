@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 test.beforeEach(async ({ page }) => {
   await page.route(/\.js(?:\?|$)/, route => {
-    if (new URL(route.request().url()).pathname.endsWith('/premium-table-v100.js')) return route.continue();
+    if (['/premium-table-v100.js','/landscape-table-v104.js','/mobile-clean-v107.js','/bottom-cards-v108.js'].some(p=>new URL(route.request().url()).pathname.endsWith(p))) return route.continue();
     return route.fulfill({ status: 200, contentType: 'application/javascript', body: '' });
   });
   await page.goto('/index.html', { waitUntil: 'load' });

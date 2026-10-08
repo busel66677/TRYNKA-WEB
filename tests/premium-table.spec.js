@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 test.beforeEach(async ({ page }) => {
   await page.route(/\.js(?:\?|$)/, route => {
     const u = new URL(route.request().url());
-    if (u.pathname.endsWith('/premium-table-v100.js')) return route.continue();
+    if (['/premium-table-v100.js','/landscape-table-v104.js','/mobile-clean-v107.js','/bottom-cards-v108.js'].some(p=>u.pathname.endsWith(p))) return route.continue();
     return route.fulfill({
       status: 200,
       contentType: 'application/javascript',
@@ -73,25 +73,25 @@ test('table is emerald felt with brass trim and premium seat styling', async ({ 
   }
 });
 
-test('mobile hand sits by bottom seat, not above the table or over bank and actions', async ({ page }, testInfo) => {
+test('mobile cards are large in their own tray BELOW all betting buttons', async ({ page }, testInfo) => {
   const dock = page.locator('#cardDock');
   if (testInfo.project.name.startsWith('android')) {
-    expect(await dock.evaluate(x => x.parentElement.matches('#game .table'))).toBe(true);
+    expect(await dock.evaluate(x => x.parentElement.id)).toBe('playerHandTray');
     const d = await dock.boundingBox();
     const table = await page.locator('#game .table').boundingBox();
-    const bank = await page.locator('#game .centerInfo').boundingBox();
-    const seat = await page.locator('#game .seat.p0').boundingBox();
     const actions = await page.locator('#gameActions').boundingBox();
-    expect(d).not.toBeNull();
-    expect(d.x).toBeGreaterThanOrEqual(table.x);
-    expect(d.x + d.width).toBeLessThanOrEqual(table.x + table.width);
-    expect(d.y).toBeGreaterThanOrEqual(table.y);
-    expect(d.y + d.height).toBeLessThanOrEqual(table.y + table.height);
-    expect(d.y).toBeGreaterThan(bank.y);
-    expect(d.y).toBeLessThan(seat.y);
-    expect(intersects(d,bank,2)).toBe(false);
-    expect(intersects(d,seat,2)).toBe(false);
-    expect(intersects(d,actions,2)).toBe(false);
+    const tray = await page.locator('#playerHandTray').boundingBox();
+    expect(d.y).toBeGreaterThanOrEqual(actions.y+actions.height);
+    expect(tray.y).toBeGreaterThan(table.y+table.height);
+    expect(intersects(d,actions)).toBe(false);
+    const cards = await page.locator('#cardDock .pullCard').all();
+    expect(cards).toHaveLength(3);
+    for(const card of cards) {
+      const rect = await card.boundingBox();
+      expect(rect.height).toBeGreaterThanOrEqual(100);
+      expect(rect.width).toBeGreaterThanOrEqual(70);
+      expect(rect.y).toBeGreaterThanOrEqual(tray.y-5);
+    }
     const horizontal = await page.evaluate(() => ({
       width:document.documentElement.scrollWidth, viewport:innerWidth,
     }));
@@ -112,6 +112,7 @@ test('real DOM mover preserves exact hand DOM and supports phone-desktop resize'
   await page.setViewportSize({ width: 900, height: 800 });
   const desktop = await page.evaluate(() => {
     window.TRYNKA_ARRANGE_PREMIUM_TABLE();
+    window.TRYNKA_ARRANGE_BOTTOM_HAND_V108();
     return {
       parent:document.getElementById('cardDock').parentElement.className,
       same:document.getElementById('myHand').dataset.testIdentity,
@@ -124,13 +125,14 @@ test('real DOM mover preserves exact hand DOM and supports phone-desktop resize'
   await page.setViewportSize({ width: 393, height: 873 });
   const mobile = await page.evaluate(() => {
     window.TRYNKA_ARRANGE_PREMIUM_TABLE();
+    window.TRYNKA_ARRANGE_BOTTOM_HAND_V108();
     return {
       parent:document.getElementById('cardDock').parentElement.className,
       same:document.getElementById('myHand').dataset.testIdentity,
       cards:document.querySelectorAll('#myHand .card').length,
     };
   });
-  expect(mobile.parent.split(' ')).toContain('table');
+  expect(mobile.parent).toContain('playerHandTray');
   expect(mobile.same).toBe('same-instance');
   expect(mobile.cards).toBe(3);
 });
