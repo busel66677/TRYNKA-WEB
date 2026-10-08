@@ -76,7 +76,7 @@ test('table is emerald felt with brass trim and premium seat styling', async ({ 
 test('mobile hand sits by bottom seat, not above the table or over bank and actions', async ({ page }, testInfo) => {
   const dock = page.locator('#cardDock');
   if (testInfo.project.name.startsWith('android')) {
-    await expect(dock).toHaveJSProperty('parentElement', await page.locator('#game .table').elementHandle());
+    expect(await dock.evaluate(x => x.parentElement.matches('#game .table'))).toBe(true);
     const d = await dock.boundingBox();
     const table = await page.locator('#game .table').boundingBox();
     const bank = await page.locator('#game .centerInfo').boundingBox();
