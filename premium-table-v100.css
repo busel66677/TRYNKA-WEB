@@ -313,7 +313,17 @@ body:has(#game:not(.hide)){
     padding:8px 7px!important;
     border-radius:24px!important;
   }
-  #game .table.seatRevealActive .centerInfo{top:48%!important}
+  #game .table.seatRevealActive .centerInfo{
+    top:48%!important;
+    padding:4px 6px!important;
+  }
+  /* The opened three-card rows need extra felt space. Keep pot + turn, hide
+     only the redundant sublabels while cards are being compared. */
+  #game .table.seatRevealActive #turnStatus,
+  #game .table.seatRevealActive #bankInfo{display:none!important}
+  #game .table.seatRevealActive .potPile{
+    height:20px!important;min-height:20px!important;margin-bottom:2px!important;
+  }
   #game .potPile{min-height:24px!important}
   #game #potBig{font-size:14px!important}
   #game #countdown{font-size:8px!important}
