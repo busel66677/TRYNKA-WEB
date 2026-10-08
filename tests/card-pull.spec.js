@@ -80,9 +80,9 @@ test('pull offset stays within card bounds and is limited per-card',async({page}
    fire('pointerdown',999);fire('pointermove',-200);fire('pointerup',-200);
    let lo=offsets[1];
    cleanup();
-   return {hi,lo,other};
+   return {hi,lo,other,max:card.clientHeight-13};
  });
- expect(result.hi).toBe(77);
+ expect(result.hi).toBe(result.max);
  expect(result.lo).toBe(0);
  expect(result.other).toBe(0);
 });
