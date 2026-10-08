@@ -1,0 +1,55 @@
+/* TRYNKA v111: subtle and accessible game feedback, never blocks taps. */
+#game #seats .seat .trynkaTurnProgress {
+  position:absolute!important;
+  left:0!important;bottom:0!important;top:auto!important;right:auto!important;
+  height:4px!important;
+  max-width:100%!important;
+  border:0!important;border-radius:0 5px 5px 0!important;
+  background:linear-gradient(90deg,#d6ac58,#fff2a6 60%,#f4d270)!important;
+  box-shadow:0 0 7px #ffe8a791!important;
+  transform:none!important;
+  transition:width .35s linear!important;
+  z-index:25!important;
+  pointer-events:none!important;
+}
+#game #seats .seat.turnAlmostOut {
+  border-color:#f28b77!important;
+  box-shadow:0 0 0 2px #ef73435c,0 0 15px #fa78477a,0 4px 12px #0008!important;
+}
+#game #seats .seat.turnAlmostOut .trynkaTurnProgress{
+  background:linear-gradient(90deg,#e94740,#ffae70)!important;
+  box-shadow:0 0 9px #ed563488!important;
+}
+#game #roundTurn[data-last-seconds="5"],
+#game #roundTurn[data-last-seconds="4"],
+#game #roundTurn[data-last-seconds="3"],
+#game #roundTurn[data-last-seconds="2"],
+#game #roundTurn[data-last-seconds="1"],
+#game #roundTurn[data-last-seconds="0"]{
+  color:#ffcd9b!important;
+  border-color:#dc915a!important;
+}
+#game .table .trynkaWinnerChip{
+  position:absolute!important;
+  width:19px!important;
+  height:19px!important;
+  display:block!important;
+  border-radius:50%!important;
+  border:3px dashed #ffe1a1!important;
+  background:radial-gradient(circle at 32% 28%,#fff8dc,#e2a948 24%,#a66224 72%,#653316)!important;
+  box-shadow:0 3px 8px #0009!important;
+  z-index:95!important;
+  pointer-events:none!important;
+  will-change:transform,opacity;
+  animation:trynkaWinFly .9s cubic-bezier(.18,.7,.35,.99) var(--win-delay,0ms) both!important;
+}
+@keyframes trynkaWinFly{
+  0%{opacity:0;transform:translate(0,0) scale(.7) rotate(0)}
+  12%{opacity:1}
+  72%{opacity:1}
+  100%{opacity:0;transform:translate(var(--win-dx),var(--win-dy)) scale(.7) rotate(540deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  #game #seats .seat .trynkaTurnProgress{transition:none!important}
+  #game .table .trynkaWinnerChip{animation:none!important;display:none!important}
+}
