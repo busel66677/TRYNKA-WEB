@@ -186,7 +186,7 @@ body:has(#game:not(.hide)){background:
  #game .table{height:545px!important;min-height:545px!important;max-height:none!important}
  #game .seat{width:80px!important}
  #game .seat.free{width:61px!important}
- #game .centerInfo{width:137px!important;max-width:137px!important}
+ #game .centerInfo{width:119px!important;max-width:119px!important;padding:4px!important}
  #game .table #cardDock{bottom:181px!important}
  #game .table #cardDock #myHand .card{width:40px!important;min-width:40px!important;max-width:40px!important;height:57px!important}
  #game .table.seatRevealActive .centerInfo{top:49%!important}
