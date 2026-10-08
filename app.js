@@ -312,6 +312,10 @@ sb.auth.onAuthStateChange((event,session)=>{
     return;
   }
   if(event==='SIGNED_OUT'&&!session){
+    roomRecovery.stop();
+    clearTimeout(roomRefreshTimer);
+    if(channel){const old=channel;channel=null;sb.removeChannel(old).catch(()=>{});}
+    currentRoom=null;currentRound=null;window.TRYNKA_GAME_STATE=null;clearNavState();
     lastAuthUserId=null;user=null;profile=null;
     $('logoutBtn')?.classList.add('hide');$('profileBtn')?.classList.add('hide');
     $('me').textContent='Гість';show('login');authView('login');
