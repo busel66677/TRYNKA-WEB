@@ -114,7 +114,7 @@
     0 8px 0 #1c0c06,0 15px 19px #000d,
     inset 0 0 0 2px #e9bc73,inset 0 0 0 5px #321809,
     inset 0 0 0 9px #0c4530,inset 0 0 45px #00170cba!important;
-  overflow:hidden!important;
+  overflow:visible!important;
  }
  #game .table::before{inset:clamp(6px,1.5svh,12px)!important;
   border:1px solid #c0d6a34a!important;border-radius:48% / 47%!important;
