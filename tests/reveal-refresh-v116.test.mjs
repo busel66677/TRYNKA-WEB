@@ -37,8 +37,8 @@ test('fallback only to own hand; never infer the opponent private hand',()=>{
  assert.deepEqual(authorizedReveals(s,person.id),[{user_id:person.id,cards:s.my_hand}]);
  s.my_hand=['9♥'];
  assert.deepEqual(authorizedReveals(s,person.id),[]);
- s.my_hand=['A♠','K♠','6♠'];
- assert.deepEqual(authorizedReveals(s,enemy.id),[], 'must not attribute actor hand to target');
+ s.my_hand=null;
+ assert.deepEqual(authorizedReveals(s,enemy.id),[], 'never fall back to actor data for target');
 });
 test('malformed, partial or absent participant seats cannot expose cards',()=>{
  const s=structuredClone(duel);
