@@ -26,8 +26,9 @@ export function uncertainActionError(error){
     || /^(08|57P|PGRST3)/.test(code);
 }
 export function actionResolvedBySnapshot(pending, state, userId) {
-  if(!pending?.roomId || !state?.room || !state?.round)return false;
+  if(!pending?.roomId || !state?.room)return false;
   if(Number(state.room.id)!==Number(pending.roomId))return false;
+  if(!state.round)return state.room.game_status==='waiting';
   const r=state.round;
   if(r.id!==pending.roundId || r.status!=='playing' || r.turn_user_id!==userId)return true;
   if(r.turn_started_at!==pending.turnStartedAt)return true;
