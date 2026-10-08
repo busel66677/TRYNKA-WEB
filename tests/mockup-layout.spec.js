@@ -46,7 +46,7 @@ const intersect=(a,b,p=0)=>a.x+a.width>b.x+p&&b.x+b.width>a.x+p&&a.y+a.height>b.
 for(const [width,height] of [[360,800],[393,873],[430,932]]){
   test('portrait mockup table and controls '+width+'px',async ({page})=>{
     await page.setViewportSize({width,height});
-    await page.evaluate(()=>window.TRYNKA_ARRANGE_LANDSCAPE_TABLE?.());
+    await page.evaluate(()=>{window.TRYNKA_ARRANGE_LANDSCAPE_TABLE?.();window.TRYNKA_ARRANGE_BOTTOM_HAND_V108?.();});
     const overlay=await page.locator('#trynkaRotateNotice').evaluate(el=>getComputedStyle(el).display);
     expect(overlay,'players should never be forced to rotate').toBe('none');
     const table=await area(page.locator('#game .table'));
