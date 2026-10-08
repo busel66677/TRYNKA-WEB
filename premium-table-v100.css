@@ -307,13 +307,13 @@ body:has(#game:not(.hide)){
     opacity:.9!important;
   }
   #game .centerInfo{
-    top:41%!important;
+    top:39%!important;
     width:148px!important;
     max-width:148px!important;
     padding:8px 7px!important;
     border-radius:24px!important;
   }
-  #game .table.seatRevealActive .centerInfo{top:40%!important}
+  #game .table.seatRevealActive .centerInfo{top:48%!important}
   #game .potPile{min-height:24px!important}
   #game #potBig{font-size:14px!important}
   #game #countdown{font-size:8px!important}
@@ -332,7 +332,7 @@ body:has(#game:not(.hide)){
     grid-area:auto!important;
     order:0!important;
     left:50%!important;right:auto!important;
-    top:auto!important;bottom:150px!important;
+    top:auto!important;bottom:177px!important;
     transform:translateX(-50%)!important;
     width:max-content!important;max-width:72%!important;
     height:auto!important;
@@ -394,7 +394,7 @@ body:has(#game:not(.hide)){
     min-height:525px!important;
     height:clamp(525px,65svh,600px)!important;
   }
-  #game .table #cardDock{bottom:159px!important}
+  #game .table #cardDock{bottom:180px!important}
   #game .table #cardDock #myHand .card{
     width:40px!important;height:57px!important;
     min-width:40px!important;max-width:40px!important;
