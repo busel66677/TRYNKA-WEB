@@ -286,7 +286,7 @@ function mountInstallButton(){
 
 function setupPwa(){
   if('serviceWorker'in navigator){
-    navigator.serviceWorker.register('./sw.js?v=111').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=112').catch(()=>{});
   }
   mountInstallButton();
   window.addEventListener('beforeinstallprompt',e=>{
