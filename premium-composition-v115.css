@@ -283,6 +283,11 @@ body:has(#game:not(.hide)){
    border-radius:19px!important;
    overflow:hidden!important;
  }
+ #game .table.seatRevealActive .centerInfo{
+   top:46%!important;
+   height:90px!important;
+   max-height:90px!important;
+ }
  #game .centerInfo #potBig{
    font-size:14px!important;
    line-height:18px!important;
