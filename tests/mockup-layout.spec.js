@@ -36,6 +36,14 @@ test.beforeEach(async ({page}) => {
   });
 });
 
+test('v117 premium table skin loads on the real game markup',async ({page})=>{
+  const felt=await page.locator('#game').evaluate(el=>getComputedStyle(el).getPropertyValue('--trynka-v117-felt').trim());
+  expect(felt).toBe('#087452');
+  await page.locator('#game .seat.p1').evaluate(el=>el.classList.add('turnActive'));
+  const active=await page.locator('#game .seat.p1').evaluate(el=>getComputedStyle(el).boxShadow);
+  expect(active).toContain('rgba');
+});
+
 const area= async locator => {
   const r=await locator.boundingBox();
   expect(r).not.toBeNull();

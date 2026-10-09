@@ -1,4 +1,4 @@
-const CACHE='trynka-v116';
+const CACHE='trynka-v117';
 const SHELL=[
   './',
   './index.html',
@@ -32,10 +32,12 @@ self.addEventListener('fetch',event=>{
 
   if(req.mode==='navigate'){
     event.respondWith(
-      fetch(req)
+      fetch(req,{cache:'no-cache'})
         .then(res=>{
-          const copy=res.clone();
-          caches.open(CACHE).then(cache=>cache.put('./index.html',copy));
+          if(res.ok){
+            const copy=res.clone();
+            caches.open(CACHE).then(cache=>cache.put('./index.html',copy));
+          }
           return res;
         })
         .catch(()=>caches.match('./index.html'))
