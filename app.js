@@ -941,7 +941,7 @@ async function doGameAction(action){
     if(error)throw error;
     clearPendingAction();
   }catch(e){
-    window.TRYNKA_MONITOR?.captureException?.(e,{context:'game_action',room_id:currentRoom,action});
+    window.TRYNKA_MONITOR?.breadcrumb?.('game_action_error',{room_id:currentRoom,action,error_code:e?.code||''});
     // A missing acknowledgement does not prove that a chip transaction failed.
     // Never create a second payment nonce while the same turn remains unresolved.
     if(uncertainActionError(e)){
