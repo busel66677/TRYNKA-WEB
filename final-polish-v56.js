@@ -51,5 +51,5 @@ function mountFairHelp(){
   b.dataset.simpleHelp='1';
   b.onclick=()=>alert('Чесна роздача означає: сервер зафіксував порядок колоди до початку гри. Після завершення браузер перевірив, що колода не була змінена.');
 }
-setInterval(()=>{mountRoundHistory();polishSpectator();mountFairHelp()},5000);
+setInterval(()=>{mountRoundHistory();polishSpectator();mountFairHelp()},20000);
 mountRoundHistory();polishSpectator();mountFairHelp();
