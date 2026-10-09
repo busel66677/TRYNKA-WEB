@@ -98,7 +98,7 @@ async function init(){
   const {data:{user}}=await sb.auth.getUser();me=user||null;
   if(me){const {data:p}=await sb.from('profiles').select('is_admin').eq('id',me.id).maybeSingle();isAdmin=!!p?.is_admin}
   await updateStrength();await enhanceSvara();await mountAdminErrors();
-  setInterval(()=>{mountUtilities();updateStrength();enhanceSvara();mountAdminErrors()},6000);
+  setInterval(()=>{mountUtilities();updateStrength();enhanceSvara();mountAdminErrors()},30000);
   document.addEventListener('trynka:reconnected',()=>{updateStrength();enhanceSvara()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
