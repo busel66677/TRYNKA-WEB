@@ -1194,3 +1194,14 @@
     font-size:9px;
   }
 }
+
+
+/* v118 mobile performance: keep the table visually rich without costly blur/compositing */
+@media(max-width:800px){
+  #game .centerInfo{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 6px 14px #0007!important}
+  #game .table{box-shadow:0 16px 28px #0009,inset 0 0 0 2px #72593d,inset 0 0 28px #001d0f88!important}
+  #game .seat{box-shadow:0 3px 8px #0007!important}
+  #game .betBadge{box-shadow:0 3px 8px #0007!important}
+  #game .gameActions{box-shadow:0 5px 14px #0007!important}
+  #game .cardDock{box-shadow:0 3px 10px #0006!important}
+}
