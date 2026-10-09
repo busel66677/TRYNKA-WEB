@@ -36,7 +36,7 @@ function wrapProfile(){
 }
 
 async function renderProfileExtras(){
-  if(!me||Date.now()-lastProfileExtras<2500)return;lastProfileExtras=Date.now();
+  if(!me||$('profile')?.classList.contains('hide')||Date.now()-lastProfileExtras<30000)return;lastProfileExtras=Date.now();
   const host=document.querySelector('#profile .profileHistoryGrid');if(!host)return;
   let recent=$('recentOpponentsPanel'),blocked=$('blockedPlayersPanel');
   if(!recent){recent=document.createElement('div');recent.id='recentOpponentsPanel';recent.className='panel communityPanel';recent.innerHTML='<h2>Останні суперники</h2><div id="recentOpponents"></div>';host.appendChild(recent)}
@@ -116,7 +116,7 @@ async function init(){
   const {data:{user}}=await sb.auth.getUser();me=user||null;
   if(!me)return;
   await loadBlocks();wrapProfile();mountRulesAtTable();await mountTemplates();await renderProfileExtras();await handleSeatInvite();
-  setInterval(()=>{wrapProfile();mountRulesAtTable();mountTemplates();renderProfileExtras()},10000);
+  setInterval(()=>{wrapProfile();mountRulesAtTable();mountTemplates();renderProfileExtras()},30000);
   sb.auth.onAuthStateChange((_,session)=>{me=session?.user||null;if(me)setTimeout(()=>{loadBlocks();handleSeatInvite()},250)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
