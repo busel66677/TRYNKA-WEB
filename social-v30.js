@@ -68,7 +68,13 @@ async function bindSocial(roomId){
   if(socialChannel){try{await sb.removeChannel(socialChannel)}catch{};socialChannel=null}
   currentRoom=roomId;
   seatMapAt=0;
-  await refreshSeatMap(true);
+  const snap=window.TRYNKA_GAME_STATE;
+  if(Number(snap?.room?.id)===Number(roomId)){
+    seatMap=new Map((snap.players||[]).filter(x=>x.seat_no!=null).map(x=>[x.user_id,{seat_no:x.seat_no,nickname:x.nickname||'Гравець'}]));
+    seatMapAt=Date.now();
+  }else{
+    await refreshSeatMap(true);
+  }
   if(!roomId)return;
 
   socialChannel=sb.channel('table-social-'+roomId+'-'+(me?.id||'guest'))
@@ -121,17 +127,22 @@ async function syncSocialBar(){
   if(!roomId)return;
   if(roomId!==currentRoom)await bindSocial(roomId);
 
-  const {data:seat}=await sb.from('room_players')
-    .select('seat_no')
-    .eq('room_id',roomId)
-    .eq('user_id',me.id)
-    .maybeSingle();
+  const snap=window.TRYNKA_GAME_STATE;
+  let seated=false;
+  if(Number(snap?.room?.id)===Number(roomId)){
+    const players=snap.players||[];
+    seated=players.some(x=>x.user_id===me?.id&&x.seat_no!=null);
+    seatMap=new Map(players.filter(x=>x.seat_no!=null).map(x=>[x.user_id,{seat_no:x.seat_no,nickname:x.nickname||'Гравець'}]));
+    seatMapAt=Date.now();
+  }else{
+    const {data:seat}=await sb.from('room_players').select('seat_no').eq('room_id',roomId).eq('user_id',me.id).maybeSingle();
+    seated=seat?.seat_no!=null;
+    await refreshSeatMap();
+  }
 
-  const seated=seat?.seat_no!=null;
   $('socialQuickBar')?.classList.toggle('spectator',!seated);
   $('socialQuickBar')?.querySelectorAll('[data-social-kind]').forEach(b=>b.disabled=!seated);
   $('socialWatchNote')?.classList.toggle('hide',seated);
-  await refreshSeatMap();
 }
 
 const THEMES=[
@@ -220,8 +231,8 @@ async function startForUser(){
   clearInterval(themeTimer);
   await refreshThemeFromProfile();
   await tick();
-  tickTimer=setInterval(tick,5000);
-  themeTimer=setInterval(refreshThemeFromProfile,12000);
+  tickTimer=setInterval(tick,20000);
+  themeTimer=setInterval(refreshThemeFromProfile,60000);
 }
 async function init(){
   const {data}=await sb.auth.getSession();
@@ -241,5 +252,6 @@ async function init(){
   });
 
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&me)tick()});
+  document.addEventListener('trynka:game-state',()=>{if(me&&gameVisible())syncSocialBar()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
