@@ -94,6 +94,6 @@ if(typeof document!=='undefined'){
   document.addEventListener('trynka:game-state',e=>receive(e.detail));
   document.addEventListener('trynka:reconnected',()=>{if(window.TRYNKA_GAME_STATE)receive(window.TRYNKA_GAME_STATE)});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
-  setInterval(tick,400);
+  setInterval(tick,1000);
   if(window.TRYNKA_GAME_STATE)receive(window.TRYNKA_GAME_STATE);
 }
