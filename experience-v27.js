@@ -307,7 +307,7 @@ async function init(){
   mountNotifyButton();
   setupPwa();
   document.addEventListener('trynka:game-state',e=>experienceTick(e.detail));
-  setInterval(()=>{mountFilters();mountFairBadge();mountNotifyButton();experienceTick()},10000);
+  setInterval(()=>{mountFilters();mountFairBadge();mountNotifyButton();experienceTick()},30000);
   experienceTick();
 }
 
