@@ -49,7 +49,7 @@ async function syncReadyButton(){
 }
 
 async function updateRank(){
- if(!me||Date.now()-lastRankAt<15000)return;lastRankAt=Date.now();
+ if(!me||$('profile')?.classList.contains('hide')||Date.now()-lastRankAt<30000)return;lastRankAt=Date.now();
  const {data}=await sb.rpc('get_season_leaderboard',{p_limit:100});if(!data)return;
  const i=data.findIndex(x=>x.user_id===me.id),host=document.querySelector('#profile .profilecard>div:nth-child(2)');if(!host)return;
  let x=$('profileSeasonRank');if(!x){x=document.createElement('div');x.id='profileSeasonRank';x.className='profileSeasonRank';host.appendChild(x)}
@@ -57,7 +57,7 @@ async function updateRank(){
 }
 
 async function watchAchievement(){
- if(!me||Date.now()-lastAchievementAt<12000)return;lastAchievementAt=Date.now();
+ if(!me||Date.now()-lastAchievementAt<30000)return;lastAchievementAt=Date.now();
  const {data}=await sb.from('player_achievements').select('achievement_key,unlocked_at,achievements(title,icon)').eq('user_id',me.id).order('unlocked_at',{ascending:false}).limit(1).maybeSingle();
  if(!data)return;const stamp=data.achievement_key+'|'+data.unlocked_at,key='trynka_seen_achievement_v1',seen=localStorage.getItem(key);
  if(!seen){localStorage.setItem(key,stamp);return}if(seen===stamp)return;localStorage.setItem(key,stamp);
@@ -111,9 +111,15 @@ function ensureOwnerDialog(){
 }
 async function loadOwnerControls(force=false){
   const rid=currentRoom(),host=$('tableExtras');if(!rid||!host||!me||$('game')?.classList.contains('hide'))return;
-  if(!force&&lastOwnerRoom===rid&&Date.now()-lastOwnerCheckAt<5000)return;
+  if(!force&&lastOwnerRoom===rid&&Date.now()-lastOwnerCheckAt<15000)return;
   lastOwnerRoom=rid;lastOwnerCheckAt=Date.now();
-  const {data:r}=await sb.from('rooms').select('id,owner_id,ante,turn_seconds,join_locked,game_status').eq('id',rid).maybeSingle();
+  const snap=window.TRYNKA_GAME_STATE;
+  let r=null;
+  if(Number(snap?.room?.id)===Number(rid))r=snap.room;
+  else{
+    const res=await sb.from('rooms').select('id,owner_id,ante,turn_seconds,join_locked,game_status').eq('id',rid).maybeSingle();
+    r=res.data||null;
+  }
   let b=$('ownerTableBtn');
   if(!r||r.owner_id!==me.id){b?.remove();return}
   if(!b){b=document.createElement('button');b.id='ownerTableBtn';b.className='ownerTableBtn';b.textContent='⚙ Керування';host.prepend(b)}
@@ -161,7 +167,7 @@ function bindConnectionGrace(){
 async function init(){
  ensureInviteDialog();const {data:{user}}=await sb.auth.getUser();me=user||null;await handleInvite();
  bindConnectionGrace();await Promise.all([mountShare(),updateRank(),watchAchievement(),checkVersion(),loadOwnerControls()]);
- setInterval(()=>{mountShare();loadOwnerControls()},5000);setInterval(()=>{updateRank();watchAchievement()},8000);setInterval(checkVersion,60000);
+ setInterval(()=>{mountShare();loadOwnerControls()},15000);setInterval(()=>{updateRank();watchAchievement()},30000);setInterval(checkVersion,60000);
  sb.auth.onAuthStateChange((event,session)=>{me=session?.user||null;setTimeout(()=>{handleInvite();loadOwnerControls(true)},300)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
