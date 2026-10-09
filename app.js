@@ -9,7 +9,7 @@ if(!cfg||cfg.supabaseUrl.includes('PASTE_')){document.body.innerHTML='<main><div
 const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}});
 let user=null,profile=null,currentRoom=null,channel=null,lobbyChannel=null,countdownTimer=null,heartbeat=null,lobbyPollTimer=null,dealTimer=null,currentRound=null,turnTimer=null,nextDealTimer=null,lastActionId=null,spectatorMode=false;
 let roomRenderVersion=0,lastSeatSignature='',messagesLoadedRoom=null,lastHandPaint='',handPullKey='',handPullY=[0,0,0],ownDealActive=false,ownDealtCount=3,buyInResolve=null,gameActionBusy=false;
-let lobbyRefreshTimer=null,roomRenderBusy=false,roomRenderQueued=false,lastTableHistoryAt=0,lastHistoryRoundId=null;
+let lobbyRefreshTimer=null,roomRenderBusy=false,roomRenderQueued=false,lastTableHistoryAt=0,lastHistoryRoundId=null,lastContributionPaint='',lastActionLogPaint='';
 let releaseCardPull=()=>{};
 const pendingActionStore=pendingActionStorage(window.sessionStorage);
 let pendingAction=pendingActionStore.read();
@@ -563,7 +563,7 @@ function subscribeRoomChannel(id){
 async function openRoom(id){
   id=Number(id);
   if(pendingAction&&Number(pendingAction.roomId)!==id)clearPendingAction();
-  currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';lastTableHistoryAt=0;lastHistoryRoundId=null;
+  currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';lastContributionPaint='';lastActionLogPaint='';lastTableHistoryAt=0;lastHistoryRoundId=null;
   roomRefreshQueue.cancel();
   const [memberRes,watcherRes]=await Promise.all([
     sb.from('room_players').select('room_id,seat_no').eq('room_id',id).eq('user_id',user.id).maybeSingle(),
@@ -647,7 +647,7 @@ async function renderRoom(){
     // The seat skeleton may be replaced AFTER other listeners paint a reveal.
     // Restore only hands authorized by the current server snapshot.
     paintAuthorizedReveals(snapshot,user.id);
-    if(seatsRebuilt)document.dispatchEvent(new CustomEvent('trynka:seats-rebuilt',{detail:snapshot}));
+    if(seatsRebuilt){lastContributionPaint='';lastActionLogPaint='';document.dispatchEvent(new CustomEvent('trynka:seats-rebuilt',{detail:snapshot}));}
     renderGameState(r,ps);
     await renderRound(r,ps,version,snapshot);
     if(version!==roomRenderVersion||currentRoom!==roomId)return;
@@ -850,6 +850,9 @@ async function renderRound(r,ps,version=roomRenderVersion,snapshot=null){
   });
 }
 async function renderContributions(gr,ps,rps=[]){
+  const sig=gr?String(gr.id)+'|'+(rps||[]).map(x=>[x.user_id,Number(x.contributed||0),!!x.folded].join(':')).join(';'):'';
+  if(sig===lastContributionPaint)return;
+  lastContributionPaint=sig;
   document.querySelectorAll('#seats .betBadge').forEach(el=>{el.classList.add('hide');el.classList.remove('foldedBet')});
   if($('contributionBoard'))$('contributionBoard').innerHTML='';
   if(!gr)return;
@@ -868,7 +871,22 @@ function renderRevealShowdown(){
   box.classList.add('hide');
   box.innerHTML='';
 }
-async function renderActionLog(roundId,ps,a=[]){if(!$('tableActionLog'))return;const rows=(a||[]).slice(0,5);const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'час вийшов — автоматично впав'};$('tableActionLog').innerHTML=rows.map(x=>'<div class="actionLogRow"><b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';const x=rows[0],flash=$('lastActionFlash');if(x&&flash&&x.action!=='ante'){const paid=x.action==='call'||x.action==='raise';flash.innerHTML='<b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';flash.classList.remove('hide');if(lastActionId!==x.id){lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop')}}}
+async function renderActionLog(roundId,ps,a=[]){
+  const host=$('tableActionLog');if(!host)return;
+  const rows=(a||[]).slice(0,5);
+  const names={ante:'вніс ставку',call:'дав',raise:'підняв',fold:'впав',reveal:'вскрився',dark:'грає в темну',boil:'запропонував варити',timeout:'час вийшов — автоматично впав'};
+  const sig=String(roundId||'')+'|'+rows.map(x=>[x.id,x.action,Number(x.amount||0),x.nickname||x.profiles?.nickname||''].join(':')).join(';');
+  if(sig!==lastActionLogPaint){
+    lastActionLogPaint=sig;
+    host.innerHTML=rows.map(x=>'<div class="actionLogRow"><b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><span>'+esc(names[x.action]||x.action)+(x.amount?' · '+x.amount+' ◉':'')+'</span></div>').join('')||'<div class="sideHistoryEmpty">Ходів ще немає</div>';
+  }
+  const x=rows[0],flash=$('lastActionFlash');
+  if(x&&flash&&x.action!=='ante'&&lastActionId!==x.id){
+    const paid=x.action==='call'||x.action==='raise';
+    flash.innerHTML='<b>'+esc(x.nickname||x.profiles?.nickname||'Гравець')+'</b><strong>'+(paid?(x.action==='raise'?'ПІДНЯВ':'ДАВ')+' '+Number(x.amount||0)+' ◉':esc(names[x.action]||x.action).toUpperCase())+'</strong>';
+    flash.classList.remove('hide');lastActionId=x.id;flash.classList.remove('pop');void flash.offsetWidth;flash.classList.add('pop');
+  }
+}
 async function doGameAction(action){
   if(!currentRoom||spectatorMode||gameActionBusy)return;
   if(pendingAction){
