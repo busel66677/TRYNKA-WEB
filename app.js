@@ -588,7 +588,9 @@ async function renderRoom(){
   roomRenderBusy=true;
   const roomId=currentRoom,version=++roomRenderVersion;
   try{
+    const snapshotStarted=performance.now();
     const {data:snapshot,error}=await sb.rpc('get_room_game_snapshot',{p_room:roomId});
+    window.TRYNKA_MONITOR?.timing?.('room_snapshot',performance.now()-snapshotStarted,{room_id:roomId,ok:!error});
     if(version!==roomRenderVersion||currentRoom!==roomId)return;
     if(error||!snapshot?.room){
       console.warn('TRYNKA room snapshot skipped',error);
@@ -931,12 +933,15 @@ async function doGameAction(action){
   guardPendingActionButtons();
 
   try{
+    const rpcStarted=performance.now();
     const {error}=await sb.rpc('play_round_action_safe',{
       p_room:pendingAction.roomId,p_action:action,p_raise_to:raiseTo,p_nonce:actionNonce
     });
+    window.TRYNKA_MONITOR?.timing?.('game_action_rpc',performance.now()-rpcStarted,{room_id:pendingAction.roomId,action,ok:!error});
     if(error)throw error;
     clearPendingAction();
   }catch(e){
+    window.TRYNKA_MONITOR?.captureException?.(e,{context:'game_action',room_id:currentRoom,action});
     // A missing acknowledgement does not prove that a chip transaction failed.
     // Never create a second payment nonce while the same turn remains unresolved.
     if(uncertainActionError(e)){
