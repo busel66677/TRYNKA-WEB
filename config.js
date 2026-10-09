@@ -5,7 +5,10 @@ window.TRYNKA_CONFIG = {
   // Sentry вмикається тільки після вставки DSN з Settings → Projects → Client Keys (DSN).
   sentryDsn: "",
   // 5% performance traces: достатньо для пошуку підвисань без зайвого навантаження.
-  sentryTracesSampleRate: 0.05
+  sentryTracesSampleRate: 0.05,
+  // PostHog project token безпечний для клієнтського коду.
+  posthogToken: "phc_vAvUV7y2XNZa4d8JAFNyK2zLZPBVrsuFkF55DLDsjprF",
+  posthogHost: "https://eu.i.posthog.com"
 };
 // Окремий модуль тестового гравця. Завантажується після конфігурації.
 import('./bot.js').catch(e=>console.error('BOT module:',e));
