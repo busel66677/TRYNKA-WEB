@@ -74,6 +74,7 @@ async function logClientError(message,context='window'){
   if(msg===lastLoggedError&&now-lastErrorAt<15000)return;
   lastLoggedError=msg;lastErrorAt=now;
   window.TRYNKA_MONITOR?.breadcrumb?.('client_error',{context,room_id:currentRoomId()});
+  window.TRYNKA_ANALYTICS?.capture?.('client_error',{context,room_id:currentRoomId(),message:msg});
   try{await sb.rpc('log_client_error',{p_message:msg,p_context:context,p_room:currentRoomId()})}catch{}
 }
 function mountErrorLogging(){
