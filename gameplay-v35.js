@@ -6,7 +6,7 @@ const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let me=null,lastRoomId=null,lastActionsSig='',lastSeatMetaSig='',lastSeatMetaAt=0,favoriteIds=new Set(),favLoadedAt=0,profileExtrasLoadedAt=0;
+let me=null,lastRoomId=null,lastActionsSig='',lastSeatMetaSig='',lastSeatMetaAt=0,favoriteIds=new Set(),favLoadedAt=0,profileExtrasLoadedAt=0,tickTimer=null,roomsObserver=null;
 
 function navState(){
   try{return JSON.parse(sessionStorage.getItem('trynka_nav_state_v1')||'{}')||{}}
@@ -64,7 +64,10 @@ async function showPrivateCodeBadge(){
   const host=document.querySelector('#game .gameIdentity');
   if(!rid||!host)return;
   let badge=$('privateRoomCodeBadge');
-  const {data:r}=await sb.from('rooms').select('is_private,invite_code').eq('id',rid).maybeSingle();
+  if(Number(showPrivateCodeBadge.checkedRoom)===rid)return;
+  const {data:r,error}=await sb.from('rooms').select('is_private,invite_code').eq('id',rid).maybeSingle();
+  if(error)return;
+  showPrivateCodeBadge.checkedRoom=rid;
   if(!r?.is_private||!r.invite_code){badge?.remove();return}
   if(!badge){
     badge=document.createElement('button');
@@ -404,14 +407,19 @@ async function start(){
   mountPrivateControls();
   mountPlayerDialog();
   await tick();
-  setInterval(tick,12000);
+  clearInterval(tickTimer);
+  tickTimer=setInterval(tick,30000);
   const rooms=$('rooms');
-  if(rooms)new MutationObserver(()=>decorateRoomCards(false)).observe(rooms,{childList:true});
+  if(rooms&&!roomsObserver){
+    roomsObserver=new MutationObserver(()=>decorateRoomCards(false));
+    roomsObserver.observe(rooms,{childList:true});
+  }
 }
 
 sb.auth.onAuthStateChange((_e,session)=>{
   me=session?.user||null;
-  if(me)setTimeout(start,0);
+  if(me)setTimeout(start,0);else{clearInterval(tickTimer);tickTimer=null}
 });
+document.addEventListener('trynka:room-snapshot',()=>{if(me&&visible('game'))syncActions()});
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
