@@ -389,9 +389,9 @@ async function init(){
     lastSeatState='';
     applyCentralState(e.detail);
   });
-  setInterval(syncUi,15000);
-  setInterval(tickTimer,200);
-  setInterval(touchPresence,10000);
+  setInterval(syncUi,30000);
+  setInterval(tickTimer,500);
+  setInterval(touchPresence,20000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)touchPresence()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
