@@ -4,8 +4,6 @@ import {readFileSync} from 'node:fs';
 
 const root=new URL('../',import.meta.url);
 const read=name=>readFileSync(new URL(name,root),'utf8');
-const escRe=value=>String(value).replace(/[.*+?^$\{\}()|[\]\\]/g,'\\$&');
-
 test('released build metadata, service worker cache and registration agree',()=>{
  const v=JSON.parse(read('version.json'));
  const release=Number(String(v.version).replace(/^v/,''));
@@ -14,7 +12,7 @@ test('released build metadata, service worker cache and registration agree',()=>
  const index=read('index.html');
  const sw=read('sw.js');
  const registration=read('experience-v27.js');
- assert.match(index,new RegExp('content="'+escRe(v.build)+'"'));
+ assert.ok(index.includes('content="'+v.build+'"'));
  assert.match(sw,new RegExp("const CACHE='trynka-v"+release+"'"));
  assert.ok(registration.includes("register('./sw.js?v="+release+"')"));
  assert.match(index,new RegExp('experience-v27\\.js\\?v=[^"]*v'+release));
