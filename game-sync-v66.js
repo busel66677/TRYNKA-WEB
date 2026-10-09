@@ -164,6 +164,7 @@ async function sync(force=false){
     clearTimeout(timeoutId);
     const {data,error}=result||{};
     const ms=performance.now()-t;renderLatency(ms);
+    window.TRYNKA_MONITOR?.timing?.('fallback_snapshot',ms,{room_id:rid,ok:!error});
     if(error)throw error;
     if(roomId()!==rid)return;
     consecutiveErrors=0;
