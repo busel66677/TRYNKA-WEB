@@ -562,6 +562,7 @@ function subscribeRoomChannel(id){
 }
 async function openRoom(id){
   id=Number(id);
+  window.TRYNKA_ANALYTICS?.capture?.('room_open',{room_id:id});
   if(pendingAction&&Number(pendingAction.roomId)!==id)clearPendingAction();
   currentRoom=id;messagesLoadedRoom=null;lastSeatSignature='';lastHandPaint='';lastContributionPaint='';lastActionLogPaint='';lastTableHistoryAt=0;lastHistoryRoundId=null;
   roomRefreshQueue.cancel();
@@ -590,7 +591,9 @@ async function renderRoom(){
   try{
     const snapshotStarted=performance.now();
     const {data:snapshot,error}=await sb.rpc('get_room_game_snapshot',{p_room:roomId});
-    window.TRYNKA_MONITOR?.timing?.('room_snapshot',performance.now()-snapshotStarted,{room_id:roomId,ok:!error});
+    const snapshotMs=performance.now()-snapshotStarted;
+    window.TRYNKA_MONITOR?.timing?.('room_snapshot',snapshotMs,{room_id:roomId,ok:!error});
+    window.TRYNKA_ANALYTICS?.timing?.('room_snapshot_perf',snapshotMs,{room_id:roomId,ok:!error});
     if(version!==roomRenderVersion||currentRoom!==roomId)return;
     if(error||!snapshot?.room){
       console.warn('TRYNKA room snapshot skipped',error);
@@ -746,6 +749,7 @@ async function takeSeat(i,r){
   if(!buyin)return;
   const {error}=await sb.rpc('take_room_seat',{p_room:currentRoom,p_seat:i,p_buyin:buyin});
   if(error)return alert(error.message);
+  window.TRYNKA_ANALYTICS?.capture?.('take_seat',{room_id:currentRoom,seat_no:i,buyin});
   window.TRYNKA_STANDUP_GUARD=null;
   const {data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
   if(p)profile=p;
@@ -937,11 +941,14 @@ async function doGameAction(action){
     const {error}=await sb.rpc('play_round_action_safe',{
       p_room:pendingAction.roomId,p_action:action,p_raise_to:raiseTo,p_nonce:actionNonce
     });
-    window.TRYNKA_MONITOR?.timing?.('game_action_rpc',performance.now()-rpcStarted,{room_id:pendingAction.roomId,action,ok:!error});
+    const rpcMs=performance.now()-rpcStarted;
+    window.TRYNKA_MONITOR?.timing?.('game_action_rpc',rpcMs,{room_id:pendingAction.roomId,action,ok:!error});
+    window.TRYNKA_ANALYTICS?.gameplay?.(action,{room_id:pendingAction.roomId,round_id:turn.id,duration_ms:Math.round(rpcMs),ok:!error,raise_to:raiseTo});
     if(error)throw error;
     clearPendingAction();
   }catch(e){
     window.TRYNKA_MONITOR?.breadcrumb?.('game_action_error',{room_id:currentRoom,action,error_code:e?.code||''});
+    window.TRYNKA_ANALYTICS?.capture?.('game_action_error',{room_id:currentRoom,action,error_code:String(e?.code||''),message:String(e?.message||'').slice(0,160)});
     // A missing acknowledgement does not prove that a chip transaction failed.
     // Never create a second payment nonce while the same turn remains unresolved.
     if(uncertainActionError(e)){
