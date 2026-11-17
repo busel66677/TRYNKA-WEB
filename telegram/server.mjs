@@ -11,6 +11,7 @@ const telegramBootstrap = '<script src="https://telegram.org/js/telegram-web-app
 const stakes=[2,5,10,20,50,100,200,500,1000];
 const seats=new Map();
 function cleanup(){const now=Date.now();for(const [id,entry] of seats){if(now-entry.lastSeen>90000)seats.delete(id)}}
+function players(table){cleanup();return [...seats.entries()].filter(([id,x])=>x.table===table).map(([id,x])=>({seat:x.seat,name:x.name,photo:x.photo||null})).sort((a,b)=>a.seat-b.seat)}
 function counts(){cleanup();return stakes.map((stake,i)=>({id:i+1,stake,maxBet:stake*100,capacity:11,occupied:[...seats.values()].filter(x=>x.table===i+1).length}))}
 function json(res,code,body){res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body))}
 async function tablePresence(req,res){
@@ -25,7 +26,11 @@ async function tablePresence(req,res){
   if(data.action==='heartbeat'&&(!existing||existing.table!==table))return json(res,409,{error:'Not seated',tables:counts()});
   const occupied=[...seats.entries()].filter(([uid,x])=>uid!==id&&x.table===table).length;
   if(occupied>=11)return json(res,409,{error:'Table full',tables:counts()});
-  seats.set(id,{table,lastSeen:Date.now()});return json(res,200,{tables:counts(),joined:table});
+  const used=new Set([...seats.entries()].filter(([uid,x])=>uid!==id&&x.table===table).map(([uid,x])=>x.seat));
+  const seat=existing?.table===table?existing.seat:Array.from({length:11},(_,i)=>i+1).find(n=>!used.has(n));
+  if(!seat)return json(res,409,{error:'Table full',tables:counts()});
+  seats.set(id,{table,seat,name:String(user.first_name||user.username||'Гравець').slice(0,22),photo:typeof user.photo_url==='string'&&user.photo_url.startsWith('https://')?user.photo_url:null,lastSeen:Date.now()});
+  return json(res,200,{tables:counts(),joined:table,seat,players:players(table)});
  }catch(e){return json(res,401,{error:'Telegram verification failed'})}
 }
 http.createServer(async (req,res)=>{
