@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { telegramAuth } from './auth.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +12,7 @@ http.createServer(async (req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
   if(req.url?.split('?')[0] === '/health') { res.writeHead(200,{'Content-Type':'application/json'});return res.end(JSON.stringify({ok:true,app:'trynka-telegram',mode:'frontend-preview'})); }
+  if(req.url?.split('?')[0] === '/api/telegram-auth' && req.method === 'POST') return telegramAuth(req,res);
   if(req.method !== 'GET' && req.method !== 'HEAD'){res.writeHead(405);return res.end();}
   let pathname;
   try { pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname); } catch {res.writeHead(400);return res.end();}
