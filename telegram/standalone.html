@@ -30,7 +30,7 @@ function renderHomeTables(){
   const occupied=info?.occupied;
   const b=document.createElement('button');b.type='button';b.className='table-item';
   const left=document.createElement('span');const h=document.createElement('strong');h.textContent='♠ Стіл №'+(i+1)+' · '+stake.toLocaleString('uk-UA');
-  const sub=document.createElement('small');sub.textContent='Макс. за розіграш '+(stake*100).toLocaleString('uk-UA');
+  const sub=document.createElement('small');sub.textContent='Ва-банк за коло · до '+(stake*100).toLocaleString('uk-UA');
   left.append(h,sub);
   const right=document.createElement('strong');right.textContent=occupied===undefined?'…/11':occupied+'/11';
   right.style.color=occupied>=11?'#ed9e83':'#f6d682';b.append(left,right);
@@ -48,7 +48,7 @@ async function joinTable(table){
  try{
   const data=await postPresence('join',table);currentTable=data.joined;
   document.getElementById('heading').textContent='Стіл №'+table;
-  document.getElementById('description').textContent='Ставка '+stakes[table-1].toLocaleString('uk-UA')+' · максимум '+(stakes[table-1]*100).toLocaleString('uk-UA')+' за розіграш. Ваш баланс прихований.';
+  document.getElementById('description').textContent='Ставка '+stakes[table-1].toLocaleString('uk-UA')+' · ва-банк за коло до '+(stakes[table-1]*100).toLocaleString('uk-UA')+'. Ваш баланс прихований.';
   mySeat=data.seat;renderRoom(data.players||[]);
   document.getElementById('home').hidden=true;document.getElementById('detail').hidden=false;
  }catch(e){statusEl.textContent='Не вдалося сісти за стіл: '+e.message}
@@ -84,7 +84,7 @@ async function leaveTable(){
 }
 setInterval(async()=>{if(currentTable){try{const data=await postPresence('heartbeat',currentTable);mySeat=data.seat;renderRoom(data.players||[])}catch(e){currentTable=null;statusEl.textContent='Місце втрачено: '+e.message;document.getElementById('home').hidden=false;document.getElementById('detail').hidden=true}}else await refreshTables()},20000);
 renderHomeTables();refreshTables();
-const pages={play:['Вільні столи','Обери стіл за ставкою. Кожен стіл розрахований на 11 гравців.'],create:['Вільні столи','9 постійних столів — створювати нові не потрібно.'],tables:['Усі столи','Ставки та максимальні суми одного розіграшу.'],profile:['Профіль','Гравець: '+name+' · Ваш баланс прихований від інших.']};
+const pages={play:['Вільні столи','Обери стіл за ставкою. Кожен стіл розрахований на 11 гравців.'],create:['Вільні столи','9 постійних столів — створювати нові не потрібно.'],tables:['Усі столи','Ставки та ліміт ва-банку за одне коло гри.'],profile:['Профіль','Гравець: '+name+' · Ваш баланс прихований від інших.']};
 function openPage(page){
  const [h,d]=pages[page]||pages.tables;
  document.getElementById('heading').textContent=h;
@@ -94,7 +94,7 @@ function openPage(page){
   stakes.forEach((stake,i)=>{
    const b=document.createElement('button');b.className='table-item';b.type='button';
    const left=document.createElement('span');const title=document.createElement('strong');title.textContent='♠ Стіл №'+(i+1)+' · '+stake.toLocaleString('uk-UA');
-   const detail=document.createElement('small');detail.textContent='11 місць · максимум '+(stake*100).toLocaleString('uk-UA')+' за розіграш';
+   const detail=document.createElement('small');detail.textContent='11 місць · ва-банк за коло до '+(stake*100).toLocaleString('uk-UA');
    left.append(title,detail);
    const right=document.createElement('span');right.textContent='›';b.append(left,right);
    b.addEventListener('click',()=>showTable(i,stake));list.append(b);
@@ -105,7 +105,7 @@ function openPage(page){
 }
 function showTable(i,stake){
  document.getElementById('heading').textContent='Стіл №'+(i+1);
- document.getElementById('description').textContent='Ставка: '+stake.toLocaleString('uk-UA')+' фішок. Максимум за розіграш: '+(stake*100).toLocaleString('uk-UA')+'. Місць: 11. Баланси інших гравців приховані.';
+ document.getElementById('description').textContent='Ставка: '+stake.toLocaleString('uk-UA')+' фішок. Ва-банк за коло: до '+(stake*100).toLocaleString('uk-UA')+'. Місць: 11. Баланси інших гравців приховані.';
  const list=document.getElementById('table-list');list.replaceChildren();
  const p=document.createElement('p');p.className='note';p.textContent='Онлайн-посадка ще не активована. Список столів уже готовий.';list.append(p);
 }
