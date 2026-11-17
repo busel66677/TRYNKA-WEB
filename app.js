@@ -336,12 +336,14 @@ async function boot(){
   if(telegramData){
     try{
       const response=await fetch('/api/telegram-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:telegramData})});
+      if(!response.ok){window.dispatchEvent(new CustomEvent('trynka:telegram-auth-error',{detail:'сервер повернув '+response.status}));}
       if(response.ok){
         const tokens=await response.json();
         const {data,error}=await sb.auth.setSession({access_token:tokens.access_token,refresh_token:tokens.refresh_token});
-        if(!error&&data?.session){await acceptSession(data.session,{restore:false});return;}
+        if(!error&&data?.session){await acceptSession(data.session,{restore:false});window.dispatchEvent(new Event('trynka:telegram-auth-ok'));return;}
+        window.dispatchEvent(new CustomEvent('trynka:telegram-auth-error',{detail:'сесію не створено'}));
       }
-    }catch(error){console.warn('Telegram sign-in unavailable');}
+    }catch(error){console.warn('Telegram sign-in unavailable');window.dispatchEvent(new CustomEvent('trynka:telegram-auth-error',{detail:'немає з’єднання із сервером'}));}
   }
   const {data,error}=await sb.auth.getSession();
   if(!error&&data?.session){await acceptSession(data.session,{restore:true});return}
