@@ -331,6 +331,17 @@ async function acceptSession(session,{restore=true}={}){
   }finally{authRestoring=false}
 }
 async function boot(){
+  const telegramData=window.Telegram?.WebApp?.initData;
+  if(telegramData){
+    try{
+      const response=await fetch('/api/telegram-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:telegramData})});
+      if(response.ok){
+        const tokens=await response.json();
+        const {data,error}=await sb.auth.setSession({access_token:tokens.access_token,refresh_token:tokens.refresh_token});
+        if(!error&&data?.session){await acceptSession(data.session,{restore:false});return;}
+      }
+    }catch(error){console.warn('Telegram sign-in unavailable');}
+  }
   const {data,error}=await sb.auth.getSession();
   if(!error&&data?.session){await acceptSession(data.session,{restore:true});return}
   // Do not erase navigation state here: INITIAL_SESSION can arrive just after page load.
