@@ -16,14 +16,14 @@ http.createServer(async (req,res)=>{
   if(req.method !== 'GET' && req.method !== 'HEAD'){res.writeHead(405);return res.end();}
   let pathname;
   try { pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname); } catch {res.writeHead(400);return res.end();}
-  if(pathname === '/' || pathname === '/telegram') pathname='/index.html';
+  if(pathname === '/' || pathname === '/telegram') pathname='/telegram/standalone.html';
   const file = path.resolve(root, '.'+pathname);
-  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && pathname !== '/telegram/quick-entry.js')){res.writeHead(404);return res.end();}
+  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html'].includes(pathname))){res.writeHead(404);return res.end();}
   try {
     const info=await stat(file);
     if(!info.isFile()){res.writeHead(404);return res.end();}
     let body=await readFile(file);
-    if(path.extname(file)==='.html') {
+    if(path.extname(file)==='.html' && pathname !== '/telegram/standalone.html') {
       let html=body.toString('utf8').replace(/<head([^>]*)>/i, '<head$1>'+telegramBootstrap);
       html=html.replace(/<script type="module" src="app\\.js\\?[^"]+"><\\/script>/, '<script type="module">import("/app.js?tgdiagnostic=7").catch(e=>window.dispatchEvent(new CustomEvent("trynka:telegram-auth-error",{detail:"модуль гри: "+String(e.message||e).slice(0,130)})))</script>');
       body=Buffer.from(html);
