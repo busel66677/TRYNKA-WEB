@@ -1,9 +1,9 @@
-<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#081c15"><title>Тринька · Telegram</title><script src="https://telegram.org/js/telegram-web-app.js"></script><style>*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 10%,#21523c,#0a2219 56%,#07130f);color:#f7edce;font:16px system-ui,-apple-system,sans-serif;min-height:100dvh}main{max-width:520px;margin:auto;padding:calc(25px + env(safe-area-inset-top)) 20px 35px}.top{display:flex;justify-content:space-between;align-items:center}.logo{color:#f5d67b;letter-spacing:3px;font-weight:900;font-size:23px}.sub{font-size:10px;color:#b5c6b9;letter-spacing:1px}.avatar{border:1px solid #bd9c57;border-radius:50%;width:44px;height:44px;background:#143f2d;color:#f4da98;font-size:20px}.hero{text-align:center;margin:58px 0 40px}.suits{font-size:53px;color:#e9c778;letter-spacing:8px;text-shadow:0 8px 28px #e7ba5266}h1{font-size:39px;margin:18px 0 6px;letter-spacing:2px}p{color:#abc2b1;margin:6px 0}.play{width:100%;background:linear-gradient(135deg,#ffe49a,#c9973c);color:#221a09;border:0;border-radius:18px;padding:20px;font-size:22px;font-weight:900;box-shadow:0 10px 30px #d5a34035}.play small{display:block;font-size:11px;margin-top:5px;letter-spacing:1px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.action{background:linear-gradient(145deg,#1c4230,#10261c);border:1px solid #bca06455;color:#f9edce;border-radius:17px;padding:20px 8px;min-height:116px;font-size:15px;font-weight:750}.action b{display:block;font-size:30px;margin-bottom:8px;font-weight:400}button{cursor:pointer}button:active{transform:scale(.98)}.status{text-align:center;font-size:13px;color:#a7c6b4;margin:24px 0 0;min-height:45px}.footer{text-align:center;font-size:10px;letter-spacing:1px;color:#71917e;margin-top:25px}.panel{background:#122e22;border:1px solid #a68b5055;border-radius:18px;padding:20px;margin-top:25px}.back{background:none;border:0;color:#f2d68b;font-size:16px;padding:8px 0}input{background:#081b13;border:1px solid #587362;border-radius:10px;color:#fff;padding:13px;width:100%;font:inherit}#home[hidden],#detail[hidden]{display:none}#detail h2{margin:18px 0}#detail p{line-height:1.5}.table-item{display:flex;justify-content:space-between;align-items:center;width:100%;padding:15px 12px;margin:10px 0;background:#1b4230;color:#f9e6b3;border:1px solid #9b814d;border-radius:14px;text-align:left}.table-item small{display:block;color:#a9cbb8;margin-top:4px}.table-item strong{font-size:18px}.table-item:disabled{opacity:.6}.note{font-size:12px;color:#b9c9ba}</style></head><body><main><div class="top"><div><div class="logo">♠ TRYNKA</div><div class="sub">TELEGRAM CARD CLUB</div></div><button class="avatar" id="avatar">♛</button></div><section id="home"><div class="hero"><div class="suits">♠ ♥ ♣</div><h1>Тринька</h1><p>Твоя гра. Твій стіл. Твоя перемога.</p></div><button class="play" data-page="play">▶ ГРАТИ ЗАРАЗ<small>9 постійних столів · до 11 гравців</small></button><div class="grid"><button class="action" data-page="create"><b>＋</b>Вільні столи</button><button class="action" data-page="tables"><b>♠</b>Усі столи</button><button class="action" data-page="friends"><b>♧</b>Друзі</button><button class="action" data-page="profile"><b>♛</b>Профіль</button></div></section><section id="detail" hidden><button class="back" id="back">← Головне меню</button><div class="panel"><h2 id="heading"></h2><p id="description"></p><div id="table-list"></div></div></section><div class="status" id="status">Підключаємо Telegram…</div><div class="footer">TRYNKA ONLINE · УКРАЇНСЬКА КАРТКОВА ГРА</div></main><script>
+<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#081c15"><title>Тринька · Telegram</title><script src="https://telegram.org/js/telegram-web-app.js"></script><style>*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 10%,#21523c,#0a2219 56%,#07130f);color:#f7edce;font:16px system-ui,-apple-system,sans-serif;min-height:100dvh}main{max-width:520px;margin:auto;padding:calc(25px + env(safe-area-inset-top)) 20px 35px}.top{display:flex;justify-content:space-between;align-items:center}.logo{color:#f5d67b;letter-spacing:3px;font-weight:900;font-size:23px}.sub{font-size:10px;color:#b5c6b9;letter-spacing:1px}.avatar{border:1px solid #bd9c57;border-radius:50%;width:44px;height:44px;background:#143f2d;color:#f4da98;font-size:20px}.hero{text-align:center;margin:58px 0 40px}.suits{font-size:53px;color:#e9c778;letter-spacing:8px;text-shadow:0 8px 28px #e7ba5266}h1{font-size:39px;margin:18px 0 6px;letter-spacing:2px}p{color:#abc2b1;margin:6px 0}.play{width:100%;background:linear-gradient(135deg,#ffe49a,#c9973c);color:#221a09;border:0;border-radius:18px;padding:20px;font-size:22px;font-weight:900;box-shadow:0 10px 30px #d5a34035}.play small{display:block;font-size:11px;margin-top:5px;letter-spacing:1px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.action{background:linear-gradient(145deg,#1c4230,#10261c);border:1px solid #bca06455;color:#f9edce;border-radius:17px;padding:20px 8px;min-height:116px;font-size:15px;font-weight:750}.action b{display:block;font-size:30px;margin-bottom:8px;font-weight:400}button{cursor:pointer}button:active{transform:scale(.98)}.status{text-align:center;font-size:13px;color:#a7c6b4;margin:24px 0 0;min-height:45px}.footer{text-align:center;font-size:10px;letter-spacing:1px;color:#71917e;margin-top:25px}.panel{background:#122e22;border:1px solid #a68b5055;border-radius:18px;padding:20px;margin-top:25px}.back{background:none;border:0;color:#f2d68b;font-size:16px;padding:8px 0}input{background:#081b13;border:1px solid #587362;border-radius:10px;color:#fff;padding:13px;width:100%;font:inherit}#home[hidden],#detail[hidden]{display:none}#detail h2{margin:18px 0}#detail p{line-height:1.5}.table-item{display:flex;justify-content:space-between;align-items:center;width:100%;padding:15px 12px;margin:10px 0;background:#1b4230;color:#f9e6b3;border:1px solid #9b814d;border-radius:14px;text-align:left}.table-item small{display:block;color:#a9cbb8;margin-top:4px}.table-item strong{font-size:18px}.table-item:disabled{opacity:.6}.note{font-size:12px;color:#b9c9ba}</style></head><body><main><div class="top"><div><div class="logo">♠ TRYNKA</div><div class="sub">TELEGRAM CARD CLUB</div></div><button class="avatar" id="avatar">♛</button></div><section id="home"><div class="hero" style="margin:25px 0 18px"><div class="suits" style="font-size:32px">♠ ♥ ♣</div><h1 style="font-size:30px;margin:8px 0">Тринька</h1><p>Твоя гра. Твій стіл. Твоя перемога.</p></div><h2 style="color:#f4d68b;font-size:19px;margin:18px 0 8px">♠ Ігрові столи <small style="font-size:12px;color:#a9cbb8">· 11 місць</small></h2><div id="home-tables"></div><div class="grid"><button class="action" data-page="friends"><b>♧</b>Друзі</button><button class="action" data-page="profile"><b>♛</b>Профіль</button></div></section><section id="detail" hidden><button class="back" id="back">← Головне меню</button><div class="panel"><h2 id="heading"></h2><p id="description"></p><div id="table-list"></div></div></section><div class="status" id="status">Підключаємо Telegram…</div><div class="footer">TRYNKA ONLINE · УКРАЇНСЬКА КАРТКОВА ГРА</div></main><script>
 const tg=window.Telegram?.WebApp;
 const statusEl=document.getElementById('status');
 const name=tg?.initDataUnsafe?.user?.first_name||'Гравець';
 const stakes=[2,5,10,20,50,100,200,500,1000];
-let signedIn=false;
+let signedIn=false;let currentTable=null;let lastTables=[];
 try{tg?.ready();tg?.expand();}catch(e){console.warn('Telegram SDK',e)}
 async function login(){
  if(!tg?.initData){statusEl.textContent='Відкрий гру через кнопку Telegram-бота';return}
@@ -12,9 +12,52 @@ async function login(){
   if(!r.ok){statusEl.textContent='Помилка входу: '+r.status;return}
   const session=await r.json();
   if(!session.access_token){statusEl.textContent='Не вдалося створити сесію';return}
-  signedIn=true;statusEl.textContent='✓ Telegram підключено · '+name;
+  signedIn=true;statusEl.textContent='✓ Telegram підключено · '+name;refreshTables();
  }catch(e){statusEl.textContent='Помилка з’єднання: '+String(e.message||e).slice(0,65)}
 }
+async function refreshTables(){
+ try{const r=await fetch('/api/tables',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);
+ const data=await r.json();lastTables=data.tables||[];renderHomeTables();
+ }catch(e){document.getElementById('home-tables').textContent='Не вдалося завантажити кількість гравців';}
+}
+function renderHomeTables(){
+ const root=document.getElementById('home-tables');root.replaceChildren();
+ stakes.forEach((stake,i)=>{
+  const info=lastTables.find(t=>t.id===i+1);
+  const occupied=info?.occupied;
+  const b=document.createElement('button');b.type='button';b.className='table-item';
+  const left=document.createElement('span');const h=document.createElement('strong');h.textContent='♠ Стіл №'+(i+1)+' · '+stake.toLocaleString('uk-UA');
+  const sub=document.createElement('small');sub.textContent='Макс. за розіграш '+(stake*100).toLocaleString('uk-UA');
+  left.append(h,sub);
+  const right=document.createElement('strong');right.textContent=occupied===undefined?'…/11':occupied+'/11';
+  right.style.color=occupied>=11?'#ed9e83':'#f6d682';b.append(left,right);
+  b.onclick=()=>joinTable(i+1);root.append(b);
+ });
+}
+async function postPresence(action,table){
+ const r=await fetch('/api/table-presence',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg?.initData,action,table})});
+ const data=await r.json();if(data.tables){lastTables=data.tables;renderHomeTables()}
+ if(!r.ok)throw Error(data.error||'Помилка посадки');
+ return data;
+}
+async function joinTable(table){
+ if(!tg?.initData){statusEl.textContent='Відкрий гру через Telegram-бота';return}
+ try{
+  const data=await postPresence('join',table);currentTable=data.joined;
+  document.getElementById('heading').textContent='Стіл №'+table;
+  document.getElementById('description').textContent='Ставка '+stakes[table-1].toLocaleString('uk-UA')+' · максимум '+(stakes[table-1]*100).toLocaleString('uk-UA')+' за розіграш. Ваш баланс прихований.';
+  const list=document.getElementById('table-list');list.replaceChildren();
+  const p=document.createElement('p');p.id='seated';p.textContent='Ви за столом. Очікуємо гравців…';list.append(p);
+  const leave=document.createElement('button');leave.className='table-item';leave.textContent='← Вийти зі столу';leave.onclick=leaveTable;list.append(leave);
+  document.getElementById('home').hidden=true;document.getElementById('detail').hidden=false;
+ }catch(e){statusEl.textContent='Не вдалося сісти за стіл: '+e.message}
+}
+async function leaveTable(){
+ try{await postPresence('leave',currentTable)}catch(e){statusEl.textContent=e.message}
+ currentTable=null;document.getElementById('home').hidden=false;document.getElementById('detail').hidden=true;
+}
+setInterval(async()=>{if(currentTable){try{await postPresence('heartbeat',currentTable)}catch(e){currentTable=null;statusEl.textContent='Місце втрачено: '+e.message;document.getElementById('home').hidden=false;document.getElementById('detail').hidden=true}}else await refreshTables()},20000);
+renderHomeTables();refreshTables();
 const pages={play:['Вільні столи','Обери стіл за ставкою. Кожен стіл розрахований на 11 гравців.'],create:['Вільні столи','9 постійних столів — створювати нові не потрібно.'],tables:['Усі столи','Ставки та максимальні суми одного розіграшу.'],friends:['Друзі','Запрошення друзів додамо разом з онлайн-грою.'],profile:['Профіль','Гравець: '+name+' · Ваш баланс прихований від інших.']};
 function openPage(page){
  const [h,d]=pages[page]||pages.tables;
@@ -42,6 +85,6 @@ function showTable(i,stake){
 }
 document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));
 document.getElementById('avatar').onclick=()=>openPage('profile');
-document.getElementById('back').onclick=()=>{document.getElementById('home').hidden=false;document.getElementById('detail').hidden=true};
+document.getElementById('back').onclick=()=>{if(currentTable){leaveTable()}else{document.getElementById('home').hidden=false;document.getElementById('detail').hidden=true}};
 login();
 </script></body></html>
