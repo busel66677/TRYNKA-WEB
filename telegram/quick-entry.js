@@ -3,6 +3,13 @@
   const tg = window.Telegram?.WebApp;
   if (!tg) return;
   document.documentElement.classList.add('trynka-telegram');
+  const authInfo = document.createElement('div');
+  authInfo.id='tg-auth-status';
+  authInfo.style.cssText='position:fixed;z-index:999999;bottom:12px;left:12px;right:12px;padding:12px;border-radius:12px;background:#143b2f;color:#f6e8c6;font:13px system-ui;text-align:center;box-shadow:0 5px 25px #0008';
+  authInfo.textContent=tg.initData?'Telegram: перевіряємо вхід…':'Telegram не передав дані входу. Відкрий гру кнопкою «Грати» всередині бота.';
+  document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('login')&&!document.getElementById('login').classList.contains('hide'))document.body.appendChild(authInfo);});
+  window.addEventListener('trynka:telegram-auth-error',e=>{authInfo.textContent='Вхід Telegram: '+(e.detail||'помилка авторизації');document.body.appendChild(authInfo);});
+  window.addEventListener('trynka:telegram-auth-ok',()=>authInfo.remove());
   try { tg.ready(); tg.expand(); } catch {}
   const css = document.createElement('style');
   css.textContent = `
