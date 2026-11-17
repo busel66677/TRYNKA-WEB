@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.env.PORT || 3000);
 const mime = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.webp':'image/webp', '.ico':'image/x-icon', '.woff2':'font/woff2', '.mp3':'audio/mpeg', '.wav':'audio/wav' };
-const telegramBootstrap = '<script src="https://telegram.org/js/telegram-web-app.js"></script><script>try{if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();}}catch(e){console.warn(e)}</script>';
+const telegramBootstrap = '<script src="https://telegram.org/js/telegram-web-app.js"></script><script>try{if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();}}catch(e){console.warn(e)}</script><script defer src="/telegram/quick-entry.js?v=2"></script>';
 http.createServer(async (req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
@@ -16,7 +16,7 @@ http.createServer(async (req,res)=>{
   try { pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname); } catch {res.writeHead(400);return res.end();}
   if(pathname === '/' || pathname === '/telegram') pathname='/index.html';
   const file = path.resolve(root, '.'+pathname);
-  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || pathname.startsWith('/telegram/')){res.writeHead(404);return res.end();}
+  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && pathname !== '/telegram/quick-entry.js')){res.writeHead(404);return res.end();}
   try {
     const info=await stat(file);
     if(!info.isFile()){res.writeHead(404);return res.end();}
