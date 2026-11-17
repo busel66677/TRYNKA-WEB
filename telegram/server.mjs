@@ -33,11 +33,57 @@ async function tablePresence(req,res){
   return json(res,200,{tables:counts(),joined:table,seat,players:players(table)});
  }catch(e){return json(res,401,{error:'Telegram verification failed'})}
 }
+
+const ADMIN_TELEGRAM_ID=806877187;
+const SUPABASE_URL='https://oqyjypzltncbruzaxetp.supabase.co';
+async function sb(path,options={}){
+ const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ if(!key)throw Error('Database not configured');
+ const r=await fetch(SUPABASE_URL+path,{...options,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',...(options.headers||{})},signal:AbortSignal.timeout(12000)});
+ const data=await r.json().catch(()=>null);
+ if(!r.ok)throw Error(data?.message||data?.error||'Database error');
+ return data;
+}
+async function readPayload(req){
+ let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>12000)throw Error('Payload too large')}
+ return JSON.parse(raw);
+}
+async function accountInfo(req,res){
+ try{
+  const data=await readPayload(req),user=validateTelegram(data.initData,process.env.TELEGRAM_BOT_TOKEN||'');
+  const email='telegram-'+user.id+'@users.trynka.invalid';
+  const users=await sb('/auth/v1/admin/users?per_page=1000');
+  const target=users.users?.find(x=>x.email===email);
+  const profile=target?await sb('/rest/v1/profiles?id=eq.'+encodeURIComponent(target.id)+'&select=id,chips,nickname'):null;
+  return json(res,200,{admin:user.id===ADMIN_TELEGRAM_ID,balance:profile?.[0]?.chips??null,name:profile?.[0]?.nickname||user.first_name||'Гравець'});
+ }catch(e){return json(res,401,{error:'Не вдалося отримати профіль'})}
+}
+async function adminApi(req,res){
+ try{
+  const data=await readPayload(req),user=validateTelegram(data.initData,process.env.TELEGRAM_BOT_TOKEN||'');
+  if(user.id!==ADMIN_TELEGRAM_ID)return json(res,403,{error:'Доступ лише адміністратору'});
+  const targetId=Number(data.targetId);
+  if(!Number.isSafeInteger(targetId)||targetId<=0)return json(res,400,{error:'Вкажіть Telegram ID гравця'});
+  const users=await sb('/auth/v1/admin/users?per_page=1000');
+  const found=users.users?.find(x=>x.email==='telegram-'+targetId+'@users.trynka.invalid');
+  if(!found)return json(res,404,{error:'Гравець ще не входив у Триньку'});
+  const profile=(await sb('/rest/v1/profiles?id=eq.'+encodeURIComponent(found.id)+'&select=id,chips,nickname'))?.[0];
+  if(!profile)return json(res,404,{error:'Профіль гравця не знайдено'});
+  if(data.action==='lookup')return json(res,200,{player:{name:profile.nickname||'Гравець',balance:profile.chips,id:targetId}});
+  if(data.action!=='adjust')return json(res,400,{error:'Невідома дія'});
+  const amount=Number(data.amount);
+  if(!Number.isSafeInteger(amount)||amount===0||Math.abs(amount)>100000)return json(res,400,{error:'Сума від 1 до 100 000 фішок'});
+  const result=await sb('/rest/v1/rpc/telegram_admin_adjust_chips',{method:'POST',body:JSON.stringify({p_target:profile.id,p_amount:amount,p_actor:String(user.id)})});
+  return json(res,200,{player:{name:profile.nickname||'Гравець',balance:result,id:targetId}});
+ }catch(e){return json(res,400,{error:String(e.message||e).slice(0,160)})}
+}
 http.createServer(async (req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
   if(req.url?.split('?')[0] === '/health') { res.writeHead(200,{'Content-Type':'application/json'});return res.end(JSON.stringify({ok:true,app:'trynka-telegram',mode:'frontend-preview'})); }
   if(req.url?.split('?')[0] === '/api/telegram-auth' && req.method === 'POST') return telegramAuth(req,res);
+  if(req.url?.split('?')[0] === '/api/account' && req.method === 'POST') return accountInfo(req,res);
+  if(req.url?.split('?')[0] === '/api/admin' && req.method === 'POST') return adminApi(req,res);
   if(req.url?.split('?')[0] === '/api/tables' && req.method === 'GET') return json(res,200,{tables:counts()});
   if(req.url?.split('?')[0] === '/api/table-presence' && req.method === 'POST') return tablePresence(req,res);
   if(req.method !== 'GET' && req.method !== 'HEAD'){res.writeHead(405);return res.end();}
