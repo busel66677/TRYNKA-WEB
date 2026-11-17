@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 const supabaseUrl = 'https://oqyjypzltncbruzaxetp.supabase.co';
 const publicKey = 'sb_publishable_PUAdJ6qJ6U8nf0UrK1FmKQ_PcyMEjIZ';
 
-function validateTelegram(initData, token) {
+export function validateTelegram(initData, token) {
   if (typeof initData !== 'string' || initData.length > 8192) throw Error('Invalid Telegram payload');
   const params = new URLSearchParams(initData);
   const hash = params.get('hash');
