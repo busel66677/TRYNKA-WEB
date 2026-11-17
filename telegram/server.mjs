@@ -77,12 +77,32 @@ async function adminApi(req,res){
   return json(res,200,{player:{name:profile.nickname||'Гравець',balance:result,id:targetId}});
  }catch(e){return json(res,400,{error:String(e.message||e).slice(0,160)})}
 }
+
+async function referralApi(req,res){
+ try{
+  const data=await readPayload(req),user=validateTelegram(data.initData,process.env.TELEGRAM_BOT_TOKEN||'');
+  const me=Number(user.id),start=String(data.startParam||'');
+  const match=/^ref_([1-9][0-9]{0,15})$/.exec(start);
+  if(match){
+   const inviter=Number(match[1]);
+   if(Number.isSafeInteger(inviter)&&inviter!==me){
+    const existing=await sb('/rest/v1/telegram_referrals?invited_id=eq.'+me+'&select=invited_id');
+    if(existing.length===0){
+     try{await sb('/rest/v1/telegram_referrals',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({invited_id:me,inviter_id:inviter})})}catch(e){console.warn('Referral registration',e.message)}
+    }
+   }
+  }
+  const rows=await sb('/rest/v1/telegram_referrals?inviter_id=eq.'+me+'&select=invited_id,rewarded_at');
+  return json(res,200,{link:'https://t.me/TrynkaGameBot?startapp=ref_'+me,invited:rows.length,rewarded:rows.filter(x=>x.rewarded_at).length,bonusChips:rows.filter(x=>x.rewarded_at).length*50});
+ }catch(e){return json(res,400,{error:'Реферальні дані тимчасово недоступні'})}
+}
 http.createServer(async (req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
   if(req.url?.split('?')[0] === '/health') { res.writeHead(200,{'Content-Type':'application/json'});return res.end(JSON.stringify({ok:true,app:'trynka-telegram',mode:'frontend-preview'})); }
   if(req.url?.split('?')[0] === '/api/telegram-auth' && req.method === 'POST') return telegramAuth(req,res);
   if(req.url?.split('?')[0] === '/api/account' && req.method === 'POST') return accountInfo(req,res);
+  if(req.url?.split('?')[0] === '/api/referrals' && req.method === 'POST') return referralApi(req,res);
   if(req.url?.split('?')[0] === '/api/admin' && req.method === 'POST') return adminApi(req,res);
   if(req.url?.split('?')[0] === '/api/tables' && req.method === 'GET') return json(res,200,{tables:counts()});
   if(req.url?.split('?')[0] === '/api/table-presence' && req.method === 'POST') return tablePresence(req,res);
