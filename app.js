@@ -327,6 +327,7 @@ async function acceptSession(session,{restore=true}={}){
     lastAuthUserId=user.id;
     await loadProfile();
     if(restore)await restoreNavState();
+    else show('lobby');
     return true;
   }finally{authRestoring=false}
 }
