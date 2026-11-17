@@ -13,7 +13,19 @@
   window.addEventListener('error',e=>{if(authInfo.isConnected)authInfo.textContent='Помилка JavaScript: '+String(e.message||'невідома').slice(0,100);});
   window.addEventListener('unhandledrejection',e=>{if(authInfo.isConnected)authInfo.textContent='Помилка запуску: '+String(e.reason?.message||e.reason||'невідома').slice(0,100);});
   setTimeout(()=>{if(authInfo.isConnected&&authInfo.textContent.includes('перевіряємо'))authInfo.textContent='Вхід не завершився. Перевірка запуску гри не пройшла.';},9000);
-  try { tg.ready(); tg.expand(); } catch {}
+  // Independent probe: this script runs even when the legacy app module fails to load.
+  if(tg.initData){
+    fetch('/api/telegram-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData}),signal:AbortSignal.timeout(12000)})
+      .then(async response=>{
+        if(!response.ok){
+          authInfo.textContent='Telegram: сервер авторизації повернув '+response.status;
+        }else{
+          authInfo.textContent='Telegram перевірено ✓. Очікуємо запуск ігрового модуля…';
+        }
+      })
+      .catch(e=>{authInfo.textContent='Telegram: запит не вдався ('+String(e.name||'помилка')+')';});
+  }
+    try { tg.ready(); tg.expand(); } catch {}
   const css = document.createElement('style');
   css.textContent = `
     .trynka-telegram body:has(#lobby:not(.hide)) { background:#07120f!important; }
