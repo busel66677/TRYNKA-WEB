@@ -1,7 +1,7 @@
 // Telegram-only main menu. Reuse the existing game actions and keep web unchanged.
 (() => {
   const tg = window.Telegram?.WebApp;
-  if (!tg?.initData) return;
+  if (!tg) return;
   document.documentElement.classList.add('trynka-telegram');
   try { tg.ready(); tg.expand(); } catch {}
   const css = document.createElement('style');
