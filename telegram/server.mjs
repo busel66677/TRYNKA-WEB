@@ -23,7 +23,11 @@ http.createServer(async (req,res)=>{
     const info=await stat(file);
     if(!info.isFile()){res.writeHead(404);return res.end();}
     let body=await readFile(file);
-    if(path.extname(file)==='.html') body=Buffer.from(body.toString('utf8').replace(/<head([^>]*)>/i, '<head$1>'+telegramBootstrap));
+    if(path.extname(file)==='.html') {
+      let html=body.toString('utf8').replace(/<head([^>]*)>/i, '<head$1>'+telegramBootstrap);
+      html=html.replace(/<script type="module" src="app\\.js\\?[^"]+"><\\/script>/, '<script type="module">import("/app.js?tgdiagnostic=7").catch(e=>window.dispatchEvent(new CustomEvent("trynka:telegram-auth-error",{detail:"модуль гри: "+String(e.message||e).slice(0,130)})))</script>');
+      body=Buffer.from(html);
+    }
     res.writeHead(200,{'Content-Type':mime[path.extname(file).toLowerCase()]||'application/octet-stream','Cache-Control':path.extname(file)==='.html'?'no-cache':'no-cache'});
     if(req.method==='HEAD') return res.end();
     res.end(body);
