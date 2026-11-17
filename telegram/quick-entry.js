@@ -10,6 +10,9 @@
   document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('login')&&!document.getElementById('login').classList.contains('hide'))document.body.appendChild(authInfo);});
   window.addEventListener('trynka:telegram-auth-error',e=>{authInfo.textContent='Вхід Telegram: '+(e.detail||'помилка авторизації');document.body.appendChild(authInfo);});
   window.addEventListener('trynka:telegram-auth-ok',()=>authInfo.remove());
+  window.addEventListener('error',e=>{if(authInfo.isConnected)authInfo.textContent='Помилка JavaScript: '+String(e.message||'невідома').slice(0,100);});
+  window.addEventListener('unhandledrejection',e=>{if(authInfo.isConnected)authInfo.textContent='Помилка запуску: '+String(e.reason?.message||e.reason||'невідома').slice(0,100);});
+  setTimeout(()=>{if(authInfo.isConnected&&authInfo.textContent.includes('перевіряємо'))authInfo.textContent='Вхід не завершився. Перевірка запуску гри не пройшла.';},9000);
   try { tg.ready(); tg.expand(); } catch {}
   const css = document.createElement('style');
   css.textContent = `
