@@ -31,3 +31,10 @@ Next: integrate durable gameplay state, full betting-round/raise rules and the a
 - The admin is publicly labeled `👑 Адмін` at a game seat and in the shared chat; the Telegram profile display name is not shown there.
 - The public phone contact link and phone text are removed from the active Mini App page. Use the shared chat for in-app contact.
 - The personal Telegram account privacy settings are independent from the Mini App. Existing contacts and older public Git history are not anonymized by this change.
+
+## Invitations and quick entry
+
+- The `ГРАТИ ЗАРАЗ` button now joins the lowest-stake occupied table with 1–3 participants, or the lowest available table when empty. The current test multiplayer supports up to four active players per round.
+- Seated players can use `Запросити друга за цей стіл` to send a Telegram Mini App link (`https://t.me/TrynkaGameBot?startapp=table_1` etc.).
+- Opening a valid `table_N` link automatically joins table N after Telegram authentication. Unknown/malformed start params are ignored and the referral `ref_N` start param is still handled by the referral API.
+- Invites carry only the table number and virtual-chip stake. They do not reveal Telegram ID, phone number, or access tokens.

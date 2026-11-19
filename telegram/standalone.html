@@ -16,6 +16,8 @@ async function login(){
   const session=await r.json();
   if(!session.access_token){statusEl.textContent='Не вдалося створити сесію';return}
   signedIn=true;statusEl.textContent='✓ Telegram підключено · '+name;refreshTables();loadAccount();apiPost('/api/referrals',{startParam:tg?.initDataUnsafe?.start_param||new URLSearchParams(location.search).get('tgWebAppStartParam')||''}).catch(()=>{});
+  const inviteTarget=extractTableInvite(getTelegramStartParam());
+  if(inviteTarget)await joinTable(inviteTarget);
  }catch(e){statusEl.textContent='Помилка з’єднання: '+String(e.message||e).slice(0,65)}
 }
 async function apiPost(url,data){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg?.initData,...data})});const result=await r.json();if(!r.ok)throw Error(result.error||'Помилка');return result}
@@ -86,6 +88,53 @@ async function postPresence(action,table){
  if(!r.ok)throw Error(data.error||'Помилка посадки');
  return data;
 }
+
+function getTelegramStartParam(){
+ const direct=tg?.initDataUnsafe?.start_param;
+ if(typeof direct==='string'&&direct.length)return direct;
+ // In Telegram the launch parameter may be in the URL fragment instead of query.
+ const query=new URLSearchParams(location.search).get('tgWebAppStartParam');
+ const hash=new URLSearchParams((location.hash||'').replace(/^#/, '')).get('tgWebAppStartParam');
+ return query||hash||'';
+}
+function extractTableInvite(raw){
+ const match=/^table_([1-9])$/.exec(String(raw||''));
+ return match?Number(match[1]):null;
+}
+function roomInviteUrl(table){return 'https://t.me/TrynkaGameBot?startapp=table_'+table}
+async function shareRoomInvite(){
+ if(!Number.isInteger(currentTable)||currentTable<1||currentTable>9)return;
+ const link=roomInviteUrl(currentTable);
+ const message='Приєднуйся до мене за стіл №'+currentTable+' у Триньці! Ставка '+stakes[currentTable-1]+' ігрових фішок.';
+ const shareUrl='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(message);
+ try{
+  if(typeof tg?.openTelegramLink==='function'){tg.openTelegramLink(shareUrl);return}
+  if(navigator.clipboard?.writeText){
+   await navigator.clipboard.writeText(link);
+   statusEl.textContent='✓ Посилання на стіл скопійовано';
+   return;
+  }
+  window.open(shareUrl,'_blank','noopener');
+ }catch(e){
+  statusEl.textContent='Не вдалося поділитися. Спробуй скопіювати посилання.';
+  try{tg?.showAlert?.(link)}catch{}
+ }
+}
+async function quickJoin(){
+ if(currentTable){statusEl.textContent='Ти вже сидиш за столом №'+currentTable;return}
+ if(!tg?.initData){statusEl.textContent='Відкрий гру кнопкою в Telegram-боті';return}
+ // Prefer the lowest-stake table with 1–3 people: test rounds include max 4 players.
+ // If everybody is alone or the club is empty, use the lowest available stake.
+ try{await refreshTables()}catch(e){console.warn('Quickplay refresh',e)}
+ const eligible=lastTables.filter(t=>Number.isInteger(t.id)&&t.id>=1&&t.id<=9&&Number(t.occupied)>0&&Number(t.occupied)<4)
+   .sort((a,b)=>Number(a.stake)-Number(b.stake)||Number(b.occupied)-Number(a.occupied));
+ const free=lastTables.filter(t=>Number.isInteger(t.id)&&t.id>=1&&t.id<=9&&Number(t.occupied)<4)
+   .sort((a,b)=>Number(a.stake)-Number(b.stake));
+ const target=eligible[0]||free[0]||{id:1};
+ return joinTable(target.id);
+}
+window.trynkaQuickJoin=quickJoin;
+
 async function joinTable(table){
  if(!tg?.initData){statusEl.textContent='Відкрий гру через Telegram-бота';return}
  try{
@@ -118,6 +167,7 @@ function renderRoom(players){
  }
  room.append(wrap);
  const foot=document.createElement('div');foot.className='room-foot';foot.textContent='Очікуємо початку гри · чужі баланси приховані';room.append(foot);
+ const invite=document.createElement('button');invite.type='button';invite.className='trynka-invite-btn';invite.textContent='✉ Запросити друга за цей стіл';invite.onclick=shareRoomInvite;room.append(invite);
  const leave=document.createElement('button');leave.className='leave-btn';leave.textContent='← Вийти зі столу';leave.onclick=leaveTable;room.append(leave);
  list.append(room);
 }

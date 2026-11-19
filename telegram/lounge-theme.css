@@ -88,3 +88,14 @@ main{position:relative;z-index:1;max-width:540px;padding-left:16px;padding-right
 .club-admin-stat strong{color:#f3dcaa}
 .status{color:#aebfb0}.footer{color:#819789}
 @media (max-width:380px){.trynka-table-amount strong{font-size:29px!important}.table-item.trynka-table{padding:13px 14px}.trynka-table-footer strong{font-size:13px!important}}
+
+/* Share a particular table with a friend, without exposing personal contacts. */
+#detail .trynka-invite-btn{
+ display:block;width:min(86%,300px);min-height:47px;margin:11px auto 4px;
+ border:1px solid #dbc58e;border-radius:13px;
+ background:linear-gradient(130deg,#e2c995,#c3a56b);color:#1d291f;
+ padding:11px 14px;font:800 13px system-ui,-apple-system,sans-serif;
+ box-shadow:0 5px 14px #0005;cursor:pointer;
+}
+#detail .trynka-invite-btn:active{transform:scale(.98)}
+.club-play:disabled{opacity:.66;cursor:wait;transform:none!important}

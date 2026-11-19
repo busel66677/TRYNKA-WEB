@@ -15,8 +15,22 @@
   const play = document.createElement('button');
   play.className = 'club-play';
   play.type = 'button';
-  play.innerHTML = '⚡ ГРАТИ ЗАРАЗ <small>ОБЕРИ СТІЛ І ПЕРЕМАГАЙ</small>';
-  play.onclick = () => home.querySelector('.tables-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  play.innerHTML = '⚡ ГРАТИ ЗАРАЗ <small>ШВИДКИЙ ПОШУК СТОЛУ</small>';
+  play.onclick = async () => {
+    if (play.disabled) return;
+    if (typeof window.trynkaQuickJoin !== 'function') {
+      status.textContent = 'Не вдалося запустити швидкий вхід';
+      return;
+    }
+    play.disabled = true;
+    play.innerHTML = '⌛ ШУКАЄМО СТІЛ <small>ПЕРЕВІРЯЄМО ВІЛЬНІ МІСЦЯ</small>';
+    try { await window.trynkaQuickJoin(); }
+    catch (e) { status.textContent = 'Швидкий вхід: ' + (e.message || 'помилка'); }
+    finally {
+      play.disabled = false;
+      play.innerHTML = '⚡ ГРАТИ ЗАРАЗ <small>ШВИДКИЙ ПОШУК СТОЛУ</small>';
+    }
+  };
   home.insertBefore(play, home.querySelector('.grid'));
 
   function entry(icon, title, hint, extraClass) {
