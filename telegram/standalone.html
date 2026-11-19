@@ -148,5 +148,6 @@ async function showReferrals(){
  }catch(e){p.textContent=e.message}
 }
 document.getElementById('referral-open').onclick=showReferrals;
+window.trynkaTelegramGameBridge = () => ({ table: currentTable, seat: mySeat });
 login();
-</script></body></html>
+</script><script defer src="/telegram/game-client.js?v=1"></script></body></html>

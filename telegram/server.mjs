@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { telegramAuth, validateTelegram } from './auth.mjs';
+import { createGameApi } from './game.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -96,6 +97,7 @@ async function referralApi(req,res){
   return json(res,200,{link:'https://t.me/TrynkaGameBot?startapp=ref_'+me,invited:rows.length,rewarded:rows.filter(x=>x.rewarded_at).length,bonusChips:rows.filter(x=>x.rewarded_at).length*50});
  }catch(e){return json(res,400,{error:'Реферальні дані тимчасово недоступні'})}
 }
+const gameApi = createGameApi({ seats, stakes, validate: validateTelegram, readPayload, json });
 http.createServer(async (req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
@@ -104,6 +106,7 @@ http.createServer(async (req,res)=>{
   if(req.url?.split('?')[0] === '/api/account' && req.method === 'POST') return accountInfo(req,res);
   if(req.url?.split('?')[0] === '/api/referrals' && req.method === 'POST') return referralApi(req,res);
   if(req.url?.split('?')[0] === '/api/admin' && req.method === 'POST') return adminApi(req,res);
+  if(req.url?.split('?')[0] === '/api/game' && req.method === 'POST') return gameApi(req,res);
   if(req.url?.split('?')[0] === '/api/tables' && req.method === 'GET') return json(res,200,{tables:counts()});
   if(req.url?.split('?')[0] === '/api/table-presence' && req.method === 'POST') return tablePresence(req,res);
   if(req.method !== 'GET' && req.method !== 'HEAD'){res.writeHead(405);return res.end();}
@@ -111,7 +114,7 @@ http.createServer(async (req,res)=>{
   try { pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname); } catch {res.writeHead(400);return res.end();}
   if(pathname === '/' || pathname === '/telegram') pathname='/telegram/standalone.html';
   const file = path.resolve(root, '.'+pathname);
-  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html'].includes(pathname))){res.writeHead(404);return res.end();}
+  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html','/telegram/game-client.js'].includes(pathname))){res.writeHead(404);return res.end();}
   try {
     const info=await stat(file);
     if(!info.isFile()){res.writeHead(404);return res.end();}

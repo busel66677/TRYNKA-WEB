@@ -15,7 +15,10 @@ export function validateTelegram(initData, token) {
   const expected = createHmac('sha256',secret).update(data).digest();
   if (!timingSafeEqual(expected,Buffer.from(hash,'hex'))) throw Error('Telegram signature mismatch');
   const timestamp = Number(params.get('auth_date'));
-  if (!Number.isSafeInteger(timestamp) || Math.abs(Date.now()/1000-timestamp)>300) throw Error('Telegram session expired');
+  // Telegram initData is fixed for a WebView launch; allow a playing session up to 12h.
+  // Reject future timestamps and old tokens; every API request still checks the HMAC.
+  const ageSeconds = Date.now()/1000 - timestamp;
+  if (!Number.isSafeInteger(timestamp) || ageSeconds < -60 || ageSeconds > 12*60*60) throw Error('Telegram session expired');
   const user = JSON.parse(params.get('user') || 'null');
   if (!user || !Number.isSafeInteger(user.id) || user.id<=0) throw Error('Invalid Telegram user');
   return user;
