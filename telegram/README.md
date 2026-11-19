@@ -25,3 +25,9 @@ Next: integrate durable gameplay state, full betting-round/raise rules and the a
 - Admins can delete chat messages and mute/unmute users. The existing chip-adjustment RPC remains server-side and admin-guarded.
 - Administrator dashboard displays Telegram player count, occupied seats, active tables and recent Telegram profiles.
 - Chat updates by polling approximately every 4.5 seconds. There are no new external dependencies.
+
+## Admin privacy
+
+- The admin is publicly labeled `👑 Адмін` at a game seat and in the shared chat; the Telegram profile display name is not shown there.
+- The public phone contact link and phone text are removed from the active Mini App page. Use the shared chat for in-app contact.
+- The personal Telegram account privacy settings are independent from the Mini App. Existing contacts and older public Git history are not anonymized by this change.

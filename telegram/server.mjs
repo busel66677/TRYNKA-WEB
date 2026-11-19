@@ -31,7 +31,7 @@ async function tablePresence(req,res){
   const used=new Set([...seats.entries()].filter(([uid,x])=>uid!==id&&x.table===table).map(([uid,x])=>x.seat));
   const seat=existing?.table===table?existing.seat:Array.from({length:11},(_,i)=>i+1).find(n=>!used.has(n));
   if(!seat)return json(res,409,{error:'Table full',tables:counts()});
-  seats.set(id,{table,seat,name:String(user.first_name||user.username||'Гравець').slice(0,22),photo:typeof user.photo_url==='string'&&user.photo_url.startsWith('https://')?user.photo_url:null,lastSeen:Date.now()});
+  seats.set(id,{table,seat,name:user.id===ADMIN_TELEGRAM_ID?'👑 Адмін':String(user.first_name||user.username||'Гравець').slice(0,22),photo:typeof user.photo_url==='string'&&user.photo_url.startsWith('https://')?user.photo_url:null,lastSeen:Date.now()});
   return json(res,200,{tables:counts(),joined:table,seat,players:players(table)});
  }catch(e){return json(res,401,{error:'Telegram verification failed'})}
 }
@@ -57,7 +57,7 @@ async function accountInfo(req,res){
   const users=await sb('/auth/v1/admin/users?per_page=1000');
   const target=users.users?.find(x=>x.email===email);
   const profile=target?await sb('/rest/v1/profiles?id=eq.'+encodeURIComponent(target.id)+'&select=id,chips,nickname'):null;
-  return json(res,200,{admin:user.id===ADMIN_TELEGRAM_ID,balance:profile?.[0]?.chips??null,name:profile?.[0]?.nickname||user.first_name||'Гравець'});
+  return json(res,200,{admin:user.id===ADMIN_TELEGRAM_ID,balance:profile?.[0]?.chips??null,name:user.id===ADMIN_TELEGRAM_ID?'Адмін':profile?.[0]?.nickname||user.first_name||'Гравець'});
  }catch(e){return json(res,401,{error:'Не вдалося отримати профіль'})}
 }
 async function adminApi(req,res){

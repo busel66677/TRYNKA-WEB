@@ -11,7 +11,7 @@ export function createChatApi({ readPayload, json, validate, sb, adminId }) {
     return Number.isSafeInteger(number) && number > 0 ? number : null;
   };
   const isModerator = user => Number(user.id) === adminId;
-  const safeName = user => (String(user.first_name || user.username || 'Гравець').trim() || 'Гравець').slice(0,32);
+  const safeName = user => isModerator(user) ? 'Адмін' : (String(user.first_name || user.username || 'Гравець').trim() || 'Гравець').slice(0,32);
 
   async function muteUntil(userId) {
     const rows = await sb('/rest/v1/telegram_chat_mutes?telegram_id=eq.' + userId + '&select=muted_until&limit=1');
@@ -36,7 +36,7 @@ export function createChatApi({ readPayload, json, validate, sb, adminId }) {
           muteUntil(me)
         ]);
         const messages = records.slice().reverse().map(row => ({
-          id: row.id, name: row.sender_name, text: row.body, at: row.created_at,
+          id: row.id, name: Number(row.sender_id) === adminId ? 'Адмін' : row.sender_name, text: row.body, at: row.created_at,
           mine: Number(row.sender_id) === me, admin: Number(row.sender_id) === adminId,
           ...(moderator ? { senderId: Number(row.sender_id) } : {})
         }));
