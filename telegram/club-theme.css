@@ -1,0 +1,67 @@
+/* Telegram TRYNKA v2 — vibrant, mobile-first club menu. */
+:root{--club-gold:#ffe18c;--club-mint:#73f4bf;--club-rose:#fb84bc;--club-ink:#091922}
+body{background:radial-gradient(ellipse 82% 39% at 18% -12%,#3b837a 0%,transparent 83%),radial-gradient(ellipse 80% 45% at 100% 2%,#65345c 0%,transparent 72%),linear-gradient(168deg,#113b39 0%,#0a242c 56%,#0b1624 100%);color:#fff4db}
+main{max-width:540px}
+.top{border-bottom:1px solid #bdf6dd54;padding-bottom:15px}
+.logo{font-weight:950;color:#ffdc83;text-shadow:0 2px 20px #ffc35d80}
+.sub{color:#bbefd8}
+.avatar{border:2px solid #f6ce77;background:linear-gradient(135deg,#733d75,#1c7775);color:#fff4b4;box-shadow:0 5px 17px #0005,0 0 0 3px #d7f9d122}
+#home .hero{margin:16px 0 10px!important;padding:5px 0 0!important}
+#home .hero h1{font-size:38px!important;background:linear-gradient(100deg,#fff4b9,#ffbc73 46%,#f983b6);background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 5px 15px #ffc77d30)}
+#home .hero p{color:#c9ecdb}
+#home .suits{text-shadow:0 3px 21px #e8bf8c9a}
+#home .lobby-intro{margin:12px 0 15px;padding:17px 15px;background:radial-gradient(ellipse at 18% 0%,#2a816a,#173b42 75%);border:1px solid #96f4c285;box-shadow:inset 0 1px #ffffff30,0 9px 24px #0005}
+#home .lobby-title{color:#ffe6a7;font-size:21px}
+#home .lobby-subtitle{color:#d0ffdf}
+.club-play{width:100%;min-height:80px;border:0;border-radius:19px;padding:15px 18px;color:#1d1a29;background:linear-gradient(113deg,#ffeb9c 0%,#ffc269 56%,#fb8fa5 100%);box-shadow:0 10px 28px #ffb45e50,inset 0 2px #ffffff88;font-weight:950;font-size:22px;letter-spacing:.3px}
+.club-play small{display:block;margin-top:4px;font-size:11px;font-weight:800;letter-spacing:1.5px}
+#home .grid{margin-top:13px}
+#home .balance-card{background:linear-gradient(145deg,#345d42,#1b3d53 76%);border:1px solid #a5edb5bf;box-shadow:0 6px 16px #0005;min-height:101px}
+#home .balance-card span{color:#b2ffca}
+#home .balance-card strong{color:#ffdf80}
+#home .action{border:1px solid #c8a9edaf;border-radius:17px;background:linear-gradient(140deg,#593f80,#1c5368 80%);color:#fff2d8;box-shadow:0 8px 18px #0003}
+#home .action b{color:#ffe391}
+.club-chat-entry{width:100%;display:flex;align-items:center;justify-content:space-between;gap:9px;margin:14px 0 0;border:1px solid #97f6e7;border-radius:17px;background:linear-gradient(115deg,#1a8e88,#244d9d 65%,#71418d);color:#f7fffb;padding:17px 17px;box-shadow:0 10px 22px #217e9f36}
+.club-chat-entry .club-chat-label{font-weight:900;font-size:17px;text-align:left}
+.club-chat-entry .club-chat-desc{font-size:11px;font-weight:500;display:block;color:#d6fff2;margin-top:5px}
+.club-admin-entry{background:linear-gradient(125deg,#7750a5,#a04e83);border-color:#ffa9db}
+#home .referral-button{border:1px solid #ffcf86;background:linear-gradient(115deg,#725034,#364c42);box-shadow:0 6px 15px #0003}
+#home .tables-section{margin-top:24px}
+#home .tables-heading h2{color:#ffe3a3}
+#home .table-item{background:linear-gradient(117deg,#1d6757,#1b4d67 62%,#273b70);border:1px solid #85d8b1a8;box-shadow:0 7px 18px #0004}
+#home .table-item strong{color:#fff0c2}
+#home .table-item small{color:#b7e9d5}
+#detail .panel{padding-top:14px}
+#detail .panel>h2{color:#ffe6a8!important}
+.club-chat-panel{display:flex;flex-direction:column;gap:12px}
+.club-chat-info{background:linear-gradient(100deg,#205f55,#284964);border:1px solid #84d6b5;border-radius:13px;padding:11px 12px;font-size:12px;color:#d5ffeb}
+.club-chat-log{height:min(53dvh,480px);min-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;border:1px solid #638d83;border-radius:18px;background:#071b25b8;padding:13px;overscroll-behavior:contain}
+.club-chat-message{max-width:91%;align-self:flex-start;background:linear-gradient(130deg,#244d56,#283b5a);padding:10px 12px;border-radius:14px 14px 14px 4px;box-shadow:0 3px 8px #0003;min-width:90px;overflow-wrap:anywhere}
+.club-chat-message.mine{align-self:flex-end;background:linear-gradient(128deg,#285a4c,#2c694a);border-radius:14px 14px 4px 14px}
+.club-chat-message.moderator{border:1px solid #ffc67190}
+.club-chat-message .by{color:#f3d48c;font-size:12px;font-weight:900}
+.club-chat-message .body{font-size:14px;white-space:pre-wrap;line-height:1.4;padding-top:5px;color:#fff}
+.club-chat-message .time{font-size:10px;color:#c1cdd1;margin-top:5px;text-align:right}
+.club-chat-compose{display:flex;align-items:end;gap:8px}
+.club-chat-compose textarea{min-width:0;flex:1;resize:none;min-height:53px;max-height:104px;padding:13px;border-radius:13px;border:1px solid #76b8a8;background:#0b2c32;color:#fff;font:14px system-ui}
+.club-chat-compose button,.club-chat-tools button{border:0;border-radius:12px;padding:13px;background:linear-gradient(120deg,#ffdb89,#ffad75);color:#21252a;font-weight:900}
+.club-chat-compose button:disabled{opacity:.5}
+.club-chat-tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.club-chat-tools button{font-size:11px;padding:8px 10px;background:#79516b;color:#fff}
+.club-chat-error{min-height:18px;font-size:12px;color:#ffaaa7}
+.club-chat-mute{font-size:12px;color:#ffad99}
+.club-admin-statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:13px 0}
+.club-admin-stat{background:linear-gradient(135deg,#204e53,#46315d);border:1px solid #c1e4bb80;border-radius:15px;padding:13px 8px;text-align:center}
+.club-admin-stat strong{display:block;font-size:26px;color:#ffe4a3}
+.club-admin-stat small{display:block;font-size:10px;color:#c5efda;margin-top:3px}
+.club-admin-recent{padding:14px 11px;border:1px solid #c4a97088;border-radius:16px;background:#11342f}
+.club-admin-recent h3{color:#ffe2a1;margin:0 0 9px;font-size:16px}
+.club-admin-player{width:100%;text-align:left;display:flex;justify-content:space-between;gap:8px;margin:6px 0;padding:11px 9px;border:1px solid #6d9a8d70;border-radius:10px;background:#244f45;color:#ffedd0}
+.club-admin-player small{font-size:10px;color:#c4dfcf}
+.club-admin-loading{font-size:12px;color:#bdeed3}
+button{touch-action:manipulation}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid #ffdc84;outline-offset:3px}
+@media(max-width:360px){.club-admin-statgrid{gap:5px}.club-admin-stat strong{font-size:21px}.club-chat-log{height:46dvh}}
+@media(prefers-reduced-motion:no-preference){.club-play{transition:transform .15s ease,filter .15s ease}.club-play:active{transform:scale(.985)}.club-chat-entry:active{transform:scale(.985)}}
+
+.club-chat-tools[hidden],.club-admin-entry[hidden]{display:none!important}

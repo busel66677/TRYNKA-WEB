@@ -16,3 +16,12 @@ Deploy `telegram-miniapp` with `node telegram/server.mjs` and the repository Doc
 Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_AUTH_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` as Railway secrets. Never commit tokens or keys.
 
 Next: integrate durable gameplay state, full betting-round/raise rules and the audited virtual-chip ledger, followed by concurrency and multi-device testing.
+
+## Telegram club lobby and community chat
+
+- The Telegram lobby now has a high-contrast, colorful play shortcut and shared-chat entry.
+- Global chat persists in Supabase tables `telegram_global_chat` and `telegram_chat_mutes`; the database SQL is recorded in `telegram/schema-global-chat.sql` and has been applied.
+- Chat API validates Telegram initData for every request; non-moderators never receive Telegram numeric IDs, client text is escaped with DOM text nodes, and send attempts are rate-limited (4 seconds).
+- Admins can delete chat messages and mute/unmute users. The existing chip-adjustment RPC remains server-side and admin-guarded.
+- Administrator dashboard displays Telegram player count, occupied seats, active tables and recent Telegram profiles.
+- Chat updates by polling approximately every 4.5 seconds. There are no new external dependencies.

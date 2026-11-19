@@ -1,6 +1,7 @@
 import http from 'node:http';
 import { telegramAuth, validateTelegram } from './auth.mjs';
 import { createGameApi } from './game.mjs';
+import { createChatApi } from './chat.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -63,6 +64,28 @@ async function adminApi(req,res){
  try{
   const data=await readPayload(req),user=validateTelegram(data.initData,process.env.TELEGRAM_BOT_TOKEN||'');
   if(user.id!==ADMIN_TELEGRAM_ID)return json(res,403,{error:'Доступ лише адміністратору'});
+  if(data.action==='stats'){
+    cleanup();
+    const [authUsers,profiles]=await Promise.all([
+      sb('/auth/v1/admin/users?per_page=1000'),
+      sb('/rest/v1/profiles?select=id,nickname,chips&order=created_at.desc&limit=100')
+    ]);
+    const byUuid=new Map();
+    const tgUsers=(authUsers.users||[]).filter(item=>{
+      const m=/^telegram-([0-9]+)@users\.trynka\.invalid$/.exec(item.email||'');
+      if(!m)return false;
+      byUuid.set(item.id,Number(m[1]));
+      return true;
+    });
+    const recentPlayers=(profiles||[]).filter(p=>byUuid.has(p.id)).slice(0,14).map(p=>({
+      telegramId:byUuid.get(p.id),name:String(p.nickname||'Гравець').slice(0,30),chips:p.chips||0
+    }));
+    return json(res,200,{
+      playersTotal:tgUsers.length,onlineNow:seats.size,
+      tablesActive:counts().filter(t=>t.occupied>0).length,
+      recentPlayers
+    });
+  }
   const targetId=Number(data.targetId);
   if(!Number.isSafeInteger(targetId)||targetId<=0)return json(res,400,{error:'Вкажіть Telegram ID гравця'});
   const users=await sb('/auth/v1/admin/users?per_page=1000');
@@ -98,6 +121,7 @@ async function referralApi(req,res){
  }catch(e){return json(res,400,{error:'Реферальні дані тимчасово недоступні'})}
 }
 const gameApi = createGameApi({ seats, stakes, validate: validateTelegram, readPayload, json });
+const chatApi = createChatApi({ readPayload, json, validate: validateTelegram, sb, adminId: ADMIN_TELEGRAM_ID });
 http.createServer(async (req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
@@ -107,6 +131,7 @@ http.createServer(async (req,res)=>{
   if(req.url?.split('?')[0] === '/api/referrals' && req.method === 'POST') return referralApi(req,res);
   if(req.url?.split('?')[0] === '/api/admin' && req.method === 'POST') return adminApi(req,res);
   if(req.url?.split('?')[0] === '/api/game' && req.method === 'POST') return gameApi(req,res);
+  if(req.url?.split('?')[0] === '/api/chat' && req.method === 'POST') return chatApi(req,res);
   if(req.url?.split('?')[0] === '/api/tables' && req.method === 'GET') return json(res,200,{tables:counts()});
   if(req.url?.split('?')[0] === '/api/table-presence' && req.method === 'POST') return tablePresence(req,res);
   if(req.method !== 'GET' && req.method !== 'HEAD'){res.writeHead(405);return res.end();}
@@ -114,7 +139,7 @@ http.createServer(async (req,res)=>{
   try { pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname); } catch {res.writeHead(400);return res.end();}
   if(pathname === '/' || pathname === '/telegram') pathname='/telegram/standalone.html';
   const file = path.resolve(root, '.'+pathname);
-  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html','/telegram/game-client.js'].includes(pathname))){res.writeHead(404);return res.end();}
+  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html','/telegram/game-client.js','/telegram/club-theme.css','/telegram/club-ui.js'].includes(pathname))){res.writeHead(404);return res.end();}
   try {
     const info=await stat(file);
     if(!info.isFile()){res.writeHead(404);return res.end();}
