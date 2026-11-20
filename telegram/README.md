@@ -38,3 +38,10 @@ Next: integrate durable gameplay state, full betting-round/raise rules and the a
 - Seated players can use `Запросити друга за цей стіл` to send a Telegram Mini App link (`https://t.me/TrynkaGameBot?startapp=table_1` etc.).
 - Opening a valid `table_N` link automatically joins table N after Telegram authentication. Unknown/malformed start params are ignored and the referral `ref_N` start param is still handled by the referral API.
 - Invites carry only the table number and virtual-chip stake. They do not reveal Telegram ID, phone number, or access tokens.
+
+## Animated table visuals
+- Test rounds have server-derived `dealStartedAt` and `finishedAt` timestamps, so late joins avoid stale animations.
+- New round: three cards appear one-by-one with smooth dealing transitions. Opponent cards remain face-down until the server finishes the round.
+- Active player's table avatar and row glow in gold; the 30-second timer ticks locally between authoritative API polls.
+- On showdown, cards flip and a winner banner appears briefly (approximately four seconds); a new round can be started after the server cooldown.
+- Reduced-motion user preferences disable decorative animations. Existing table panels survive presence heartbeats to avoid flicker.

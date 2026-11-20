@@ -88,6 +88,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
     return {
       table, status: round.status, roundId: round.id,
       pot: round.pot, stake: round.stake, turnEndsAt: round.turnEndsAt,
+      dealStartedAt: round.dealStartedAt, finishedAt: round.finishedAt,
       nextRoundAt: finished ? round.finishedAt + RESTART_MS : null,
       reason: finished ? round.reason : null,
       myTurn: round.status === 'playing' && player?.id === userId,
@@ -137,7 +138,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
         folded: false, acted: false
       }));
       round = {
-        id: ++sequence, table, status: 'playing', stake: stakes[table - 1],
+        id: ++sequence, table, status: 'playing', dealStartedAt: Date.now(), stake: stakes[table - 1],
         pot: stakes[table - 1] * players.length, players, turn: 0,
         turnEndsAt: Date.now() + TURN_MS, winners: [], reason: null, finishedAt: null
       };
