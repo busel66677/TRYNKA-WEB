@@ -99,7 +99,7 @@
   }
   function makeButton(parent,text,action,table,{danger=false,disabled=false}={}){
     const button=node('button',danger?'danger':'',text);
-    button.type='button';button.disabled=busy||disabled;
+    button.type='button';button.disabled=Boolean(disabled);
     button.onclick=async()=>{
       if(busy||button.disabled)return;
       busy=true;button.disabled=true;
@@ -109,7 +109,7 @@
         errorMessage='';
         applyState(table,state);
       }catch(e){errorMessage=e.message||'Не вдалося виконати хід';}
-      finally{busy=false;refresh();}
+      finally{busy=false;if(button.isConnected)button.disabled=false;refresh();}
     };
     parent.append(button);
     return button;
