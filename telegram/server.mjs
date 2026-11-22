@@ -96,7 +96,7 @@ async function adminApi(req,res){
   if(data.action==='lookup')return json(res,200,{player:{name:profile.nickname||'Гравець',balance:profile.chips,id:targetId}});
   if(data.action!=='adjust')return json(res,400,{error:'Невідома дія'});
   const amount=Number(data.amount);
-  if(!Number.isSafeInteger(amount)||amount===0||Math.abs(amount)>100000)return json(res,400,{error:'Сума від 1 до 100 000 фішок'});
+  if(!Number.isSafeInteger(amount)||amount===0||Math.abs(amount)>100000)return json(res,400,{error:'Сума від 1 до 100 000 віртуальних грн'});
   const result=await sb('/rest/v1/rpc/telegram_admin_adjust_chips',{method:'POST',body:JSON.stringify({p_target:profile.id,p_amount:amount,p_actor:String(user.id)})});
   return json(res,200,{player:{name:profile.nickname||'Гравець',balance:result,id:targetId}});
  }catch(e){return json(res,400,{error:String(e.message||e).slice(0,160)})}
