@@ -6,6 +6,7 @@ const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['6','7','8','9','10','J','Q','K','A'];
 const TURN_MS = 30000;
 const RESTART_MS = 7000;
+const READY_DELAY_MS = 5000;
 const MAX_PLAYERS = 4;
 
 function makeDeck() {
@@ -18,7 +19,7 @@ function makeDeck() {
   return cards;
 }
 
-export function scoreHand(hand) {
+function scoreWithoutJoker(hand) {
   const ranks = hand.map(c => c.rank);
   const triple = ranks.every(rank => rank === ranks[0]);
   const tr = ranks[0];
@@ -31,9 +32,66 @@ export function scoreHand(hand) {
   return { value, label: value + ' очок' };
 }
 
+// Валет піки — єдиний джокер. Підстановка визначається лише на сервері.
+export function scoreHand(hand) {
+  if (!Array.isArray(hand) || hand.length !== 3) throw Error('Invalid hand');
+  const jokerIndex = hand.findIndex(card => card.rank === 'J' && card.suit === '♠');
+  if (jokerIndex < 0) return scoreWithoutJoker(hand);
+  let best = null;
+  for (const suit of SUITS) for (const rank of RANKS) {
+    const replacement = hand.map((card, i) => i === jokerIndex ? {rank, suit} : card);
+    const score = scoreWithoutJoker(replacement);
+    if (!best || score.value > best.value) best = score;
+  }
+  return {value: best.value, label: best.label + ' · джокер J♠'};
+}
+
 export function createGameApi({ seats, stakes, validate, readPayload, json }) {
   const rounds = new Map();
+  const readyByTable = new Map();
   let sequence = 0;
+
+  function readyState(table) {
+    let state = readyByTable.get(table);
+    if (!state) {state = {ids: new Set(), endsAt: null};readyByTable.set(table, state);}
+    for (const id of state.ids) if (seats.get(id)?.table !== table) state.ids.delete(id);
+    if (state.ids.size < 2) state.endsAt = null;
+    return state;
+  }
+  function waitingView(table, userId) {
+    const state = readyState(table);
+    return {
+      table, status: 'waiting',
+      seated: [...seats.values()].filter(p => p.table === table).length,
+      maxPlayers: MAX_PLAYERS, readyCount: state.ids.size,
+      readySeats: [...state.ids].map(id => seats.get(id)?.seat).filter(Boolean),
+      myReady: state.ids.has(userId), readyEndsAt: state.endsAt
+    };
+  }
+  function startRound(table, entries) {
+    const deck = makeDeck();
+    const players = entries.slice(0, MAX_PLAYERS).map(([uid,p]) => ({
+      id: uid, seat: p.seat, name: p.name,
+      cards: [deck.pop(), deck.pop(), deck.pop()], folded: false, acted: false
+    }));
+    const round = {
+      id: ++sequence, table, status: 'playing', dealStartedAt: Date.now(),
+      stake: stakes[table - 1], pot: stakes[table - 1] * players.length,
+      players, turn: 0, turnEndsAt: Date.now() + TURN_MS,
+      winners: [], reason: null, finishedAt: null
+    };
+    readyByTable.delete(table);
+    rounds.set(table, round);
+    return round;
+  }
+  function maybeStartReady(table) {
+    const state = readyState(table);
+    if (state.endsAt === null || Date.now() < state.endsAt) return null;
+    const entries = [...seats.entries()].filter(([id,p]) => p.table === table && state.ids.has(id))
+      .sort((a,b) => a[1].seat - b[1].seat).slice(0, MAX_PLAYERS);
+    if (entries.length < 2) {state.endsAt = null;return null;}
+    return startRound(table, entries);
+  }
 
   function isPresent(player, table) {
     const current = seats.get(player.id);
@@ -82,7 +140,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
     }
   }
   function view(round, userId, table) {
-    if (!round) return { table, status: 'waiting', seated: [...seats.values()].filter(p => p.table === table).length, maxPlayers: MAX_PLAYERS };
+    if (!round) return waitingView(table, userId);
     const finished = round.status === 'finished';
     const player = round.players[round.turn];
     return {
@@ -121,31 +179,37 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
     if (!seat || seat.table !== table) return json(res, 409, { error: 'Спершу займіть місце за столом' });
     let round = rounds.get(table);
     tick(round);
+    if (round?.status === 'finished' && Date.now() >= round.finishedAt + RESTART_MS) {
+      rounds.delete(table);
+      round = null;
+    }
+    if (!round) round = maybeStartReady(table);
     const action = data.action;
     if (action === 'state') return json(res, 200, view(round, id, table));
-    if (action === 'start') {
-      if (round?.status === 'playing') return json(res, 409, { error: 'Роздача вже триває' });
-      if (round?.status === 'finished' && Date.now() < round.finishedAt + RESTART_MS) {
-        return json(res, 409, { error: 'Дочекайтеся завершення попередньої роздачі' });
+    if (action === 'ready') {
+      if (round) return json(res, 409, {error:'Дочекайся наступної роздачі'});
+      const state = readyState(table);
+      if (state.ids.has(id)) {
+        state.ids.delete(id);
+        if (state.ids.size < 2) state.endsAt = null;
+      } else {
+        if (state.ids.size >= MAX_PLAYERS) return json(res,409,{error:'На цю роздачу вже готові четверо'});
+        state.ids.add(id);
+        if (state.ids.size >= 2 && state.endsAt === null) state.endsAt = Date.now() + READY_DELAY_MS;
       }
-      const entries = [...seats.entries()].filter(([, p]) => p.table === table)
-        .sort((a,b) => a[1].seat - b[1].seat).slice(0, MAX_PLAYERS);
-      if (entries.length < 2) return json(res, 409, { error: 'Для гри потрібно щонайменше двоє' });
-      if (!entries.some(([uid]) => uid === id)) return json(res, 403, { error: 'Ця роздача доступна першим чотирьом гравцям' });
-      const deck = makeDeck();
-      const players = entries.map(([uid,p]) => ({
-        id: uid, seat: p.seat, name: p.name, cards: [deck.pop(), deck.pop(), deck.pop()],
-        folded: false, acted: false
-      }));
-      round = {
-        id: ++sequence, table, status: 'playing', dealStartedAt: Date.now(), stake: stakes[table - 1],
-        pot: stakes[table - 1] * players.length, players, turn: 0,
-        turnEndsAt: Date.now() + TURN_MS, winners: [], reason: null, finishedAt: null
-      };
-      rounds.set(table, round);
-      return json(res, 200, view(round, id, table));
+      return json(res, 200, waitingView(table, id));
     }
-    if (!['call', 'fold', 'reveal'].includes(action)) return json(res, 400, { error: 'Невідома дія' });
+    if (action === 'start') {
+      if (round?.status === 'playing') return json(res,409,{error:'Роздача вже триває'});
+      if (round?.status === 'finished') return json(res,409,{error:'Дочекайся завершення попередньої роздачі'});
+      const entries = [...seats.entries()].filter(([,p]) => p.table === table)
+        .sort((a,b) => a[1].seat - b[1].seat).slice(0,MAX_PLAYERS);
+      if (entries.length < 2) return json(res,409,{error:'Для гри потрібно щонайменше двоє'});
+      if (!entries.some(([uid])=>uid===id)) return json(res,403,{error:'Ця роздача доступна першим чотирьом гравцям'});
+      round = startRound(table, entries);
+      return json(res,200,view(round,id,table));
+    }
+    if (!['call', 'raise', 'fold', 'reveal'].includes(action)) return json(res, 400, { error: 'Невідома дія' });
     if (!round || round.status !== 'playing') return json(res, 409, { error: 'Наразі немає активної роздачі' });
     const me = round.players[round.turn];
     if (!me || me.id !== id) return json(res, 403, { error: 'Зараз не ваш хід' });
@@ -153,6 +217,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
     me.acted = true;
     if (action === 'fold') me.folded = true;
     if (action === 'call') round.pot += round.stake;
+    if (action === 'raise') round.pot += round.stake * 2;
     if (action === 'reveal') finish(round, 'Вскриття за вимогою гравця');
     else advance(round);
     return json(res, 200, view(round, id, table));
