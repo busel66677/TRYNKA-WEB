@@ -64,15 +64,22 @@
     board.setAttribute('aria-label',lastStanding?'Карти останнього гравця, очки та виграш':'Відкриті карти, очки та переможець');
     board.append(node('div','tg-reveal-title',lastStanding?'🃏 ОСТАННІЙ ГРАВЕЦЬ ВІДКРИВАЄ КАРТИ':'🃏 ВСКРИТТЯ КАРТ'));
     const winners=(state.payouts||[]).filter(w=>Number(w.amount)>0);
-    const bannerText=winners.length
-      ?winners.length===1
-        ?'🏆 '+short(winners[0].name,17)+' забрав '+money(winners[0].amount)
-        :'🏆 Банк поділено: '+winners.map(w=>short(w.name,10)+' '+money(w.amount)).join(' · ')
-      :'Роздачу завершено';
-    board.append(node('div','tg-reveal-winner',bannerText));
+    const players=Array.isArray(state.players)?state.players:[];
+    const findWinner=w=>players.find(p=>Number(p.seat)===Number(w.seat));
+    if(winners.length===1){
+      const w=winners[0],p=findWinner(w);
+      board.append(node('div','tg-reveal-winner','🏆 ПЕРЕМІГ: '+short(w.name,19)));
+      board.append(node('div','tg-reveal-winning-score','Результат: '+String(p?.result||'—')));
+      board.append(node('div','tg-reveal-winning-payout','Забрав банк: '+money(w.amount)));
+    }else if(winners.length>1){
+      board.append(node('div','tg-reveal-winner','🏆 НІЧИЯ · БАНК ПОДІЛЕНО'));
+      for(const w of winners){
+        const p=findWinner(w);
+        board.append(node('div','tg-reveal-tie-score',short(w.name,13)+' · '+String(p?.result||'—')+' · '+money(w.amount)));
+      }
+    }else board.append(node('div','tg-reveal-winner','Роздачу завершено'));
     const list=node('div','tg-reveal-list');
     const me=seatOfMe();
-    const players=Array.isArray(state.players)?state.players:[];
     // When everyone else folds, display the LAST player's entire hand to every viewer.
     // At a regular showdown compare only surviving hands (folded hands stay private).
     const shown=players.filter(p=>p.revealed===true && Array.isArray(p.cards));
@@ -85,7 +92,7 @@
       const info=node('div','tg-reveal-info');
       info.append(node('b','tg-reveal-name',own?'ВИ':short(p.name,16)));
       const result=p.result||'Комбінація не визначена';
-      info.append(node('span','tg-reveal-score',(lastStanding?'ОЧКИ: ':'')+result));
+      info.append(node('span','tg-reveal-score',result));
       const hand=node('div','tg-reveal-hand');
       for(let i=0;i<3;i++){
         const card=createFace(p.cards?.[i],animateReveal?'tg-face-flip':'');
@@ -110,45 +117,58 @@
     const bounds=wrap.getBoundingClientRect();
     if(bounds.width<100||bounds.height<110)return;
     const players=Array.isArray(state.players)?state.players:[];
+    if(players.length<2)return;
+    const cx=bounds.width*.5,cy=bounds.height*.5;
+    wrap.querySelectorAll('.tg-dealing-back,.tg-deal-deck').forEach(el=>el.remove());
+    const deck=node('div','tg-deal-deck','♠');
+    deck.style.left=(cx-18)+'px';
+    deck.style.top=(cy-24)+'px';
+    wrap.append(deck);
+    let count=0;
     const me=seatOfMe();
-    const cx=bounds.width*.50,cy=bounds.height*.49;
-    const myCards=room.querySelectorAll('.tg-own-hand .tg-card');
-    let done=0;
+    // Three consecutive passes: one card per player, then second, then third.
     for(let i=0;i<3;i++){
       players.forEach((p,k)=>{
         const seat=room.querySelector('.seat[data-seat="'+Number(p.seat)+'"]');
-        const target=p.seat===me&&myCards[i]?myCards[i]:seat?.querySelector('.seat-icon');
+        const target=seat?.querySelector('.seat-icon');
         if(!target)return;
         const box=target.getBoundingClientRect();
         const x=box.left-bounds.left+box.width*.5;
         const y=box.top-bounds.top+box.height*.5;
         const card=node('div','tg-dealing-back','♠');
-        card.style.left=(cx-13)+'px';
-        card.style.top=(cy-18)+'px';
-        card.style.setProperty('--ix',String(i));
+        card.style.left=(cx-16)+'px';
+        card.style.top=(cy-22)+'px';
         wrap.append(card);
-        const delay=(i*players.length+k)*125;
-        const duration=680;
+        const delay=(i*players.length+k)*225;
+        const duration=850;
+        const dx=x-cx+(i-1)*7,dy=y-cy+(i-1)*5;
         if(typeof card.animate==='function'){
-          const animation=card.animate([
-            {transform:'translate(0,0) rotate(-16deg) scale(.62)',opacity:0},
-            {transform:'translate(0,0) rotate(-8deg) scale(1)',opacity:1,offset:.13},
-            {transform:'translate('+(x-cx)+'px,'+(y-cy)+'px) rotate('+(k*9-15)+'deg) scale(.82)',opacity:1,offset:.85},
-            {transform:'translate('+(x-cx)+'px,'+(y-cy)+'px) rotate(0deg) scale(.5)',opacity:0}
-          ],{duration,delay,fill:'forwards',easing:'cubic-bezier(.26,.7,.3,1)'});
-          animation.onfinish=()=>card.remove();
-          animation.oncancel=()=>card.remove();
+          const a=card.animate([
+            {transform:'translate(0,0) rotate(-20deg) scale(.6)',opacity:0},
+            {transform:'translate(0,0) rotate(-8deg) scale(1)',opacity:1,offset:.14},
+            {transform:'translate('+dx+'px,'+dy+'px) rotate('+(k*11-14)+'deg) scale(.9)',opacity:1,offset:.85},
+            {transform:'translate('+dx+'px,'+dy+'px) rotate(0deg) scale(.7)',opacity:0}
+          ],{duration,delay,fill:'forwards',easing:'cubic-bezier(.16,.7,.26,1)'});
+          a.onfinish=()=>card.remove();
+          a.oncancel=()=>card.remove();
         }else{
-          // No Web Animations support: leave live game fully playable.
-          card.remove();
+          // CSS animation fallback for Telegram WebViews without WAAPI.
+          card.style.setProperty('--tg-dx',dx+'px');
+          card.style.setProperty('--tg-dy',dy+'px');
+          card.style.animation='tg-card-fly 850ms '+delay+'ms both cubic-bezier(.16,.7,.26,1)';
+          card.addEventListener('animationend',()=>card.remove(),{once:true});
         }
-        done++;
+        count++;
       });
     }
-    if(done){
+    if(count){
       room.classList.add('tg-dealing');
-      window.setTimeout(()=>{if(room.isConnected)room.classList.remove('tg-dealing')},Math.min(2800,done*125+850));
-    }
+      const age=3*players.length*225+850;
+      window.setTimeout(()=>{
+        deck.remove();
+        if(room.isConnected)room.classList.remove('tg-dealing');
+      },Math.min(4000,age));
+    }else deck.remove();
   }
 
   function update(state,opts={}){
@@ -160,8 +180,13 @@
       if(state?.status==='waiting'){lastDealKey='';lastRevealKey='';}
       return;
     }
-    showOwnScore(state,room);
+    // No score overlay during play; show the decisive score at the end.
+    room.querySelector('.tg-my-points')?.remove();
     renderShowdown(state,room,opts);
+    if(state.status==='finished'){
+      room.querySelectorAll('.tg-dealing-back,.tg-deal-deck').forEach(el=>el.remove());
+      room.classList.remove('tg-dealing');
+    }
     const dealKey=String(state.table)+':'+String(state.roundId);
     // The actual server deal time, not a poll, triggers the visual flight.
     const age=Date.now()-Number(state.dealStartedAt||0);
