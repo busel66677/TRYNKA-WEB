@@ -1,0 +1,135 @@
+/* TRYNKA v133 — readable reveal for up to 4 players; staged card flight. */
+body.trynka-in-table .tg-own-label .tg-my-points{
+  display:block!important;
+  font:950 clamp(10px,2.6vw,12px)/1.14 system-ui,sans-serif!important;
+  color:#ffe8a9!important;white-space:normal!important;
+  text-shadow:0 1px 3px #00150ecc!important;
+  margin-top:3px!important;
+}
+body.trynka-in-table .felt-wrap .tg-dealing-back{
+  position:absolute!important;z-index:28!important;pointer-events:none!important;
+  display:grid!important;place-items:center!important;
+  width:26px!important;height:36px!important;border-radius:5px!important;
+  border:2px solid #efd49e!important;
+  background:radial-gradient(circle at 50% 48%,#31936d,#0f503b 65%,#062b1f)!important;
+  color:#ffe6ab!important;font:900 19px/1 Georgia,serif!important;
+  box-shadow:0 3px 10px #0009,inset 0 0 0 2px #184a35!important;
+  transform-origin:center!important;will-change:transform!important;
+}
+body.trynka-in-table .felt-wrap>.tg-reveal-board{
+  position:absolute!important;top:50%!important;left:50%!important;
+  transform:translate(-50%,-50%)!important;
+  display:flex!important;flex-direction:column!important;
+  align-items:stretch!important;justify-content:center!important;
+  width:clamp(190px,88%,325px)!important;max-width:92%!important;
+  max-height:91%!important;z-index:25!important;
+  padding:clamp(7px,1.45vh,13px)!important;margin:0!important;
+  border:2px solid #f3d58e!important;border-radius:16px!important;
+  background:linear-gradient(160deg,#164a35f5,#08291cf6 56%,#031910fa)!important;
+  box-shadow:0 0 0 200vmax #0005,0 4px 24px #000c,
+    0 0 20px #ffdd8a55,inset 0 1px #fff2bf76!important;
+  overflow:hidden!important;pointer-events:none!important;
+  color:#fdf1d1!important;
+  animation:tg-reveal-appear .45s cubic-bezier(.2,.8,.3,1) both;
+}
+body.trynka-in-table .tg-reveal-title{
+  color:#e8cc8a!important;
+  font:900 clamp(10px,2.9vw,13px)/1.15 system-ui,sans-serif!important;
+  letter-spacing:.07em!important;text-align:center!important;
+  margin-bottom:3px!important;
+}
+body.trynka-in-table .tg-reveal-winner{
+  font:950 clamp(12px,3.65vw,17px)/1.23 system-ui,sans-serif!important;
+  color:#ffefc2!important;text-align:center!important;
+  text-shadow:0 1px 7px #e4b96779!important;
+  margin-bottom:7px!important;overflow-wrap:anywhere!important;
+}
+body.trynka-in-table .tg-reveal-list{
+  min-height:0!important;display:grid!important;gap:4px!important;
+  overflow:hidden!important;
+}
+body.trynka-in-table .tg-reveal-row{
+  min-width:0!important;min-height:0!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  gap:6px!important;align-items:center!important;
+  border:1px solid #889e7854!important;border-radius:9px!important;
+  padding:4px 5px!important;background:#001c13b3!important;
+}
+body.trynka-in-table .tg-reveal-row.is-winner{
+  border-color:#ffe2a2!important;
+  background:linear-gradient(115deg,#66502d77,#0b3c29cc)!important;
+  box-shadow:inset 0 0 9px #e5c37237!important;
+}
+body.trynka-in-table .tg-reveal-row.is-mine{
+  border-left:3px solid #5effb9!important;
+}
+body.trynka-in-table .tg-reveal-row.is-folded{opacity:.72!important}
+body.trynka-in-table .tg-reveal-info{
+  min-width:0!important;display:flex!important;flex-direction:column!important;
+  gap:2px!important;overflow:hidden!important;
+}
+body.trynka-in-table .tg-reveal-name{
+  font:900 clamp(10px,2.8vw,12px)/1.14 system-ui,sans-serif!important;
+  color:#fff3d3!important;white-space:nowrap!important;
+  text-overflow:ellipsis!important;overflow:hidden!important;
+}
+body.trynka-in-table .tg-reveal-score{
+  font:800 clamp(9px,2.65vw,11px)/1.17 system-ui,sans-serif!important;
+  color:#ffe3a0!important;overflow-wrap:anywhere!important;
+}
+body.trynka-in-table .tg-reveal-hand{
+  display:flex!important;gap:3px!important;
+  align-items:center!important;flex:0 0 auto!important;
+}
+body.trynka-in-table .tg-reveal-face{
+  width:clamp(25px,7.1vw,34px)!important;
+  height:clamp(35px,9.7vw,47px)!important;
+  display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;
+  gap:1px!important;padding:1px!important;
+  border:1px solid #fff7e1!important;border-radius:5px!important;
+  background:#fff9eb!important;color:#15231b!important;
+  box-shadow:0 2px 6px #0009!important;
+}
+body.trynka-in-table .tg-reveal-face.red{color:#b72f32!important}
+body.trynka-in-table .tg-reveal-face b{
+  font:950 clamp(10px,3vw,14px)/1 system-ui,sans-serif!important;
+}
+body.trynka-in-table .tg-reveal-face i{
+  font:900 clamp(12px,3.5vw,16px)/1 system-ui,sans-serif!important;
+}
+body.trynka-in-table .tg-reveal-bank{
+  text-align:center!important;margin-top:6px!important;
+  font:750 clamp(9px,2.5vw,11px)/1.15 system-ui,sans-serif!important;
+  color:#d0dccc!important;
+}
+body.trynka-in-table .tg-reveal-face.tg-face-flip{
+  animation:tg-final-card-flip .5s both ease-out;
+  animation-delay:calc(var(--deal-index)*110ms);
+}
+@keyframes tg-final-card-flip{
+  0%{transform:scaleX(.06) rotateY(80deg);opacity:.1}
+  50%{transform:scaleX(.18) rotateY(40deg);opacity:1}
+  100%{transform:scaleX(1) rotateY(0);opacity:1}
+}
+@keyframes tg-reveal-appear{
+  from{opacity:0;transform:translate(-50%,-44%) scale(.89)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+@media(max-height:680px){
+ body.trynka-in-table .felt-wrap>.tg-reveal-board{padding:6px!important;max-height:95%!important}
+ body.trynka-in-table .tg-reveal-winner{margin-bottom:4px!important}
+ body.trynka-in-table .tg-reveal-list{gap:2px!important}
+ body.trynka-in-table .tg-reveal-row{padding:2px 3px!important;gap:3px!important}
+ body.trynka-in-table .tg-reveal-face{width:25px!important;height:34px!important}
+ body.trynka-in-table .tg-reveal-bank{margin-top:3px!important}
+}
+@media(max-width:360px){
+ body.trynka-in-table .felt-wrap>.tg-reveal-board{width:94%!important;max-width:94%!important}
+ body.trynka-in-table .tg-reveal-face{width:24px!important;height:33px!important}
+ body.trynka-in-table .tg-reveal-hand{gap:2px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.trynka-in-table .felt-wrap>.tg-reveal-board,
+ body.trynka-in-table .tg-reveal-face.tg-face-flip{animation:none!important}
+}
