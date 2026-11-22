@@ -1,0 +1,25 @@
+name: Telegram Mini App checks
+on:
+  push:
+    branches: [telegram-miniapp]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  telegram:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Telegram JavaScript
+        run: |
+          node --check telegram/game.mjs
+          node --check telegram/game-client.js
+          node --check telegram/table-v123.js
+          node --check telegram/server.mjs
+          node --check telegram/club-ui.js
+      - name: Run game, chat, entry and privacy tests
+        run: node --test tests/telegram-*.test.mjs
