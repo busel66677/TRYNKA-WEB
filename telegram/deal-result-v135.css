@@ -1,0 +1,105 @@
+/* TRYNKA v135 — results first, three-card dealing choreography. */
+body.trynka-in-table .felt-wrap>.tg-reveal-board{
+  max-height:94%!important;
+  gap:clamp(2px,.75vh,5px)!important;
+  padding:clamp(7px,1.3vh,10px)!important;
+}
+body.trynka-in-table .tg-reveal-title{
+  color:#b9cbbb!important;
+  letter-spacing:.07em!important;
+  margin-bottom:1px!important;
+}
+body.trynka-in-table .tg-reveal-winner{
+  color:#fff0bf!important;
+  font:950 clamp(14px,3.8vw,19px)/1.14 system-ui,sans-serif!important;
+  margin:0!important;
+  text-shadow:0 2px 10px #e9bc6b62!important;
+}
+body.trynka-in-table .tg-reveal-winning-score{
+  width:max-content!important;max-width:100%!important;
+  margin:1px auto 2px!important;
+  padding:5px 12px!important;
+  border-radius:999px!important;
+  border:1px solid #d0f1c2!important;
+  background:linear-gradient(140deg,#16794f,#0b563b)!important;
+  color:#f7ffdf!important;
+  font:950 clamp(12px,3.5vw,16px)/1.18 system-ui,sans-serif!important;
+  text-align:center!important;overflow-wrap:anywhere!important;
+  box-shadow:0 2px 7px #0006,0 0 11px #22f9a360!important;
+}
+body.trynka-in-table .tg-reveal-winning-payout{
+  color:#e2d8b7!important;
+  text-align:center!important;
+  font:800 clamp(10px,2.9vw,12px)/1.13 system-ui,sans-serif!important;
+  margin:0 0 3px!important;
+}
+body.trynka-in-table .tg-reveal-tie-score{
+  width:100%!important;
+  color:#f4e7bb!important;
+  text-align:center!important;
+  font:800 clamp(10px,2.8vw,12px)/1.15 system-ui,sans-serif!important;
+  padding:2px 4px!important;
+  border-bottom:1px solid #e0bf8649!important;
+}
+body.trynka-in-table .tg-reveal-list{
+  gap:3px!important;
+  flex:0 1 auto!important;
+  overflow:hidden!important;
+}
+body.trynka-in-table .tg-reveal-row{
+  padding:3px 5px!important;gap:4px!important;
+}
+/* The last survivor still reveals all three cards to every player. */
+body.trynka-in-table .tg-last-standing .tg-reveal-row{
+  padding:6px!important;gap:5px!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-winning-score{
+  margin-top:1px!important;
+}
+body.trynka-in-table .felt-wrap>.tg-deal-deck{
+  position:absolute!important;
+  z-index:29!important;
+  pointer-events:none!important;
+  display:grid!important;place-items:center!important;
+  width:36px!important;height:48px!important;
+  border:2px solid #ffe0a1!important;border-radius:7px!important;
+  background:
+    radial-gradient(circle at 40% 31%,#257d58,#0a3828 73%)!important;
+  color:#f9e2a8!important;
+  font:950 23px/1 Georgia,serif!important;
+  box-shadow:0 0 0 3px #0a271b,inset 0 0 0 3px #af965b6b,
+    0 5px 12px #000a,0 0 16px #1df8ab9c!important;
+  transform:rotate(-8deg)!important;
+  animation:tg-deck-pulse .85s ease-in-out 3 alternate!important;
+}
+body.trynka-in-table .felt-wrap>.tg-dealing-back{
+  width:32px!important;height:44px!important;
+  font-size:20px!important;
+  border:2px solid #ffe7b4!important;
+  border-radius:6px!important;
+  box-shadow:inset 0 0 0 3px #0a3426,0 4px 13px #000c,0 0 8px #d5b46c44!important;
+}
+@keyframes tg-card-fly{
+  0%{opacity:0;transform:translate(0,0) rotate(-18deg) scale(.6)}
+  15%{opacity:1;transform:translate(0,0) rotate(-8deg) scale(1)}
+  85%{opacity:1;transform:translate(var(--tg-dx),var(--tg-dy)) rotate(8deg) scale(.92)}
+  100%{opacity:0;transform:translate(var(--tg-dx),var(--tg-dy)) scale(.67)}
+}
+@keyframes tg-deck-pulse{
+  0%{box-shadow:0 0 0 3px #0a271b,0 3px 11px #000b,0 0 8px #23ffac57}
+  100%{box-shadow:0 0 0 3px #0a271b,0 3px 11px #000b,0 0 20px #23ffacb0}
+}
+@media(max-height:650px){
+  body.trynka-in-table .tg-reveal-winning-score{
+    padding:3px 8px!important;font-size:12px!important;
+  }
+  body.trynka-in-table .tg-reveal-winning-payout{font-size:10px!important}
+  body.trynka-in-table .tg-reveal-title{font-size:10px!important}
+  body.trynka-in-table .tg-reveal-list{gap:2px!important}
+  body.trynka-in-table .tg-reveal-row{padding:2px 4px!important}
+  body.trynka-in-table .tg-last-standing .tg-reveal-row{padding:4px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.trynka-in-table .felt-wrap>.tg-deal-deck{animation:none!important}
+  body.trynka-in-table .felt-wrap>.tg-dealing-back{animation:none!important}
+}
