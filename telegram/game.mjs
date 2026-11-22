@@ -85,14 +85,15 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
     const deck = makeDeck();
     const players = entries.slice(0, MAX_PLAYERS).map(([uid,p]) => ({
       id: uid, seat: p.seat, name: p.name, isBot: p.isBot === true,
-      cards: [deck.pop(), deck.pop(), deck.pop()], folded: false, acted: false
+      cards: [deck.pop(), deck.pop(), deck.pop()], folded: false, acted: false,
+      contributed: stakes[table - 1], lastAction: 'ante'
     }));
     const round = {
       id: ++sequence, table, status: 'playing', dealStartedAt: Date.now(),
       stake: stakes[table - 1], pot: stakes[table - 1] * players.length,
       players, turn: 0, turnEndsAt: Date.now() + TURN_MS,
       turnStartedAt: Date.now(),
-      winners: [], reason: null, finishedAt: null
+      winners: [], payouts: [], actionLog: [], reason: null, finishedAt: null
     };
     readyByTable.delete(table);
     rounds.set(table, round);
@@ -123,6 +124,25 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
     const scores = active.map(p => ({ id: p.id, score: scoreHand(p.cards).value }));
     const best = Math.max(...scores.map(s => s.score));
     round.winners = scores.filter(s => s.score === best).map(s => s.id);
+    // Deterministic integer split: everyone sees the same payouts.
+    // These are TEST bank allocations; no account balance is credited.
+    const winners = round.players.filter(p => round.winners.includes(p.id))
+      .sort((a,b)=>a.seat-b.seat);
+    const base = winners.length ? Math.floor(round.pot / winners.length) : 0;
+    const extra = winners.length ? round.pot % winners.length : 0;
+    round.payouts = winners.map((p,i)=>({
+      seat:p.seat, name:p.name, amount:base+(i<extra?1:0)
+    }));
+  }
+  function recordAction(round, player, type, amount=0) {
+    player.lastAction = type;
+    const event = {seat:player.seat, name:player.name, type, amount, at:Date.now()};
+    round.actionLog.push(event);
+    if(round.actionLog.length>16)round.actionLog.shift();
+  }
+  function addContribution(round,player,amount) {
+    round.pot += amount;
+    player.contributed += amount;
   }
   function advance(round) {
     if (surviving(round).length <= 1) { finish(round, 'Залишився один гравець'); return; }
@@ -141,7 +161,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
   function tick(round) {
     if (!round || round.status !== 'playing') return;
     for (const p of round.players) {
-      if (!isPresent(p, round.table)) { p.folded = true; p.acted = true; }
+      if (!isPresent(p, round.table) && !p.folded) { p.folded = true; p.acted = true; recordAction(round,p,'disconnect',0); }
     }
     if (surviving(round).length <= 1) { finish(round, 'Гравці вийшли зі столу'); return; }
     // One server-controlled bot action after a short thinking delay.
@@ -151,6 +171,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
     if (Date.now() >= round.turnEndsAt) {
       p.folded = true;
       p.acted = true;
+      recordAction(round,p,'timeout',0);
       advance(round);
       return;
     }
@@ -160,10 +181,13 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
       const roll = randomInt(100);
       if (strength < 16 && roll < 12 && surviving(round).length > 2) {
         p.folded = true;
+        recordAction(round,p,'fold',0);
       } else if (strength >= 25 && roll < 24) {
-        round.pot += round.stake * 2; // raise
+        addContribution(round,p,round.stake*2);
+        recordAction(round,p,'raise',round.stake*2);
       } else {
-        round.pot += round.stake; // call
+        addContribution(round,p,round.stake);
+        recordAction(round,p,'call',round.stake);
       }
       advance(round);
     }
@@ -183,8 +207,13 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
       winners: finished ? round.players.filter(p => round.winners.includes(p.id)).map(p => p.seat) : [],
       maxPlayers: MAX_PLAYERS,
       testBotCount: testBotCount(table, userId),
+      lastAction:round.actionLog.at(-1)||null,
+      actionLog:round.actionLog.slice(-6),
+      payouts:finished?round.payouts:[],
       players: round.players.map(p => ({
         seat: p.seat, name: p.name, isBot: p.isBot, folded: p.folded, acted: p.acted,
+        contributed:p.contributed, lastAction:p.lastAction,
+        won:finished?(round.payouts.find(w=>w.seat===p.seat)?.amount||0):0,
         cards: finished || p.id === userId ? p.cards : null,
         result: finished && !p.folded ? scoreHand(p.cards).label : null,
         winner: finished && round.winners.includes(p.id)
@@ -270,11 +299,22 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
     if (!me || me.id !== id) return json(res, 403, { error: 'Зараз не ваш хід' });
     if (me.folded || me.acted) return json(res, 409, { error: 'Хід уже зроблено' });
     me.acted = true;
-    if (action === 'fold') me.folded = true;
-    if (action === 'call') round.pot += round.stake;
-    if (action === 'raise') round.pot += round.stake * 2;
-    if (action === 'reveal') finish(round, 'Вскриття за вимогою гравця');
-    else advance(round);
+    if (action === 'fold') {
+      me.folded = true;
+      recordAction(round,me,'fold');
+    }
+    if (action === 'call') {
+      addContribution(round,me,round.stake);
+      recordAction(round,me,'call',round.stake);
+    }
+    if (action === 'raise') {
+      addContribution(round,me,round.stake*2);
+      recordAction(round,me,'raise',round.stake*2);
+    }
+    if (action === 'reveal') {
+      recordAction(round,me,'reveal');
+      finish(round, 'Вскриття за вимогою гравця');
+    } else advance(round);
     return json(res, 200, view(round, id, table));
   };
 }
