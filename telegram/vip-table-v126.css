@@ -1,0 +1,105 @@
+/* TRYNKA VIP v126 — actual lounge artwork and visible release marker.
+   This stylesheet loads AFTER all previous Telegram table themes. */
+body.trynka-in-table #table-list>.room{
+  background:
+    linear-gradient(90deg,rgba(0,14,10,.24),rgba(0,14,10,.08) 47%,rgba(0,14,10,.24)),
+    url('/telegram/vip-lounge-v126.svg') center center / 100% 100% no-repeat!important;
+  border:2px solid #edca83!important;
+  box-shadow:0 0 0 2px #241b10,inset 0 0 0 1px #f7de8f66,
+    inset 0 0 22px #000b,0 0 21px #0af0ab46!important;
+}
+body.trynka-in-table .felt{
+  background:
+    radial-gradient(ellipse 60% 70% at 46% 38%,rgba(37,217,148,.25),transparent 75%),
+    repeating-linear-gradient(31deg,#fff2c304 0px,#fff2c304 1px,transparent 1px,transparent 5px),
+    radial-gradient(ellipse at 48% 42%,#0a8458 0%,#075a3d 52%,#023522 100%)!important;
+  border:clamp(6px,1.65vw,9px) solid #d6a566!important;
+  outline:2px solid #fcdfa0!important;
+  box-shadow:0 0 0 4px #48311a,0 4px 0 5px #1d1109,
+    0 14px 28px #000d,0 0 22px #10ffaa66,
+    inset 0 0 0 3px #fce6a8,inset 0 0 0 7px #0a4030,
+    inset 0 0 0 9px #28ffb5c0,inset 0 0 45px #001d17b0!important;
+}
+body.trynka-in-table .felt::after{
+  inset:4.5%!important;
+  border:2px solid #0ffdb280!important;
+  box-shadow:0 0 13px #14fdbb93,inset 0 0 9px #12ecb8a1!important;
+}
+body.trynka-in-table .room-head::before{display:none!important}
+body.trynka-in-table .room-head{
+  position:relative!important;gap:4px!important;
+  color:#ffdf9b!important;
+}
+body.trynka-in-table .vip-version-pill{
+  flex:0 0 auto!important;display:inline-flex!important;
+  align-items:center;justify-content:center;
+  padding:4px 5px!important;
+  border:1px solid #f0d090!important;border-radius:7px!important;
+  background:linear-gradient(170deg,#66572b,#173c2d)!important;
+  color:#fff1b2!important;font:900 9px/1 system-ui,sans-serif!important;
+  white-space:nowrap;box-shadow:0 0 9px #f1be6d80!important;
+}
+body.trynka-in-table .tg-room-tools{gap:3px!important}
+body.trynka-in-table .vip-refresh-btn{
+  display:grid;place-items:center;flex:0 0 24px;
+  min-width:24px!important;min-height:25px!important;
+  padding:0!important;margin:0!important;
+  border:1px solid #c7a764!important;border-radius:7px!important;
+  background:linear-gradient(145deg,#1c5c43,#073426)!important;
+  color:#fbdf9e!important;
+  font:bold 16px/1 system-ui!important;
+}
+body.trynka-in-table .vip-refresh-btn:focus-visible{
+  outline:2px solid #fbdf9e;outline-offset:2px;
+}
+body.trynka-in-table .felt-center{
+  color:#ffe3a5!important;font-size:clamp(17px,5.5vw,29px)!important;
+}
+body.trynka-in-table .felt-center::before{
+  content:"♛"!important;font-size:clamp(23px,7vw,37px)!important;
+  color:#ffe39d!important;text-shadow:0 0 13px #ffd17894!important;
+}
+body.trynka-in-table .felt-center::after{
+  content:"VIP • v126";
+  display:block;
+  width:max-content;max-width:96%;
+  margin:9px auto 0;padding:4px 10px;
+  border:1px solid #e9c985bd;border-radius:15px;
+  color:#fbe3ab;background:#092e21da;
+  font:900 10px/1.2 system-ui,sans-serif;
+  letter-spacing:.13em;
+  box-shadow:0 0 10px #18ffac49;
+}
+body.trynka-in-table .seat.empty .seat-icon{
+  border:2px solid #e5c17c!important;
+  background:radial-gradient(circle at 35% 20%,#2f7d55 0%,#0a5039 46%,#02271b 100%)!important;
+  box-shadow:0 0 0 2px #0a1d16,0 0 9px #37e5ac88,
+    inset 0 0 7px #18e6b654,0 3px 8px #0009!important;
+}
+body.trynka-in-table .seat.mine .seat-icon{
+  background:radial-gradient(circle at 35% 22%,#65ffe4,#07ac7e 51%,#007653)!important;
+  box-shadow:0 0 0 3px #ffd17e9e,0 0 16px #19ffd0d1!important;
+}
+body.trynka-in-table .tg-round{
+  border:2px solid #e6c77e!important;
+  border-radius:17px!important;
+  background:linear-gradient(150deg,#154d37,#0a291e 64%,#04150f)!important;
+  box-shadow:inset 0 1px #fff5cf52,0 0 17px #14f2a54b,0 5px 20px #000a!important;
+}
+body.trynka-in-table .tg-round-title{
+  color:#fff7e2!important;text-shadow:0 2px 7px #000c!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button:not(.ready){
+  background:linear-gradient(160deg,#8dffd3,#2df3a9 39%,#08a869)!important;
+  border:2px solid #cdffdf!important;box-shadow:inset 0 2px #fff9d890,
+  0 0 15px #1fffa485,0 3px 9px #000a!important;
+}
+@media(max-width:375px){
+ body.trynka-in-table .vip-version-pill{font-size:8px!important;padding:3px!important}
+ body.trynka-in-table .room-head{font-size:9px!important}
+ body.trynka-in-table .tg-tool-btn{padding:2px 4px!important}
+ body.trynka-in-table .vip-refresh-btn{flex-basis:22px!important;min-width:22px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.trynka-in-table .tg-round-buttons .tg-ready-button{transition:none!important}
+}
