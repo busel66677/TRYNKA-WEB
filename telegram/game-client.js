@@ -188,7 +188,11 @@
       if(state?.status==='finished'&&state.winners?.includes(seat))el.classList.add('is-winner');
     }
   }
-  window.trynkaSyncGameHighlights=()=>setSeatHighlights(snapshotTable===currentTable()?snapshot:null);
+  window.trynkaSyncGameHighlights=()=>{
+    const state=snapshotTable===currentTable()?snapshot:null;
+    setSeatHighlights(state);
+    window.trynkaBankHudUpdate?.(state);
+  };
   function clockUpdate(){
     if(!snapshot||snapshotTable!==currentTable())return;
     if(snapshot.status==='playing'&&timeText&&timeFill){
@@ -219,7 +223,11 @@
     const panel=node('div','tg-showdown');
     panel.append(node('div','tg-showdown-heading','♠ ВСКРИТТЯ ♠'));
     const names=(data.players||[]).filter(p=>p.winner).map(p=>p.name);
-    panel.append(node('div','tg-showdown-subtitle',names.length?'🏆 '+names.join(', '):'Карти відкрито'));
+    const winners=(data.payouts||[]).filter(w=>w.amount>0);
+    const payoutText=winners.length
+      ?winners.map(w=>'🏆 '+w.name+' — '+Number(w.amount).toLocaleString('uk-UA')+' грн').join(' · ')
+      :names.length?'🏆 '+names.join(', '):'Карти відкрито';
+    panel.append(node('div','tg-showdown-subtitle',payoutText));
     wrap.append(panel);
     // Explicit cleanup keeps the final cards readable after the reveal.
     window.setTimeout(()=>panel.remove(),Math.max(500,4300-age));
@@ -268,7 +276,10 @@
       panel.append(node('p','tg-round-line','Ставка: '+data.stake+' віртуальних грн · підсвічений гравець робить хід'));
     }else{
       const winners=(data.players||[]).filter(p=>p.winner).map(p=>p.name);
-      title.textContent=winners.length?'🏆 Переможець: '+winners.join(', '):'Роздачу завершено';
+      const awards=(data.payouts||[]).filter(w=>w.amount>0);
+      title.textContent=awards.length
+        ?'🏆 '+awards.map(w=>w.name+' — '+Number(w.amount).toLocaleString('uk-UA')+' грн').join(' · ')
+        :winners.length?'🏆 Переможець: '+winners.join(', '):'Роздачу завершено';
       panel.append(title);
       panel.append(node('p','tg-round-line',data.reason||'Вскриття карт'));
     }
@@ -334,6 +345,7 @@
     }
     lastStatus=data.status;
     setSeatHighlights(data);
+    window.trynkaBankHudUpdate?.(data);
     clockUpdate();
     if(data.myTurn&&data.status==='playing'&&data.turnSeat!==window.__trynkaLastTurnSeat){
       // Only subtle haptic feedback; no loud audio.
