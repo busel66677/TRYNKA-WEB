@@ -46,6 +46,7 @@
     chatOpen = false;
     shade.hidden = true;
   }
+  window.trynkaCloseTableChat=closeChat;
   close.addEventListener('click',closeChat);
   shade.addEventListener('click',event=>{if(event.target===shade)closeChat()});
   document.addEventListener('keydown',event=>{if(chatOpen&&event.key==='Escape')closeChat()});
