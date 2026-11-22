@@ -169,7 +169,7 @@ function renderRoom(players){
  const backBtn=document.createElement('button');backBtn.className='room-back-btn';backBtn.type='button';backBtn.textContent='←';backBtn.setAttribute('aria-label','Повернутися до меню');backBtn.onclick=()=>document.getElementById('back').click();
  const headingBlock=document.createElement('div');headingBlock.className='room-head-label';
  const roomTitle=document.createElement('b');roomTitle.textContent='TRYNKA · №'+currentTable;
- const roomCounter=document.createElement('span');roomCounter.className='room-head-count';roomCounter.textContent=players.length+'/11 місць · v127';
+ const roomCounter=document.createElement('span');roomCounter.className='room-head-count';roomCounter.textContent=players.length+'/11 місць · '+Number(stakes[currentTable-1]||0).toLocaleString('uk-UA')+' грн';
  headingBlock.append(roomTitle,roomCounter);head.append(backBtn,headingBlock);room.append(head);
  const wrap=document.createElement('div');wrap.className='felt-wrap';
  const felt=document.createElement('div');felt.className='felt';
