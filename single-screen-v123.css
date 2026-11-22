@@ -1,0 +1,287 @@
+/* TRYNKA v123 · single-viewport play surface on Android, iOS and compact laptops.
+   Only presentation changes: existing server-authorized cards and wagering controls remain live. */
+@media (orientation:portrait) and (max-width:700px) {
+  body:has(#game:not(.hide)) {
+    height:var(--trynka-visible-height,100dvh)!important;
+    min-height:0!important;
+    max-height:var(--trynka-visible-height,100dvh)!important;
+    overflow:hidden!important;overscroll-behavior:none!important;
+  }
+  body:has(#game:not(.hide))>header{display:none!important}
+  body:has(#game:not(.hide))>main{
+    width:100%!important;max-width:none!important;
+    height:100%!important;min-height:0!important;max-height:100%!important;
+    margin:0!important;padding:0!important;overflow:hidden!important;
+  }
+  #game:not(.hide){
+    width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;
+    padding:3px 5px calc(env(safe-area-inset-bottom,0px) + 4px)!important;
+    margin:0!important;display:flex!important;flex-direction:column!important;
+    gap:4px!important;overflow:hidden!important;box-sizing:border-box!important;
+  }
+  #game .gameTop,#game .gameBar{
+    flex:0 0 auto!important;position:relative!important;
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    height:clamp(38px,6.5dvh,49px)!important;min-height:0!important;max-height:49px!important;
+    flex-wrap:nowrap!important;gap:5px!important;
+    margin:0!important;padding:3px 5px!important;
+    border-radius:11px!important;z-index:60!important;
+  }
+  #game #leaveRoom{
+    position:relative!important;display:flex!important;align-items:center!important;
+    justify-content:center!important;flex:0 0 auto!important;
+    grid-area:auto!important;order:0!important;
+    width:42px!important;min-width:42px!important;height:31px!important;min-height:31px!important;
+    margin:0!important;padding:2px 3px!important;font-size:0!important;border-radius:8px!important;
+  }
+  #game #leaveRoom::after{content:"←";font-size:20px!important;color:#ffe0a0!important;line-height:1!important}
+  #game .gameIdentity{
+    flex:1 1 20px!important;min-width:0!important;width:auto!important;max-width:none!important;
+    position:static!important;grid-area:auto!important;order:1!important;
+    padding:0!important;margin:0!important;text-align:center!important;overflow:hidden!important;
+  }
+  #game .gameIdentity .eyebrow,#game .gameIdentity::after{display:none!important}
+  #game .gameIdentity h2{
+    font:800 clamp(11px,3.5vw,15px)/1.12 Arial,sans-serif!important;
+    margin:0!important;color:#f1d78d!important;
+    white-space:nowrap!important;text-overflow:ellipsis!important;overflow:hidden!important;
+  }
+  #game .gameTopActions{
+    position:static!important;display:flex!important;flex:0 0 auto!important;order:2!important;
+    justify-content:flex-end!important;align-items:center!important;
+    gap:4px!important;grid-area:auto!important;min-width:0!important;width:auto!important;
+    margin:0!important;padding:0!important;overflow:visible!important;
+  }
+  #game .gameWallet,#game #gameBalance{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    min-width:70px!important;max-width:116px!important;min-height:31px!important;height:31px!important;
+    flex:0 1 auto!important;padding:5px 7px!important;margin:0!important;
+    font:900 clamp(10px,2.85vw,12px)/1 Arial,sans-serif!important;
+    color:#ffe3a0!important;white-space:nowrap!important;
+    border:1px solid #e9c57890!important;border-radius:9px!important;
+    background:linear-gradient(155deg,#2b3020,#091b13)!important;
+  }
+  #game #inviteBtn,#game #landscapeFullscreenBtn,#game #addTestBot,
+  #game .netQualityBadge,#game .diagTableBtn{
+    display:none!important;
+  }
+  #game #compactDrawerBtn{
+    display:grid!important;place-items:center!important;flex:0 0 34px!important;
+    width:34px!important;height:31px!important;min-height:31px!important;
+    padding:0!important;margin:0!important;
+    background:#132d21!important;border:1px solid #d8b9798c!important;
+    border-radius:9px!important;color:#ffe2a5!important;font-size:17px!important;
+  }
+  #game #standUpBtn:not(.hide){
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    width:auto!important;max-width:53px!important;min-width:0!important;min-height:31px!important;
+    height:31px!important;padding:3px!important;margin:0!important;
+    font-size:9px!important;white-space:nowrap!important;
+  }
+  #game .gamegrid{
+    flex:1 1 0!important;width:100%!important;min-height:0!important;max-height:none!important;
+    margin:0!important;padding:0!important;display:block!important;overflow:hidden!important;
+  }
+  #game .tableWrap{
+    display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+    gap:4px!important;position:relative!important;
+    width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;
+    padding:6px 6px 4px!important;margin:0!important;box-sizing:border-box!important;
+    border-radius:13px!important;overflow:hidden!important;
+  }
+  #game .tableWrap>.table{
+    position:relative!important;display:block!important;order:0!important;
+    flex:1 1 0!important;min-height:0!important;max-height:none!important;
+    width:100%!important;max-width:100%!important;height:auto!important;
+    margin:0 auto!important;border-width:clamp(5px,1.35dvh,9px)!important;
+    border-radius:38% / 32%!important;overflow:hidden!important;
+    box-sizing:border-box!important;
+  }
+  #game .table .dealerBadge,#game .table .deckStack{display:none!important}
+  #game .table .tableGlow{inset:7px!important}
+  #game .table::before{inset:6px!important}
+  #game .table::after{top:68%!important;font-size:10px!important;opacity:.36!important}
+  #game .seat:not(.free){
+    width:clamp(67px,22vw,91px)!important;min-height:30px!important;
+    padding:2px 3px!important;border-radius:9px!important;
+  }
+  #game .seat.free{
+    width:clamp(36px,12vw,47px)!important;min-height:28px!important;
+    padding:1px!important;border-radius:9px!important;
+  }
+  #game .seatAvatar{width:21px!important;min-width:21px!important;height:21px!important;font-size:11px!important}
+  #game .seatName{font-size:8px!important;line-height:9px!important}
+  #game .seatStack{font-size:7px!important;line-height:9px!important}
+  #game .seat.p4{top:8px!important;bottom:auto!important}
+  #game .seat.p3,#game .seat.p5{top:13%!important;bottom:auto!important}
+  #game .seat.p2,#game .seat.p6{top:43%!important;bottom:auto!important}
+  #game .seat.p1,#game .seat.p7{top:auto!important;bottom:17%!important}
+  #game .seat.p0{top:auto!important;bottom:6px!important}
+  #game .seatBacks i{width:15px!important;height:22px!important}
+  #game .centerInfo{
+    top:46%!important;left:50%!important;
+    height:auto!important;min-height:0!important;max-height:91px!important;
+    width:clamp(106px,35%,137px)!important;min-width:0!important;max-width:137px!important;
+    padding:5px!important;gap:1px!important;border-radius:15px!important;
+    transform:translate(-50%,-50%)!important;overflow:hidden!important;
+  }
+  #game .centerInfo #potBig{font-size:clamp(12px,3.3vw,16px)!important;line-height:1.2!important}
+  #game .centerInfo .potPile{height:18px!important;min-height:0!important;max-height:18px!important;flex:0 0 18px!important;transform:scale(.45)!important;margin:-2px auto!important}
+  #game .centerInfo #bankInfo,#game .centerInfo #countdown{
+    display:block!important;line-height:1.13!important;
+    font-size:clamp(8px,2.4vw,10px)!important;max-height:17px!important;
+    padding:1px 3px!important;margin:0!important;
+  }
+  #game .centerInfo #turnStatus{display:none!important}
+  #game .tableWrap>#playerHandTray{
+    position:relative!important;order:1!important;flex:0 0 auto!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:100%!important;max-width:none!important;
+    height:clamp(82px,15.8dvh,119px)!important;min-height:0!important;max-height:119px!important;
+    margin:0!important;padding:2px 4px 3px!important;
+    border-radius:10px!important;box-sizing:border-box!important;
+    overflow:visible!important;
+  }
+  #game .tableWrap>#playerHandTray:has(#cardDock.hide),
+  #game .tableWrap>#playerHandTray:has(#cardDock.revealMode){display:none!important}
+  #game .tableWrap>#playerHandTray #cardDock{
+    display:flex!important;position:relative!important;inset:auto!important;
+    width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;
+    margin:0!important;padding:0!important;gap:1px!important;
+    border:0!important;background:transparent!important;box-shadow:none!important;
+    transform:none!important;justify-content:center!important;
+  }
+  #game .tableWrap>#playerHandTray #cardDock.hide,
+  #game .tableWrap>#playerHandTray #cardDock.revealMode{display:none!important}
+  #game .tableWrap>#playerHandTray .cardDockLabel{
+    display:block!important;font-size:9px!important;line-height:12px!important;
+    padding:0!important;margin:0!important;letter-spacing:.025em!important;
+    height:12px!important;min-height:12px!important;
+  }
+  #game .tableWrap>#playerHandTray #cardDock #myHand,
+  #game .tableWrap>#playerHandTray #cardDock #myHand[class*="handSeat"]{
+    display:flex!important;flex:1 1 0!important;justify-content:center!important;align-items:center!important;
+    position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;
+    min-height:0!important;height:auto!important;padding:0 2px 2px!important;margin:0!important;
+    gap:clamp(5px,2vw,10px)!important;transform:none!important;overflow:visible!important;
+  }
+  #game .tableWrap>#playerHandTray #myHand .card,
+  #game .tableWrap>#playerHandTray #myHand .pullCard{
+    position:relative!important;display:block!important;flex:0 0 auto!important;
+    width:clamp(57px,20vw,77px)!important;min-width:clamp(57px,20vw,77px)!important;
+    max-width:clamp(57px,20vw,77px)!important;
+    height:clamp(66px,11.3dvh,94px)!important;min-height:clamp(66px,11.3dvh,94px)!important;
+    max-height:clamp(66px,11.3dvh,94px)!important;
+    margin:0!important;padding:0!important;
+    border-radius:8px!important;overflow:hidden!important;
+    touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;
+    pointer-events:auto!important;
+  }
+  #game .tableWrap>#playerHandTray #myHand .cardCover{
+    touch-action:none!important;pointer-events:auto!important;cursor:ns-resize!important;
+  }
+  #game .tableWrap>#playerHandTray #myHand .cardFace{pointer-events:none!important}
+  #game .tableWrap>#playerHandTray #myHand .cardCover small{font-size:7px!important;letter-spacing:0!important}
+  #game .tableWrap>#playerHandTray #myHand .cardCover i{font-size:22px!important}
+  #game .tableWrap>#gameActions{
+    order:2!important;flex:0 0 auto!important;position:relative!important;inset:auto!important;
+    display:block!important;width:100%!important;max-width:none!important;min-width:0!important;
+    height:auto!important;min-height:0!important;
+    padding:3px 4px 4px!important;margin:0!important;transform:none!important;
+    border-radius:11px!important;overflow:visible!important;box-sizing:border-box!important;
+  }
+  #game .tableWrap>#gameActions.hide{display:none!important}
+  #game .tableWrap>#gameActions .roundMeta{
+    display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
+    justify-content:center!important;gap:4px!important;height:auto!important;min-height:0!important;
+    margin:0 0 3px!important;padding:0!important;
+    font-size:9px!important;line-height:1.1!important;
+  }
+  #game .tableWrap>#gameActions #roundPot,
+  #game .tableWrap>#gameActions #roundBet{display:none!important}
+  #game .tableWrap>#gameActions #roundTurn{
+    display:block!important;max-width:100%!important;min-width:0!important;
+    font-size:10px!important;line-height:1.1!important;overflow:hidden!important;text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  #game .tableWrap>#gameActions .actionButtons{
+    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:4px!important;margin:0!important;
+  }
+  #game .tableWrap>#gameActions .actionButtons button{
+    width:100%!important;min-width:0!important;
+    min-height:43px!important;height:43px!important;
+    margin:0!important;padding:3px 1px!important;
+    border-radius:9px!important;white-space:normal!important;
+    font:850 clamp(9px,2.6vw,12px)/1.1 Arial,sans-serif!important;
+    touch-action:manipulation!important;
+  }
+  #game:not(.compactDrawerOpen)>.gamegrid>.gameSide{display:none!important}
+  #game .gamegrid .gameSide{
+    display:none!important;position:fixed!important;
+    inset:calc(env(safe-area-inset-top,0px) + 51px) 7px calc(env(safe-area-inset-bottom,0px) + 7px)!important;
+    z-index:1005!important;width:auto!important;min-width:0!important;
+    max-width:none!important;height:auto!important;max-height:none!important;
+    margin:0!important;padding:46px 9px 12px!important;
+    border:1px solid #d8bd7b9f!important;border-radius:17px!important;
+    background:linear-gradient(165deg,#133a2b,#06150e 85%)!important;
+    box-shadow:0 0 0 100vmax #000a,0 16px 42px #000d!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  #game.compactDrawerOpen .gamegrid .gameSide{display:flex!important;flex-direction:column!important;gap:9px!important}
+  #game .gameSide .tableHistory{flex:0 0 auto!important;max-height:135px!important;overflow:auto!important}
+  #game .gameSide .chat{flex:1 0 175px!important;min-height:175px!important}
+  #game .gameSide .chat #messages{flex:1 1 auto!important;min-height:90px!important;max-height:none!important;overflow:auto!important}
+  #game #compactDrawerClose{
+    position:absolute!important;top:8px!important;right:10px!important;display:inline-flex!important;
+    align-items:center!important;justify-content:center!important;width:88px!important;height:32px!important;
+    min-height:32px!important;padding:4px!important;border-radius:8px!important;font-size:12px!important;
+    background:#264637!important;color:#fce3a9!important;border:1px solid #ccb06b!important;
+  }
+}
+@media (orientation:portrait) and (max-width:700px) and (max-height:670px){
+  #game .gameTop,#game .gameBar{height:37px!important;max-height:37px!important}
+  #game .tableWrap{padding:3px!important;gap:3px!important}
+  #game .tableWrap>#playerHandTray{height:81px!important;max-height:81px!important;padding:1px!important}
+  #game .tableWrap>#playerHandTray #myHand .card,
+  #game .tableWrap>#playerHandTray #myHand .pullCard{height:66px!important;min-height:66px!important;max-height:66px!important;width:56px!important;min-width:56px!important;max-width:56px!important}
+  #game .tableWrap>#gameActions .roundMeta{margin-bottom:1px!important}
+  #game .tableWrap>#gameActions .actionButtons button{min-height:40px!important;height:40px!important}
+  #game .centerInfo .potPile{display:none!important}
+  #game .centerInfo{max-height:70px!important}
+  #game .seat:not(.free){min-height:27px!important}
+}
+@media (orientation:landscape) and (max-height:700px) and (max-width:1100px) {
+  body:has(#game:not(.hide)){height:var(--trynka-visible-height,100dvh)!important;min-height:0!important;max-height:var(--trynka-visible-height,100dvh)!important;overflow:hidden!important}
+  body:has(#game:not(.hide))>main{height:100%!important;max-height:100%!important;margin:0!important;padding:2px 3px!important;overflow:hidden!important}
+  #game:not(.hide){display:flex!important;flex-direction:column!important;gap:3px!important;height:100%!important;min-height:0!important;max-height:100%!important;overflow:hidden!important}
+  #game .gameTop{flex:0 0 auto!important;height:clamp(33px,9dvh,44px)!important;min-height:0!important;margin:0!important}
+  #game .gamegrid{flex:1 1 0!important;min-height:0!important;height:auto!important;overflow:hidden!important}
+  #game .tableWrap{
+    display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+    width:100%!important;height:100%!important;min-height:0!important;
+    margin:0!important;padding:4px 9px!important;overflow:visible!important;
+  }
+  #game .tableWrap>.table{
+    flex:1 1 0!important;width:100%!important;height:auto!important;min-height:0!important;
+    max-height:none!important;margin:0 auto!important;
+  }
+  #game .table #cardDock #myHand .pullCard{touch-action:none!important;pointer-events:auto!important}
+  #game .table #cardDock #myHand .cardCover{touch-action:none!important;pointer-events:auto!important}
+  #game .table .gameActions{
+    position:absolute!important;z-index:150!important;
+    bottom:-59px!important;max-width:calc(100vw - 48px)!important;
+  }
+  #game .gamegrid .gameSide{display:none!important}
+  #game.compactDrawerOpen .gamegrid .gameSide{
+    display:flex!important;flex-direction:column!important;position:fixed!important;
+    inset:48px 8px 8px!important;z-index:1100!important;margin:0!important;padding:45px 9px 10px!important;
+    background:#0b2419!important;border:1px solid #d2b879!important;border-radius:12px!important;
+    overflow:auto!important;box-shadow:0 0 0 100vmax #0009!important;
+  }
+  #game #compactDrawerBtn{display:grid!important;place-items:center!important;min-width:29px!important;width:29px!important;height:29px!important;padding:0!important}
+  #game #compactDrawerClose{position:absolute!important;top:8px!important;right:8px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  #game .pullCard,#game .pullCard .cardCover{transition:none!important;animation:none!important}
+}
