@@ -12,8 +12,13 @@ const mime = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; chars
 const telegramBootstrap = '<script src="https://telegram.org/js/telegram-web-app.js"></script><script>try{if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();}}catch(e){console.warn(e)}</script><script defer src="/telegram/quick-entry.js?v=4"></script>';
 const stakes=[2,5,10,20,50,100,200,500,1000];
 const seats=new Map();
-function cleanup(){const now=Date.now();for(const [id,entry] of seats){if(now-entry.lastSeen>90000)seats.delete(id)}}
-function players(table){cleanup();return [...seats.entries()].filter(([id,x])=>x.table===table).map(([id,x])=>({seat:x.seat,name:x.name,photo:x.photo||null})).sort((a,b)=>a.seat-b.seat)}
+function cleanup(){
+ const now=Date.now();
+ // Human presence is authoritative. Temporary bots follow their owner.
+ for(const [id,p] of seats) if(!p.isBot&&now-p.lastSeen>90000)seats.delete(id);
+ for(const [id,p] of seats) if(p.isBot && (!seats.has(p.ownerId)||seats.get(p.ownerId)?.table!==p.table))seats.delete(id);
+}
+function players(table){cleanup();return [...seats.entries()].filter(([id,x])=>x.table===table).map(([id,x])=>({seat:x.seat,name:x.name,photo:x.photo||null,isBot:x.isBot===true})).sort((a,b)=>a.seat-b.seat)}
 function counts(){cleanup();return stakes.map((stake,i)=>({id:i+1,stake,maxBet:stake*100,capacity:11,occupied:[...seats.values()].filter(x=>x.table===i+1).length}))}
 function json(res,code,body){res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body))}
 async function tablePresence(req,res){
@@ -21,10 +26,17 @@ async function tablePresence(req,res){
   for await(const chunk of req){raw+=chunk;if(raw.length>12000)return json(res,413,{error:'Too large'})}
   const data=JSON.parse(raw);const user=validateTelegram(data.initData,process.env.TELEGRAM_BOT_TOKEN||'');
   cleanup();const id=String(user.id);const table=Number(data.table);
-  if(data.action==='leave'){seats.delete(id);return json(res,200,{tables:counts(),joined:null})}
+  if(data.action==='leave'){
+    seats.delete(id);
+    for(const [botId,p] of seats)if(p.isBot&&p.ownerId===id)seats.delete(botId);
+    return json(res,200,{tables:counts(),joined:null});
+  }
   if(!Number.isInteger(table)||table<1||table>9)return json(res,400,{error:'Invalid table'});
   if(data.action!=='join'&&data.action!=='heartbeat')return json(res,400,{error:'Invalid action'});
   const existing=seats.get(id);
+  if(data.action==='join' && existing?.table!==table){
+    for(const [botId,p] of seats)if(p.isBot&&p.ownerId===id)seats.delete(botId);
+  }
   if(data.action==='heartbeat'&&(!existing||existing.table!==table))return json(res,409,{error:'Not seated',tables:counts()});
   const occupied=[...seats.entries()].filter(([uid,x])=>uid!==id&&x.table===table).length;
   if(occupied>=11)return json(res,409,{error:'Table full',tables:counts()});
@@ -81,7 +93,7 @@ async function adminApi(req,res){
       telegramId:byUuid.get(p.id),name:String(p.nickname||'Гравець').slice(0,30),chips:p.chips||0
     }));
     return json(res,200,{
-      playersTotal:tgUsers.length,onlineNow:seats.size,
+      playersTotal:tgUsers.length,onlineNow:[...seats.values()].filter(p=>!p.isBot).length,
       tablesActive:counts().filter(t=>t.occupied>0).length,
       recentPlayers
     });
@@ -120,7 +132,7 @@ async function referralApi(req,res){
   return json(res,200,{link:'https://t.me/TrynkaGameBot?startapp=ref_'+me,invited:rows.length,rewarded:rows.filter(x=>x.rewarded_at).length,bonusChips:rows.filter(x=>x.rewarded_at).length*50});
  }catch(e){return json(res,400,{error:'Реферальні дані тимчасово недоступні'})}
 }
-const gameApi = createGameApi({ seats, stakes, validate: validateTelegram, readPayload, json });
+const gameApi = createGameApi({ seats, stakes, validate: validateTelegram, readPayload, json, adminId: ADMIN_TELEGRAM_ID });
 const chatApi = createChatApi({ readPayload, json, validate: validateTelegram, sb, adminId: ADMIN_TELEGRAM_ID });
 http.createServer(async (req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
