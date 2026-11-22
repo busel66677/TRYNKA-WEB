@@ -168,7 +168,7 @@
     timeText=null;timeFill=null;timeTrack=null;finishButton=null;
     const head=node('div','tg-round-head');
     head.append(node('span','','♠ РОЗДАЧА · '+(data.roundId||'—')));
-    head.append(node('span','tg-pot',data.status==='waiting'?'2–4 гравці':'Банк: '+Number(data.pot||0)+' ◉'));
+    head.append(node('span','tg-pot',data.status==='waiting'?'2–4 гравці':'Банк: '+Number(data.pot||0)+' грн'));
     panel.append(head);
     if(errorMessage)panel.append(node('p','tg-round-error',errorMessage));
     const title=node('div','tg-round-title'+(data.myTurn?' own-turn':''));
@@ -180,7 +180,7 @@
       panel.append(node('p','tg-round-line','За столом: '+(data.seated??'…')+'. Для тестової роздачі потрібно щонайменше двоє.'));
       makeButton(buttons,'🃏 Роздати карти','start',table,{disabled:Number(data.seated)<2});
       panel.append(buttons);
-      panel.append(node('p','tg-round-note','Тестовий режим · без списання ігрових фішок'));
+      panel.append(node('p','tg-round-note','Тестовий режим · без списання віртуальних грн'));
       setSeatHighlights(null);
       return;
     }
@@ -194,7 +194,7 @@
       timeText=node('strong','','30 с');clock.append(timeText);panel.append(clock);
       timeTrack=node('div','tg-time-track');timeFill=node('div','tg-time-fill');
       timeTrack.append(timeFill);panel.append(timeTrack);
-      panel.append(node('p','tg-round-line','Ставка: '+data.stake+' тестових фішок · підсвічений гравець робить хід'));
+      panel.append(node('p','tg-round-line','Ставка: '+data.stake+' віртуальних грн · підсвічений гравець робить хід'));
     }else{
       const winners=(data.players||[]).filter(p=>p.winner).map(p=>p.name);
       title.textContent=winners.length?'🏆 Переможець: '+winners.join(', '):'Роздачу завершено';
@@ -224,7 +224,7 @@
       finishButton=makeButton(buttons,'🃏 Нова роздача','start',table,{disabled:true});
       panel.append(buttons);
     }
-    panel.append(node('p','tg-round-note','Тестова партія: віртуальні фішки не списуються та не нараховуються.'));
+    panel.append(node('p','tg-round-note','Тестова партія: віртуальні грн не списуються та не нараховуються.'));
     setSeatHighlights(data);
     clockUpdate();
     if(showWinner)showdownOverlay(data);
