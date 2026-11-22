@@ -106,3 +106,78 @@ main{position:relative;z-index:1;max-width:540px;padding-left:16px;padding-right
 .trynka-table-filter:focus-visible{outline:2px solid #fff0ba;outline-offset:2px}
 .trynka-tables-empty{padding:20px 17px;border:1px dashed #8c9b84;border-radius:14px;background:#183226;color:#d6e2d1;font-size:13px;line-height:1.5;text-align:center}
 @media(max-width:360px){.trynka-table-filter{font-size:12px;padding:8px 4px}}
+
+/* TRYNKA Modern Home v5 — restrained emerald and gold, mobile-first */
+:root{--home-ink:#081812;--home-card:#153329;--home-text:#f7f1e2;--home-muted:#b5c8bb;--home-accent:#f2d595}
+html{background:#091812}
+body{background:radial-gradient(ellipse 100% 32% at 50% -7%,#254b3b 0%,transparent 82%),linear-gradient(165deg,#0c211a,#081711 75%);color:var(--home-text);-webkit-font-smoothing:antialiased}
+body:before{opacity:.13}
+main{max-width:520px;padding:calc(15px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #6680714f;padding:1px 2px 15px}
+.brand-lockup{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-icon{height:43px;width:43px;border-radius:14px;background:linear-gradient(145deg,#e9d9ad,#b58b47);color:#142b20;display:grid;place-items:center;font-size:27px;box-shadow:0 4px 12px #0005,inset 0 1px #fff9}
+.logo{font-size:21px;font-weight:950;line-height:1.08;letter-spacing:1.3px;color:#fff4d8;text-shadow:none}
+.logo-period{color:#dbb36b}
+.sub{font-size:9px;letter-spacing:1.2px;margin-top:5px;color:#a9bfb0}
+.avatar{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#1b382d;border:1px solid #71877899;color:#f7da9f;font-size:22px;box-shadow:none;flex-shrink:0}
+#home .hero{position:relative;isolation:isolate;overflow:hidden;text-align:left;margin:19px 0 0!important;padding:24px 23px 23px!important;border:1px solid #5a785f8c;border-bottom:0;border-radius:24px 24px 0 0;background:radial-gradient(ellipse 80% 115% at 100% 12%,#285a43 0%,transparent 75%),linear-gradient(145deg,#183a2c,#102920);box-shadow:0 12px 30px #0003}
+#home .hero:before{content:"";position:absolute;right:-43px;bottom:-73px;width:180px;height:180px;border:1px solid #e5c88d20;transform:rotate(-24deg);border-radius:40px;z-index:-1}
+#home .hero-overline{display:flex;align-items:center;gap:7px;letter-spacing:1.7px;font-size:10px;font-weight:850;color:#c9d7b8}
+.hero-overline-dot{height:7px;width:7px;background:#93d0a8;border-radius:50%;box-shadow:0 0 0 3px #93d0a81f}
+#home .hero .suits{position:absolute;right:17px;top:31px;letter-spacing:2px;font-size:29px!important;color:#e3c58e;opacity:.77;white-space:nowrap;text-shadow:none}
+#home .hero .suits span{color:#d78c84}
+#home .hero h1{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:clamp(37px,10vw,47px)!important;line-height:1.05;letter-spacing:-2.2px;font-weight:950;margin:24px 0 11px!important;color:#f8eed4!important;background:none!important;-webkit-text-fill-color:#f8eed4!important;filter:none!important;text-shadow:none!important}
+.hero-period{color:#d0ad6b;-webkit-text-fill-color:#d0ad6b}
+#home .hero p{color:#c8d7c8;font-size:13px;line-height:1.55;margin:0;max-width:320px}
+#home .lobby-intro{display:flex;align-items:center;gap:12px;text-align:left;margin:0 0 17px!important;padding:14px 22px!important;border:1px solid #5a785f8c;border-top:1px solid #ffffff1d;border-radius:0 0 23px 23px;background:linear-gradient(115deg,#1b3e2e,#173729);box-shadow:0 10px 22px #0002}
+#home .lobby-intro:before{content:none}
+#home .lobby-symbol{display:grid;place-items:center;width:39px;height:39px;flex:none;border-radius:12px;background:#294b38;color:#edce91;font-size:24px;letter-spacing:0;text-shadow:none;border:1px solid #9a8d615b}
+#home .lobby-title{font:850 11px/1.25 system-ui;letter-spacing:1.2px;color:#e9ddb9}
+#home .lobby-subtitle{font-size:12px;line-height:1.35;color:#b4cdbc;margin-top:3px}
+.club-play{position:relative;display:flex;align-items:center;gap:13px;width:100%;min-height:82px;margin:0 0 12px;padding:15px 16px;text-align:left;border:1px solid #ffe8b2;border-radius:19px;background:linear-gradient(115deg,#f4dca5,#deb975 64%,#cba05e);box-shadow:0 9px 20px #0004,inset 0 1px #fff9;color:#16271e;letter-spacing:0;touch-action:manipulation}
+.club-play-icon{display:grid;place-items:center;width:45px;height:45px;flex:none;border-radius:14px;background:#193a2c;color:#f3da9c;font-size:27px;box-shadow:inset 0 1px #ffffff1c}
+.club-play-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.club-play-copy strong{font-size:21px;line-height:1.1;font-weight:950;letter-spacing:-.5px}
+.club-play-copy small{font-size:11px;font-weight:730;line-height:1.2;letter-spacing:.2px;color:#4f4834}
+.club-play-arrow{width:32px;height:32px;flex:none;display:grid;place-items:center;background:#ffffff59;border-radius:50%;font-size:20px;font-weight:950}
+.club-play:disabled{opacity:.68;cursor:wait}
+#home .grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:11px;margin:0 0 24px}
+#home .balance-card,#home .grid .action{min-height:109px;border:1px solid #6f826a80;background:linear-gradient(135deg,#1b3d2f,#122d24);box-shadow:inset 0 1px #ffffff11,0 5px 14px #0003;border-radius:18px;padding:15px 14px;text-align:left}
+#home .balance-card span{color:#c7d6b8;letter-spacing:1.05px;font-size:10px}
+#home .balance-card strong{font-size:clamp(24px,6vw,30px);letter-spacing:-.9px;color:#f5db9e;font-variant-numeric:tabular-nums;line-height:1.15;margin:7px 0 3px}
+#home .balance-card small{font-size:10px;color:#a5bdab}
+#home .grid .action{display:flex;align-items:flex-start;justify-content:center;flex-direction:column;gap:3px;border-color:#74897580;color:#fbefd5}
+#home .grid .action b{font-size:26px;margin:0;line-height:1.15;color:#f2d393}
+#home .grid .action span{font-size:15px;font-weight:850}
+#home .grid .action small{color:#b1c4b4;font-size:10px;font-weight:600}
+#home .home-section-label{display:flex;align-items:center;gap:12px;margin:0 2px 9px;color:#a7bdac;font-size:10px;letter-spacing:1.3px;font-weight:900}
+#home .home-section-label i{display:block;flex:1;height:1px;background:#59715e66}
+#home .club-chat-entry,#home .referral-button{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 10px;border-radius:17px;border:1px solid #6c8d7f99;background:linear-gradient(120deg,#1b3d32,#19342b);color:#f8ead4;box-shadow:0 5px 14px #0003;padding:13px 14px;text-align:left;min-height:70px}
+#home .club-chat-entry .club-entry-icon{width:43px;height:43px;flex:none;display:grid;place-items:center;border:1px solid #7c9e8a77;border-radius:13px;background:#2c5945;font-size:22px;color:#dfd2ad}
+#home .club-chat-entry .club-chat-label{flex:1;min-width:0;font-size:14px;line-height:1.2;color:#f6ead3;letter-spacing:.1px}
+#home .club-chat-entry .club-chat-desc{font-size:11px;line-height:1.4;font-weight:550;color:#b3cbb8;margin-top:5px}
+#home .club-admin-entry{border-color:#a38c6299;background:linear-gradient(120deg,#39392b,#27382c)}
+#home .club-admin-entry .club-entry-icon{background:#554a30;border-color:#a7956677}
+#home .referral-button{justify-content:space-between;flex-wrap:wrap;min-height:58px;padding:13px 16px;border-color:#776e4e9e;background:#28392a;font-size:14px;font-weight:800;color:#e9d7b5}
+#home .referral-button span{color:#baa97e;font-size:11px;font-weight:650}
+#home .tables-section{margin-top:28px}
+#home .tables-heading{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+#home .tables-heading h2{font-size:22px;letter-spacing:-.4px;color:#f4ead3;line-height:1.15;margin:0;font-weight:950}
+#home .tables-heading h2:before{content:"♠";color:#d7b875;margin-right:9px;font-size:20px}
+#home .tables-heading span{font-size:11px;color:#bacbbd}
+#home .tables-subtitle{font-size:12px;line-height:1.45;color:#a7bfae;margin:0 0 14px}
+#home .trynka-table-filters{gap:6px;padding:4px;border:1px solid #66816e6b;background:#10271d;border-radius:14px;margin:0 0 15px}
+#home .trynka-table-filter{min-height:42px;padding:9px 5px;border-radius:11px;border:1px solid transparent;background:transparent;color:#b6c9ba;box-shadow:none;font-size:12px;font-weight:800}
+#home .trynka-table-filter[aria-pressed="true"]{border-color:#8ca98c77;background:#2c4e38;color:#ffebbf;box-shadow:0 2px 8px #0004}
+#home .table-item.trynka-table{border-color:#5874669c;background:linear-gradient(130deg,#1a372c,#152b23);border-radius:17px;box-shadow:0 4px 12px #0004;padding:14px 15px;margin-bottom:10px}
+#home .trynka-table-top{padding-bottom:9px}
+#home .trynka-table-main{padding:10px 0 8px}
+#home .trynka-table-amount strong{font-size:30px!important;color:#f6e2ae!important}
+#home .trynka-table-arrow{background:#d9c18e;width:34px;height:34px}
+#home .trynka-table-seats{background:#234433;border-color:#6c9379;font-size:11px}
+#home .trynka-table-footer{padding-top:9px}
+#home .trynka-table-footer strong{font-size:13px!important}
+button{transition:filter .12s ease,transform .12s ease}
+button:focus-visible{outline:2px solid #f5dda5;outline-offset:3px}
+@media(max-width:360px){main{padding-left:12px;padding-right:12px}#home .hero{padding:20px 17px!important}#home .hero .suits{font-size:25px!important;right:12px}#home .lobby-intro{padding:12px 16px!important}.club-play{padding:13px 12px;gap:10px}.club-play-copy strong{font-size:18px}.club-play-icon{width:39px;height:39px}.club-play-arrow{width:27px;height:27px}#home .balance-card,#home .grid .action{padding:12px 11px}#home .tables-heading h2{font-size:19px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
