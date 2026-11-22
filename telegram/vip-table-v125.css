@@ -1,0 +1,331 @@
+/* TRYNKA VIP v125 — Emerald Neon Club
+   Selected concept: premium black/green lounge, champagne-gold rails, mint neon.
+   Intentionally scoped to the real Telegram table; no overlays replace live UI. */
+body.trynka-in-table{
+  --vip-bg:#030e0b;--vip-panel:#081d16;--vip-felt:#056343;
+  --vip-gold:#e7c47a;--vip-brass:#aa8148;--vip-neon:#19ed9f;
+  background:
+    radial-gradient(ellipse 85% 42% at 50% 15%,#0e6048 0%,#08271d 45%,transparent 92%),
+    radial-gradient(ellipse 110% 78% at 50% 87%,#0b3427 0%,transparent 77%),
+    linear-gradient(165deg,#02120d,#06150f 65%,#020906 100%)!important;
+  color:#fff3d7;
+}
+body.trynka-in-table::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55;
+  background:
+    linear-gradient(116deg,transparent 0 13%,#e9bb5b12 13.2%,transparent 13.6% 86%,#e9bb5b13 86.2%,transparent 86.6%),
+    radial-gradient(ellipse 22% 40% at -7% 51%,#14e8af24,transparent),
+    radial-gradient(ellipse 24% 40% at 107% 50%,#17cda624,transparent);
+}
+body.trynka-in-table main{position:relative;z-index:1}
+body.trynka-in-table .top{
+  position:relative!important;gap:5px!important;
+  border:0!important;border-bottom:1px solid #e9cb7755!important;
+  background:linear-gradient(120deg,#0b2b20aa,#06180faf)!important;
+  box-shadow:0 4px 12px #0006,0 1px 0 #37e7a320!important;
+  border-radius:9px!important;
+}
+body.trynka-in-table .top::after{
+  content:"";position:absolute;bottom:0;left:31%;right:31%;height:1px;
+  background:linear-gradient(90deg,transparent,#19fbb7,transparent);
+  box-shadow:0 0 7px #13ffb2;pointer-events:none;
+}
+body.trynka-in-table .brand-lockup{display:flex;align-items:center;gap:5px!important;min-width:0}
+body.trynka-in-table .brand-icon{
+  display:grid;place-items:center;flex:none;
+  border:1px solid #f3d391!important;
+  background:radial-gradient(circle at 33% 24%,#4c5933,#08231b 72%)!important;
+  box-shadow:inset 0 1px 0 #fff3cc86,0 0 10px #cba25b42!important;
+  border-radius:50%!important;color:#ffe2a1!important;
+  text-shadow:0 0 6px #f0c267!important;
+}
+body.trynka-in-table .logo{
+  font-family:Georgia,'Times New Roman',serif!important;
+  font-size:clamp(15px,4.5vw,20px)!important;font-weight:900!important;
+  letter-spacing:.085em!important;color:#ffe5a7!important;
+  line-height:1.08!important;text-shadow:0 2px 3px #000a,0 0 15px #e7c37440!important;
+}
+body.trynka-in-table .logo-period{color:#19e7a4!important}
+body.trynka-in-table .sub{
+  font-size:clamp(6px,1.62vw,8px)!important;letter-spacing:.15em!important;
+  color:#b9d8c8!important;white-space:nowrap;
+}
+body.trynka-in-table .tg-wallet{
+  min-width:0!important;min-height:30px!important;
+  padding:5px 9px!important;margin-left:auto!important;
+  border-radius:999px!important;border:1px solid #dab46e!important;
+  color:#ffe1a0!important;font:900 clamp(10px,2.8vw,13px)/1.2 system-ui,sans-serif!important;
+  background:linear-gradient(155deg,#2f3521,#081e17 72%)!important;
+  box-shadow:inset 0 1px 0 #fff0c23d,0 0 10px #deb06029,0 2px 8px #0007!important;
+}
+body.trynka-in-table .avatar{
+  flex:none!important;width:31px!important;height:31px!important;
+  border:1px solid #e9ca83!important;
+  border-radius:50%!important;background:linear-gradient(135deg,#314e30,#14291e)!important;
+  color:#ffdb87!important;
+  box-shadow:0 0 10px #efd07649,inset 0 1px #ffffff44!important;
+}
+body.trynka-in-table #detail>.back{
+  width:max-content!important;max-width:100%!important;
+  color:#e9e3ce!important;
+  background:linear-gradient(115deg,#12271fcc,#09201690)!important;
+  border:1px solid #a8ab7b59!important;border-radius:8px!important;
+  font-weight:800!important;font-size:11px!important;
+  box-shadow:0 2px 8px #0004!important;
+}
+body.trynka-in-table #table-list>.room{
+  position:relative!important;isolation:isolate;
+  border:1px solid #c59b5c99!important;border-radius:19px!important;
+  background:
+    radial-gradient(ellipse 78% 62% at 50% 48%,#0d4934 0%,#073124 49%,transparent 85%),
+    repeating-linear-gradient(147deg,transparent 0 13px,#f1c96705 14px,transparent 15px),
+    linear-gradient(135deg,#071e17,#020d09)!important;
+  box-shadow:0 0 0 2px #08170f,inset 0 0 0 1px #edc57f33,
+    inset 0 0 27px #000c,0 0 16px #05cd8b1c!important;
+}
+body.trynka-in-table #table-list>.room::before,
+body.trynka-in-table #table-list>.room::after{
+  content:"";position:absolute;top:13%;bottom:16%;width:2px;z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent 0%,#c9a16585 19%,#21f2a169 48%,#cba16662 81%,transparent);
+  box-shadow:0 0 13px #11ef9c2b;
+}
+body.trynka-in-table #table-list>.room::before{left:2px}
+body.trynka-in-table #table-list>.room::after{right:2px}
+body.trynka-in-table .room-head{
+  position:relative!important;z-index:2!important;gap:5px!important;
+  margin:0!important;
+  font-size:clamp(9px,2.65vw,12px)!important;letter-spacing:.035em!important;
+  color:#ffe3a4!important;font-weight:900!important;
+  text-shadow:0 1px 2px #000c!important;
+}
+body.trynka-in-table .room-head::before{
+  content:"♛ VIP";
+  position:absolute;left:50%;top:0px;transform:translateX(-50%);
+  width:49px;height:24px;display:grid;place-items:center;
+  border:1px solid #d3ac6c;background:linear-gradient(165deg,#3b4a24,#08221a);
+  border-radius:6px 6px 12px 12px;
+  color:#f7d78d;font:900 10px/1 Georgia,serif;letter-spacing:.06em;
+  text-shadow:0 1px 2px #000c;box-shadow:0 0 11px #11cb9047,inset 0 1px 0 #fff4b54d;
+  pointer-events:none;
+}
+body.trynka-in-table .tg-room-tools{position:relative;z-index:3}
+body.trynka-in-table .tg-tool-btn{
+  border:1px solid #b3955d!important;border-radius:9px!important;
+  background:linear-gradient(155deg,#194833,#0a291d)!important;
+  box-shadow:inset 0 1px 0 #ffeaab24,0 2px 7px #0007!important;
+  color:#fff1cb!important;font-weight:800!important;
+}
+body.trynka-in-table .tg-tool-btn:active{filter:brightness(1.15)!important}
+body.trynka-in-table .felt-wrap{z-index:1!important}
+body.trynka-in-table .felt{
+  inset:11% 10.5% 12%!important;
+  border:clamp(5px,1.5vw,8px) solid #c09958!important;
+  outline:1px solid #f4d799b8!important;
+  border-radius:49% / 45%!important;
+  background:
+    radial-gradient(ellipse 69% 57% at 50% 43%,#126f4e 0%,#075438 66%,#032d20 100%),
+    repeating-linear-gradient(35deg,#ffffff06 0 1px,transparent 1px 5px)!important;
+  box-shadow:
+    0 0 0 2px #1a1109,0 0 0 5px #4b351c,
+    0 7px 0 #2b1e10,0 13px 21px #000c,
+    0 0 16px #2cf4ac4a,
+    inset 0 0 0 3px #ffe8ab,
+    inset 0 0 0 6px #214632,
+    inset 0 0 0 8px #0eec9f9f,
+    inset 0 0 33px #011d14c9!important;
+}
+body.trynka-in-table .felt::before{
+  content:"";position:absolute;inset:9% 10%;
+  border:1px dotted #d9c07b6b!important;border-radius:50% / 47%!important;
+  box-shadow:0 0 0 1px #35e79a18!important;
+  pointer-events:none;
+}
+body.trynka-in-table .felt::after{
+  content:"";position:absolute;inset:3.5%;
+  border:1px solid #37eca4a8!important;border-radius:50% / 45%!important;
+  box-shadow:0 0 7px #19f4a27b,inset 0 0 8px #0ff7a331!important;
+  pointer-events:none;
+}
+body.trynka-in-table .felt-center{
+  top:49%!important;left:50%!important;
+  color:#ffe1a1!important;
+  font:900 clamp(17px,5.2vw,28px)/1.1 Georgia,'Times New Roman',serif!important;
+  letter-spacing:.14em!important;
+  text-shadow:0 3px 5px #000c,0 0 15px #d6a95477!important;
+  white-space:nowrap;
+}
+body.trynka-in-table .felt-center::before{
+  content:"♛";display:block;font-size:clamp(22px,6.4vw,34px);
+  line-height:1.1;margin-bottom:5px;color:#f9d788;
+  text-shadow:0 0 14px #eac06b7a;
+}
+body.trynka-in-table .felt-center small{
+  color:#eccb86!important;font:700 clamp(8px,2.4vw,13px)/1.2 Georgia,serif!important;
+  letter-spacing:.18em!important;
+  margin-top:8px!important;text-shadow:0 1px 3px #000a!important;
+}
+body.trynka-in-table .seat{z-index:3!important}
+body.trynka-in-table .seat.empty .seat-icon{
+  opacity:1!important;border:1.5px dashed #efce84!important;
+  background:radial-gradient(circle at 32% 24%,#206a4c,#06291e 67%,#031b14)!important;
+  color:#f6e5bc!important;
+  box-shadow:0 0 0 2px #071d15,0 0 0 3px #1debaa46,
+    inset 0 1px 7px #1ff4a524,0 3px 7px #0008!important;
+}
+body.trynka-in-table .seat:not(.empty) .seat-icon{
+  border:2px solid #e9ce89!important;
+  background:linear-gradient(135deg,#327660,#0d4532)!important;
+  color:#fff7d8!important;
+  box-shadow:0 0 0 2px #00351d,0 0 12px #2af0aa4b!important;
+}
+body.trynka-in-table .seat-name{
+  display:block!important;max-width:100%!important;
+  border:1px solid #b89b6582!important;
+  border-radius:999px!important;
+  padding:2px 4px!important;
+  background:linear-gradient(135deg,#031e15ee,#07120cf5)!important;
+  color:#eee9d7!important;
+  text-align:center!important;
+  text-shadow:0 1px 2px #000c!important;
+  box-shadow:0 1px 4px #0008!important;
+}
+body.trynka-in-table .seat.mine .seat-icon{
+  border:2px solid #ffdd8a!important;
+  background:radial-gradient(circle at 37% 23%,#38e9b1,#069e73 48%,#06664f)!important;
+  color:#fafff6!important;
+  box-shadow:0 0 0 3px #f5c96f44,0 0 14px #16ffd1c4,
+    0 4px 11px #0008!important;
+}
+body.trynka-in-table .seat.mine .seat-name{
+  color:#ffe5ac!important;border-color:#e9c478!important;font-weight:900!important;
+  background:#05291edc!important;
+}
+body.trynka-in-table .seat.mine::before{
+  content:"♛";position:absolute;top:-15px;left:50%;transform:translateX(-50%);
+  color:#f9db8b;font-size:15px;font-weight:900;
+  text-shadow:0 0 9px #f5ca73b5;pointer-events:none;
+}
+body.trynka-in-table .seat.is-turn .seat-icon{
+  border-color:#a8ffda!important;
+  box-shadow:0 0 0 3px #0ef0a15c,0 0 22px #25ffb4!important;
+}
+body.trynka-in-table .seat.is-ready .seat-name{color:#b2ffd0!important}
+body.trynka-in-table .tg-round{
+  position:relative!important;z-index:4!important;
+  border:1px solid #d4b16e!important;
+  border-radius:15px!important;
+  background:
+    linear-gradient(118deg,#23cb8420,transparent 47%),
+    linear-gradient(165deg,#0b3628 0%,#0a221a 55%,#04140f 100%)!important;
+  box-shadow:inset 0 1px 0 #fff8d73a,inset 0 0 20px #13e99e12,
+    0 0 0 1px #133622,0 4px 14px #0008,0 0 9px #13ffae28!important;
+}
+body.trynka-in-table .tg-round::before{
+  content:"";position:absolute;left:15%;right:15%;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,#4cf8b8,transparent);
+  box-shadow:0 0 8px #16eab2b9;pointer-events:none;
+}
+body.trynka-in-table .tg-round-head{
+  color:#e3c57d!important;font-weight:900!important;letter-spacing:.055em!important;
+}
+body.trynka-in-table .tg-round-head .tg-pot{
+  padding:3px 7px;border:1px solid #ab935f9c;border-radius:999px;
+  background:#112c20!important;color:#f6dd9b!important;
+}
+body.trynka-in-table .tg-round-title{
+  color:#fff5de!important;
+  text-transform:uppercase!important;letter-spacing:.045em!important;
+  font-size:clamp(12px,3.75vw,16px)!important;font-weight:950!important;
+  text-shadow:0 2px 4px #000a!important;
+}
+body.trynka-in-table .tg-round-title.own-turn{color:#4ef9b7!important}
+body.trynka-in-table .tg-round-line{color:#c8d8cc!important}
+body.trynka-in-table .tg-clock strong{color:#ffe5a1!important}
+body.trynka-in-table .tg-time-fill{
+  background:linear-gradient(90deg,#18ad75,#25f2a0)!important;
+}
+body.trynka-in-table .tg-round-buttons{
+  gap:5px!important;
+}
+body.trynka-in-table .tg-round-buttons button{
+  border-radius:10px!important;font-weight:950!important;
+  border:1px solid #dbc388ab!important;
+  box-shadow:inset 0 1px 0 #fff7c95a,0 3px 7px #0009!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button{
+  background:linear-gradient(165deg,#67ffc2 0%,#16d985 50%,#07935a 100%)!important;
+  border:1px solid #bcffdb!important;color:#062919!important;
+  text-shadow:0 1px 0 #d0ffe4!important;
+  box-shadow:inset 0 2px 0 #dcffe0bb,0 0 11px #07eda37d,
+    0 4px 12px #0009!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button.ready{
+  background:linear-gradient(150deg,#1c5e45,#0b3929)!important;
+  color:#bcffdc!important;border-color:#66eab0!important;
+  text-shadow:none!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-secondary-button{
+  background:linear-gradient(170deg,#183d2b,#071b14)!important;
+  color:#f2d69b!important;border:1px solid #bf9c61!important;
+  text-shadow:0 1px 2px #0009!important;
+}
+body.trynka-in-table .tg-round-buttons button:disabled{
+  opacity:.50!important;box-shadow:inset 0 1px 0 #ffffff12!important;
+  filter:saturate(.7)!important;
+}
+body.trynka-in-table .tg-round-buttons button:focus-visible,
+body.trynka-in-table .tg-tool-btn:focus-visible,
+body.trynka-in-table .back:focus-visible{
+  outline:2px solid #ffe3a0!important;outline-offset:2px!important;
+}
+body.trynka-in-table .tg-round-buttons button.danger{
+  background:linear-gradient(145deg,#ab4b4c,#652829)!important;
+  color:#fff1ed!important;
+}
+body.trynka-in-table .tg-round-buttons button:not(.tg-ready-button):not(.tg-secondary-button):not(.tg-next-button):first-child:not(.danger){
+  background:linear-gradient(145deg,#22b486,#087b57)!important;color:#fffdf4!important;
+}
+body.trynka-in-table .tg-round-buttons button:not(.tg-ready-button):not(.tg-secondary-button):not(.tg-next-button):nth-child(2){
+  background:linear-gradient(145deg,#f6d88d,#b98535)!important;color:#17251b!important;
+}
+body.trynka-in-table .tg-round-buttons button:not(.tg-ready-button):not(.tg-secondary-button):not(.tg-next-button):nth-child(3){
+  background:linear-gradient(145deg,#70c7cf,#1a7e91)!important;color:#071d19!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-next-button{
+  color:#10261b!important;background:linear-gradient(145deg,#ffe9ab,#cbab67)!important;
+}
+body.trynka-in-table .tg-own-label{color:#c1dbc9!important}
+body.trynka-in-table .tg-own-label b{color:#ffe6a3!important;font-weight:900!important}
+body.trynka-in-table .tg-card.pullable{
+  border:2px solid #e8d3a1!important;
+  background:#fff8ea!important;box-shadow:0 3px 9px #000a,0 0 8px #dfc28137!important;
+}
+body.trynka-in-table .tg-card.pullable .tg-peek-cover{
+  border:2px solid #f1cc82!important;
+  background:
+    radial-gradient(circle at 50% 40%,#1bb38244,transparent 48%),
+    repeating-linear-gradient(45deg,#113f2d 0 5px,#1c6247 5px 10px)!important;
+  box-shadow:inset 0 0 0 2px #051f16,inset 0 0 0 4px #e8c47f65!important;
+  color:#f3d38d!important;text-shadow:0 0 10px #eac16a83!important;
+}
+body.trynka-in-table .tg-card.pullable.tg-peeking{filter:brightness(1.06)}
+body.trynka-in-table .tg-results summary{color:#f4d68d!important}
+body.trynka-in-table .tg-chat-drawer{
+  border-color:#e8c47f!important;background:linear-gradient(165deg,#143e2e,#07180f)!important;
+}
+@media(max-width:365px){
+  body.trynka-in-table .room-head::before{display:none}
+  body.trynka-in-table .logo{font-size:15px!important;letter-spacing:.05em!important}
+  body.trynka-in-table .felt-center{font-size:17px!important}
+  body.trynka-in-table .seat-name{font-size:7px!important}
+}
+@media(max-height:630px){
+  body.trynka-in-table .room-head::before{height:20px;font-size:9px}
+  body.trynka-in-table .felt{border-width:5px!important}
+  body.trynka-in-table .felt-center::before{margin-bottom:1px;font-size:21px}
+  body.trynka-in-table .tg-round-title{font-size:12px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.trynka-in-table .tg-round-buttons button{transition:none!important}
+}
