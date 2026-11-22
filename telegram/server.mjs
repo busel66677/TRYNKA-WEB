@@ -139,12 +139,12 @@ http.createServer(async (req,res)=>{
   try { pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname); } catch {res.writeHead(400);return res.end();}
   if(pathname === '/' || pathname === '/telegram') pathname='/telegram/standalone.html';
   const file = path.resolve(root, '.'+pathname);
-  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html','/telegram/game-client.js','/telegram/club-theme.css','/telegram/lounge-theme.css','/telegram/club-ui.js','/telegram/table-v123.css','/telegram/table-v123.js','/telegram/vip-table-v125.css'].includes(pathname))){res.writeHead(404);return res.end();}
+  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html','/telegram/game-client.js','/telegram/club-theme.css','/telegram/lounge-theme.css','/telegram/club-ui.js','/telegram/table-v123.css','/telegram/table-v123.js','/telegram/vip-table-v125.css','/telegram/vip-table-v126.css','/telegram/vip-lounge-v126.svg','/telegram/vip-refresh-v126.js'].includes(pathname))){res.writeHead(404);return res.end();}
   try {
     const info=await stat(file);
     if(!info.isFile()){res.writeHead(404);return res.end();}
     let body=await readFile(file);
-    res.writeHead(200,{'Content-Type':mime[path.extname(file).toLowerCase()]||'application/octet-stream','Cache-Control':path.extname(file)==='.html'?'no-cache':'no-cache'});
+    res.writeHead(200,{'Content-Type':mime[path.extname(file).toLowerCase()]||'application/octet-stream','Cache-Control':'no-store, max-age=0, must-revalidate'});
     if(req.method==='HEAD') return res.end();
     res.end(body);
   } catch {res.writeHead(404);res.end('Not found');}
