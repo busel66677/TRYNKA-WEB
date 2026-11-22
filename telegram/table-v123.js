@@ -3,6 +3,20 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const num = value => String(value == null ? '—' : value);
+  // Telegram viewportHeight excludes native Telegram chrome more reliably than 100dvh.
+  function syncViewportHeight(){
+    const telegramHeight=Number(window.Telegram?.WebApp?.viewportHeight||0);
+    const visualHeight=Number(window.visualViewport?.height||0);
+    const innerHeight=Number(window.innerHeight||0);
+    const heights=[telegramHeight,visualHeight,innerHeight].filter(v=>Number.isFinite(v)&&v>250);
+    if(!heights.length)return;
+    document.documentElement.style.setProperty('--tg-table-visible-height',Math.floor(Math.min(...heights))+'px');
+  }
+  syncViewportHeight();
+  window.addEventListener('resize',syncViewportHeight,{passive:true});
+  window.addEventListener('orientationchange',syncViewportHeight,{passive:true});
+  window.visualViewport?.addEventListener('resize',syncViewportHeight,{passive:true});
+  window.Telegram?.WebApp?.onEvent?.('viewportChanged',syncViewportHeight);
   let chatOpen = false;
   let chatBusy = false;
   let chatLoading = false;
