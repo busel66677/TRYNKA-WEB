@@ -1,0 +1,136 @@
+/* TRYNKA v132 — central LIVE bank, action and winnings UI */
+body.trynka-in-table #table-list>.room.tg-show-bank .felt-center{
+  display:none!important;
+}
+body.trynka-in-table #table-list>.room .felt .tg-bank-hud{
+  position:absolute!important;z-index:5!important;top:50%!important;left:50%!important;
+  transform:translate(-50%,-50%)!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  gap:clamp(2px,.52vh,5px)!important;
+  width:clamp(119px,65%,220px)!important;max-height:85%!important;
+  padding:clamp(6px,1.3vh,12px) clamp(5px,2vw,11px)!important;
+  border-radius:19px!important;
+  background:linear-gradient(150deg,#042a1ee8,#062318e9)!important;
+  border:1px solid #ead19b88!important;
+  color:#fff3ce!important;text-align:center!important;
+  box-shadow:0 1px 13px #0009,0 0 14px #0eff9a24,inset 0 1px #ffe1ae30!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+}
+body.trynka-in-table .tg-bank-label{
+  color:#d7c188!important;
+  font:900 clamp(9px,2.3vw,12px)/1.1 system-ui,sans-serif!important;
+  letter-spacing:.13em!important;
+}
+body.trynka-in-table .tg-bank-total{
+  color:#ffebb7!important;
+  font:950 clamp(17px,5.6vw,29px)/1.07 system-ui,sans-serif!important;
+  text-shadow:0 2px 5px #000a,0 0 11px #f4bb6f43!important;
+  white-space:nowrap!important;font-variant-numeric:tabular-nums!important;
+}
+body.trynka-in-table .tg-bank-turn{
+  display:block!important;
+  width:100%!important;
+  border:1px solid #c9ac6f90!important;
+  border-radius:8px!important;padding:4px 3px!important;
+  background:#3b3927e6!important;
+  font:950 clamp(9px,2.55vw,12px)/1.1 system-ui,sans-serif!important;
+  color:#ffdfa4!important;
+  white-space:nowrap!important;text-overflow:ellipsis!important;overflow:hidden!important;
+}
+body.trynka-in-table .tg-bank-turn.mine{
+  background:#127c52!important;border-color:#afffc5!important;
+  color:#e8ffe7!important;box-shadow:0 0 12px #0dff9f6b!important;
+}
+body.trynka-in-table .tg-bank-contributions{
+  width:100%!important;display:grid!important;grid-template-columns:1fr!important;
+  gap:1px!important;margin-top:1px!important;
+}
+body.trynka-in-table .tg-bank-contribution{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  min-width:0!important;gap:4px!important;
+  padding:1px 2px!important;
+  border-bottom:1px solid #a7cba821!important;
+  font:650 clamp(8px,2.35vw,11px)/1.2 system-ui,sans-serif!important;
+}
+body.trynka-in-table .tg-bank-contribution.is-folded{
+  color:#9eaea2!important;opacity:.7!important;
+}
+body.trynka-in-table .tg-bank-player-name{
+  color:#d2e0d3!important;max-width:60%!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+}
+body.trynka-in-table .tg-bank-player-amount{
+  color:#ffe0a2!important;white-space:nowrap!important;
+  font-weight:850!important;font-variant-numeric:tabular-nums!important;
+}
+body.trynka-in-table .tg-bank-last{
+  width:100%!important;
+  color:#b8d4b4!important;
+  font:600 clamp(8px,2.3vw,10px)/1.15 system-ui,sans-serif!important;
+  overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;
+}
+body.trynka-in-table .tg-bank-winner{
+  width:100%!important;padding:5px 3px!important;
+  border:1px solid #d1b273aa!important;border-radius:9px!important;
+  background:#6f522c66!important;color:#ffe5a3!important;
+  font:900 clamp(10px,2.8vw,13px)/1.2 system-ui,sans-serif!important;
+}
+body.trynka-in-table .tg-bank-payout-note{
+  color:#c5d2bf!important;
+  font:500 clamp(7px,2vw,9px)/1.1 system-ui,sans-serif!important;
+}
+body.trynka-in-table .seat .tg-contrib-badge{
+  position:absolute!important;z-index:11!important;
+  display:block!important;top:100%!important;left:50%!important;
+  transform:translateX(-50%)!important;
+  width:max-content!important;max-width:82px!important;
+  margin-top:clamp(11px,2.5vh,21px)!important;
+  padding:2px 4px!important;border:1px solid #d4b77c!important;border-radius:7px!important;
+  background:#102a20f5!important;color:#ffe3a7!important;
+  font:900 clamp(8px,2.2vw,10px)/1 system-ui,sans-serif!important;
+  box-shadow:0 1px 7px #0008!important;white-space:nowrap!important;
+  pointer-events:none!important;font-variant-numeric:tabular-nums!important;
+}
+body.trynka-in-table .seat .tg-contrib-badge.folded{
+  border-color:#817b6d!important;color:#bfbab2!important;background:#152018e9!important;
+}
+body.trynka-in-table .seat .tg-seat-turn-tag{
+  position:absolute!important;z-index:13!important;
+  left:50%!important;bottom:calc(100% + 5px)!important;transform:translateX(-50%)!important;
+  display:block!important;padding:3px 6px!important;
+  color:#031b14!important;background:#ffd889!important;
+  border:1px solid #fff1bb!important;border-radius:8px!important;
+  box-shadow:0 0 13px #f4d98aaf,0 2px 6px #000b!important;
+  font:950 clamp(9px,2.5vw,12px)/1 system-ui,sans-serif!important;
+  white-space:nowrap!important;pointer-events:none!important;
+}
+body.trynka-in-table .seat.tg-bank-folded .seat-icon{
+  filter:grayscale(.75)!important;opacity:.68!important;
+}
+body.trynka-in-table .seat.is-turn .seat-icon{
+  border:3px solid #fff2b6!important;
+  box-shadow:0 0 0 4px #ffdb72a6,0 0 25px #ffe089e5!important;
+}
+body.trynka-in-table .tg-bank-finished .tg-bank-hud{
+  border:2px solid #efd28c!important;
+  box-shadow:0 0 16px #f4c97279,0 3px 15px #000a!important;
+}
+@media(max-width:375px){
+  body.trynka-in-table #table-list>.room .felt .tg-bank-hud{
+    width:72%!important;padding:6px 5px!important;gap:2px!important;
+  }
+  body.trynka-in-table .tg-bank-total{font-size:19px!important}
+  body.trynka-in-table .seat .tg-contrib-badge{font-size:8px!important;padding:2px 3px!important}
+}
+@media(max-height:660px){
+  body.trynka-in-table #table-list>.room .felt .tg-bank-hud{
+    max-height:88%!important;gap:1px!important;padding:5px 4px!important;
+  }
+  body.trynka-in-table .tg-bank-total{font-size:17px!important}
+  body.trynka-in-table .tg-bank-contribution{font-size:8px!important}
+  body.trynka-in-table .tg-bank-winner{font-size:10px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.trynka-in-table .seat.is-turn .seat-icon{animation:none!important}
+}
