@@ -133,3 +133,84 @@ body.trynka-in-table .tg-reveal-face.tg-face-flip{
  body.trynka-in-table .felt-wrap>.tg-reveal-board,
  body.trynka-in-table .tg-reveal-face.tg-face-flip{animation:none!important}
 }
+
+/* v134 — public last-standing showdown: final player's hand for EVERY viewer */
+body.trynka-in-table .felt-wrap>.tg-reveal-board.tg-last-standing{
+  width:clamp(208px,91%,335px)!important;
+  max-width:96%!important;
+  gap:5px!important;
+  border:2px solid #ffe1a1!important;
+  background:linear-gradient(160deg,#184c35f9,#08281af9 70%,#02170ffb)!important;
+  box-shadow:0 0 0 200vmax #0007,0 6px 26px #000d,
+    0 0 23px #efca807b,inset 0 1px #fff0bf91!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-title{
+  color:#f7d891!important;
+  font:950 clamp(11px,3vw,14px)/1.2 system-ui,sans-serif!important;
+  letter-spacing:.035em!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-winner{
+  color:#fff5cf!important;
+  font:950 clamp(14px,4.2vw,19px)/1.22 system-ui,sans-serif!important;
+  margin-bottom:6px!important;
+  text-shadow:0 0 13px #edca837a!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-list{
+  margin:0!important;gap:0!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-row{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  padding:11px 7px!important;
+  border:1px solid #edca82!important;
+  border-radius:13px!important;
+  background:linear-gradient(170deg,#295538aa,#082f1fe6)!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-info{
+  align-items:center!important;text-align:center!important;
+  gap:4px!important;overflow:visible!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-name{
+  color:#ffe7aa!important;
+  font:950 clamp(13px,3.75vw,17px)/1.15 system-ui,sans-serif!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-score{
+  display:block!important;
+  padding:4px 9px!important;
+  color:#08261b!important;
+  background:#ffe5a2!important;
+  border-radius:999px!important;
+  font:950 clamp(12px,3.4vw,16px)/1.12 system-ui,sans-serif!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-hand{gap:7px!important}
+body.trynka-in-table .tg-last-standing .tg-reveal-face{
+  width:clamp(36px,11vw,49px)!important;
+  height:clamp(51px,15.8vw,68px)!important;
+  border-radius:7px!important;
+  border:2px solid #fff8e3!important;
+  box-shadow:0 3px 12px #0009,0 0 5px #ffd98a35!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-face b{
+  font-size:clamp(15px,4.5vw,21px)!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-face i{
+  font-size:clamp(17px,5vw,24px)!important;
+}
+body.trynka-in-table .tg-last-standing .tg-reveal-note{
+  color:#d1e4d2!important;
+  font:700 clamp(9px,2.7vw,11px)/1.2 system-ui,sans-serif!important;
+  text-align:center!important;
+  margin-top:3px!important;
+}
+@media(max-height:615px){
+  body.trynka-in-table .tg-last-standing .tg-reveal-row{padding:5px!important;gap:4px!important}
+  body.trynka-in-table .tg-last-standing .tg-reveal-face{height:48px!important;width:34px!important}
+  body.trynka-in-table .tg-last-standing .tg-reveal-winner{margin-bottom:3px!important;font-size:13px!important}
+}
+@media(max-width:355px){
+  body.trynka-in-table .tg-last-standing .tg-reveal-hand{gap:4px!important}
+  body.trynka-in-table .tg-last-standing .tg-reveal-face{width:35px!important;height:49px!important}
+}
