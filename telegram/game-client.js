@@ -105,31 +105,50 @@
     item.append(face,cover);
     const key=String(snapshot?.roundId||'')+':'+index;
     let offset=Math.max(0,Number(peekOffsets.get(key)||0));
-    let startY=0,startOffset=0,dragging=false,moved=false;
+    let startY=0,startOffset=0,dragging=false,moved=false,pointerId=null;
+    let swallowClick=false;
     const apply=value=>{
       const max=Math.max(12,item.getBoundingClientRect().height-9);
       offset=Math.max(0,Math.min(max,Number(value)||0));
       peekOffsets.set(key,offset);
       cover.style.transform='translate3d(0,'+offset+'px,0)';
+      item.classList.toggle('tg-peeking',offset>8);
+      item.classList.toggle('tg-peek-open',offset>max*.65);
     };
+    const toggle=()=>apply(offset>item.clientHeight*.45?0:item.clientHeight*.83);
     item.addEventListener('pointerdown',e=>{
       if(e.pointerType==='mouse'&&e.button!==0)return;
-      dragging=true;moved=false;startY=e.clientY;startOffset=offset;
+      if(dragging)return;
+      dragging=true;moved=false;pointerId=e.pointerId;
+      startY=e.clientY;startOffset=offset;
+      item.classList.add('tg-peek-dragging');
       try{item.setPointerCapture(e.pointerId)}catch{}
       e.preventDefault();
     });
     item.addEventListener('pointermove',e=>{
-      if(!dragging)return;
+      if(!dragging||e.pointerId!==pointerId)return;
       if(Math.abs(e.clientY-startY)>3)moved=true;
       apply(startOffset+e.clientY-startY);
       e.preventDefault();
     });
-    const release=()=>{dragging=false};
-    item.addEventListener('pointerup',release);
-    item.addEventListener('pointercancel',release);
-    item.addEventListener('click',()=>{
-      if(moved){moved=false;return}
-      apply(offset>item.clientHeight*.45?0:item.clientHeight*.83);
+    item.addEventListener('pointerup',e=>{
+      if(!dragging||e.pointerId!==pointerId)return;
+      dragging=false;pointerId=null;
+      item.classList.remove('tg-peek-dragging');
+      if(!moved)toggle();
+      // A pointer tap may generate a synthetic click even after preventDefault.
+      swallowClick=true;
+      queueMicrotask(()=>{swallowClick=false});
+      try{item.releasePointerCapture(e.pointerId)}catch{}
+      e.preventDefault();
+    });
+    item.addEventListener('pointercancel',()=>{
+      dragging=false;pointerId=null;item.classList.remove('tg-peek-dragging');
+    });
+    item.addEventListener('click',e=>{
+      if(swallowClick||e.detail!==0){e.preventDefault();return}
+      // Keyboard activation (Enter/Space) remains available.
+      toggle();
     });
     item.addEventListener('dragstart',e=>e.preventDefault());
     parent.append(item);
