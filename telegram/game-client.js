@@ -68,6 +68,8 @@
   let timeTrack=null;
   let timeFill=null;
   let finishButton=null;
+  let readyTimer=null;
+  const peekOffsets=new Map();
   const reducedMotion=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||false;
 
   function currentTable(){return Number(window.trynkaTelegramGameBridge?.()?.table)||null}
@@ -91,11 +93,48 @@
     if(text!==undefined)element.textContent=text;
     return element;
   }
-  function addCard(parent,card,mode,delay){
+  function addCard(parent,card,mode,delay,{pull=false,index=0}={}){
     const red=card&&['♥','♦'].includes(card.suit);
-    const item=node('div','tg-card'+(red?' red':'')+(!card?' back':'')+(mode?' '+mode:''),card?card.rank+card.suit:'♠');
+    const item=node(pull?'button':'div','tg-card'+(red?' red':'')+(!card?' back':'')+(mode?' '+mode:'')+(pull?' pullable':''));
     if(mode)item.style.setProperty('--delay',delay+'ms');
+    if(!pull){item.textContent=card?card.rank+card.suit:'♠';parent.append(item);return item;}
+    item.type='button';
+    item.setAttribute('aria-label','Карта '+(index+1)+'. Потягни вниз або натисни, щоб подивитися');
+    const face=node('span','tg-card-face',card?card.rank+card.suit:'♠');
+    const cover=node('span','tg-peek-cover','♠');
+    item.append(face,cover);
+    const key=String(snapshot?.roundId||'')+':'+index;
+    let offset=Math.max(0,Number(peekOffsets.get(key)||0));
+    let startY=0,startOffset=0,dragging=false,moved=false;
+    const apply=value=>{
+      const max=Math.max(12,item.getBoundingClientRect().height-9);
+      offset=Math.max(0,Math.min(max,Number(value)||0));
+      peekOffsets.set(key,offset);
+      cover.style.transform='translate3d(0,'+offset+'px,0)';
+    };
+    item.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      dragging=true;moved=false;startY=e.clientY;startOffset=offset;
+      try{item.setPointerCapture(e.pointerId)}catch{}
+      e.preventDefault();
+    });
+    item.addEventListener('pointermove',e=>{
+      if(!dragging)return;
+      if(Math.abs(e.clientY-startY)>3)moved=true;
+      apply(startOffset+e.clientY-startY);
+      e.preventDefault();
+    });
+    const release=()=>{dragging=false};
+    item.addEventListener('pointerup',release);
+    item.addEventListener('pointercancel',release);
+    item.addEventListener('click',()=>{
+      if(moved){moved=false;return}
+      apply(offset>item.clientHeight*.45?0:item.clientHeight*.83);
+    });
+    item.addEventListener('dragstart',e=>e.preventDefault());
     parent.append(item);
+    apply(offset);
+    return item;
   }
   function makeButton(parent,text,action,table,{danger=false,disabled=false}={}){
     const button=node('button',danger?'danger':'',text);
@@ -115,7 +154,7 @@
     return button;
   }
   function fingerprint(state){
-    if(state.status==='waiting')return 'waiting:'+state.seated;
+    if(state.status==='waiting')return 'waiting:'+state.seated+':'+state.readyCount+':'+state.myReady+':'+(state.readySeats||[]).join(',')+':'+state.readyEndsAt;
     const players=(state.players||[]).map(p=>[p.seat,p.folded,p.acted,p.winner].join(':')).join('|');
     return [state.roundId,state.status,state.turnSeat,state.myTurn,state.pot,players].join('/');
   }
@@ -123,9 +162,10 @@
     const room=document.querySelector('#detail:not([hidden]) .room');
     if(!room)return;
     for(const el of room.querySelectorAll('.seat')){
-      el.classList.remove('is-turn','is-winner');
+      el.classList.remove('is-turn','is-winner','is-ready');
       const seat=Number(el.dataset.seat);
       if(state?.status==='playing'&&seat===Number(state.turnSeat))el.classList.add('is-turn');
+      if(state?.status==='waiting'&&state.readySeats?.includes(seat))el.classList.add('is-ready');
       if(state?.status==='finished'&&state.winners?.includes(seat))el.classList.add('is-winner');
     }
   }
@@ -138,6 +178,10 @@
       timeText.textContent=whole+' с';
       timeFill.style.width=Math.min(100,remaining/30000*100)+'%';
       timeTrack?.classList.toggle('urgent',whole<=8);
+    }
+    if(snapshot.status==='waiting'&&readyTimer){
+      const remaining=Number(snapshot.readyEndsAt||0)-Date.now();
+      readyTimer.textContent=remaining>0?'Початок через '+Math.ceil(remaining/1000)+' с':'Збираємо гравців';
     }
     if(snapshot.status==='finished'&&finishButton){
       const remaining=Math.max(0,Math.ceil((Number(snapshot.nextRoundAt||0)-Date.now())/1000));
@@ -165,7 +209,7 @@
     const panel=panelFor(table);
     if(!panel)return;
     panel.replaceChildren();
-    timeText=null;timeFill=null;timeTrack=null;finishButton=null;
+    timeText=null;timeFill=null;timeTrack=null;finishButton=null;readyTimer=null;
     const head=node('div','tg-round-head');
     head.append(node('span','','♠ РОЗДАЧА · '+(data.roundId||'—')));
     head.append(node('span','tg-pot',data.status==='waiting'?'2–4 гравці':'Банк: '+Number(data.pot||0)+' грн'));
@@ -175,13 +219,21 @@
     const buttons=node('div','tg-round-buttons');
 
     if(data.status==='waiting'){
-      title.textContent='Очікуємо гравців';
+      title.textContent='Готуємося до гри';
       panel.append(title);
-      panel.append(node('p','tg-round-line','За столом: '+(data.seated??'…')+'. Для тестової роздачі потрібно щонайменше двоє.'));
-      makeButton(buttons,'🃏 Роздати карти','start',table,{disabled:Number(data.seated)<2});
+      const readyLine=node('p','tg-round-line','Готові: '+Number(data.readyCount||0)+' / 4 · гравців за столом: '+Number(data.seated||0));
+      panel.append(readyLine);
+      readyTimer=node('div','tg-round-line','');
+      panel.append(readyTimer);
+      const ready=makeButton(buttons,data.myReady?'✓ ГОТОВО · СКАСУВАТИ':'✓ ГОТОВО','ready',table);
+      ready.classList.add('tg-ready-button');
+      ready.classList.toggle('ready',Boolean(data.myReady));
+      const start=makeButton(buttons,'🃏 Старт','start',table,{disabled:Number(data.seated)<2});
+      start.classList.add('tg-secondary-button');
       panel.append(buttons);
       panel.append(node('p','tg-round-note','Тестовий режим · без списання віртуальних грн'));
-      setSeatHighlights(null);
+      setSeatHighlights(data);
+      clockUpdate();
       return;
     }
 
@@ -202,26 +254,43 @@
       panel.append(node('p','tg-round-line',data.reason||'Вскриття карт'));
     }
 
-    for(const p of data.players||[]){
-      const active=data.status==='playing'&&Number(data.turnSeat)===Number(p.seat);
-      const wrapper=node('article','tg-player'+(active?' is-turn':'')+(p.winner?' is-winner':'')+(p.folded?' is-folded':''));
-      const heading=node('div','tg-player-heading');
-      heading.append(node('strong','',(p.winner?'🏆 ':'')+p.name+' · №'+p.seat));
-      heading.append(node('span','tg-player-status',p.folded?'Впав':p.result||(active?'● Ходить':p.acted?'Дав':'Чекає')));
-      wrapper.append(heading);
+    if(data.status==='playing'){
+      const mine=(data.players||[]).find(p=>Array.isArray(p.cards));
+      const own=node('div','tg-own-hand');
+      const ownLabel=node('div','tg-own-label');
+      ownLabel.append(node('b','','МОЇ КАРТИ'));
+      ownLabel.append(node('span','','Потягни карту вниз'));
+      own.append(ownLabel);
       const cards=node('div','tg-hand');
-      const hand=p.cards||[null,null,null];
-      hand.forEach((card,i)=>addCard(cards,card,animateReveal?'reveal':animateDeal?'deal':'',(i*155)+(p.seat-1)*85));
-      wrapper.append(cards);panel.append(wrapper);
+      (mine?.cards||[null,null,null]).forEach((card,i)=>addCard(cards,card,animateDeal?'deal':'',i*130,{pull:Boolean(card),index:i}));
+      own.append(cards);
+      panel.append(own);
+    }else if(data.status==='finished'){
+      const results=node('details','tg-results');
+      results.append(node('summary','','🃏 Карти та результати гравців'));
+      const list=node('div','tg-results-content');
+      for(const p of data.players||[]){
+        const wrapper=node('article','tg-player'+(p.winner?' is-winner':'')+(p.folded?' is-folded':''));
+        const heading=node('div','tg-player-heading');
+        heading.append(node('strong','',(p.winner?'🏆 ':'')+p.name+' · №'+p.seat));
+        heading.append(node('span','tg-player-status',p.result||(p.folded?'Впав':'')));
+        wrapper.append(heading);
+        const cards=node('div','tg-hand');
+        (p.cards||[null,null,null]).forEach((card,i)=>addCard(cards,card,animateReveal?'reveal':'',i*75));
+        wrapper.append(cards);list.append(wrapper);
+      }
+      results.append(list);panel.append(results);
     }
 
     if(data.status==='playing'&&data.myTurn){
       makeButton(buttons,'ДАВ','call',table);
+      makeButton(buttons,'ПІДНЯТИ','raise',table);
+      makeButton(buttons,'ВСКРИТИСЯ','reveal',table);
       makeButton(buttons,'ВПАВ','fold',table,{danger:true});
-      makeButton(buttons,'ВСКРИВСЯ','reveal',table);
       panel.append(buttons);
     }else if(data.status==='finished'){
       finishButton=makeButton(buttons,'🃏 Нова роздача','start',table,{disabled:true});
+      finishButton.classList.add('tg-next-button');
       panel.append(buttons);
     }
     panel.append(node('p','tg-round-note','Тестова партія: віртуальні грн не списуються та не нараховуються.'));
@@ -238,7 +307,7 @@
     const animateReveal=data.status==='finished'&&(lastStatus==='playing'||(newRound&&Date.now()-Number(data.finishedAt||0)<4000));
     const showWinner=animateReveal;
     snapshot=data;snapshotTable=table;
-    if(newRound)lastRound=String(data.roundId);
+    if(newRound){lastRound=String(data.roundId);peekOffsets.clear();}
     // Repaint only when something actually changed; a 1.3s network poll must never restart animation.
     if(key!==lastKey||!document.querySelector('#detail:not([hidden]) .room .tg-round')){
       render(table,data,{animateDeal,animateReveal,showWinner});
