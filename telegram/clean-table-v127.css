@@ -1,0 +1,316 @@
+/* TRYNKA 127 — clean compact table for Telegram Mini App.
+   The old ornate VIP theme is intentionally no longer loaded. All real cards,
+   players, states and actions are still rendered by the existing game engine. */
+
+body.trynka-in-table{
+  background:#06150f!important;color:#eaf0e9!important;
+  overflow:hidden!important;overscroll-behavior:none!important;
+}
+body.trynka-in-table::before{display:none!important}
+body.trynka-in-table main{
+  width:100%!important;max-width:520px!important;
+  height:var(--tg-table-visible-height,100dvh)!important;
+  max-height:var(--tg-table-visible-height,100dvh)!important;
+  margin:0 auto!important;
+  padding:calc(max(env(safe-area-inset-top,0px),72px) + 9px) 9px calc(env(safe-area-inset-bottom,0px) + 8px)!important;
+  overflow:hidden!important;gap:0!important;
+}
+body.trynka-in-table .top,body.trynka-in-table #detail>.back{
+  display:none!important;
+}
+body.trynka-in-table #detail{
+  min-height:0!important;flex:1 1 0!important;
+  gap:0!important;overflow:hidden!important;
+}
+body.trynka-in-table #detail>.panel{
+  display:flex!important;flex:1 1 0!important;min-height:0!important;
+  margin:0!important;padding:0!important;overflow:hidden!important;
+}
+body.trynka-in-table #table-list{
+  display:flex!important;flex:1 1 0!important;min-height:0!important;
+  overflow:hidden!important;
+}
+body.trynka-in-table #table-list>.room{
+  display:grid!important;grid-template-rows:44px minmax(0,1fr) auto!important;
+  gap:6px!important;
+  flex:1 1 0!important;width:100%!important;
+  height:100%!important;min-height:0!important;max-height:100%!important;
+  padding:10px 9px 9px!important;margin:0!important;
+  border-radius:22px!important;border:1px solid #375747!important;
+  background:
+    radial-gradient(ellipse 85% 61% at 50% 35%,#153e2e 0%,#0b291d 58%,transparent 95%),
+    linear-gradient(170deg,#081c14 0%,#05140e 100%)!important;
+  box-shadow:inset 0 1px #a7caab14,0 5px 25px #0006!important;
+  overflow:hidden!important;isolation:isolate!important;
+}
+body.trynka-in-table #table-list>.room::before,
+body.trynka-in-table #table-list>.room::after{content:none!important;display:none!important}
+body.trynka-in-table .room-head{
+  position:relative!important;z-index:10!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  flex-wrap:nowrap!important;
+  height:44px!important;min-height:44px!important;
+  gap:5px!important;padding:0!important;margin:0!important;
+  color:#f2e6c6!important;font-family:system-ui,sans-serif!important;
+  letter-spacing:0!important;text-shadow:none!important;
+  overflow:visible!important;
+}
+body.trynka-in-table .room-head::before,body.trynka-in-table .room-head::after{
+  content:none!important;display:none!important
+}
+body.trynka-in-table .room-back-btn{
+  width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;
+  flex:0 0 35px!important;
+  display:grid!important;place-items:center!important;
+  padding:0!important;margin:0!important;
+  border:1px solid #456452!important;border-radius:11px!important;
+  background:#153528!important;color:#f3dfb9!important;
+  font:800 23px/1 system-ui,sans-serif!important;
+}
+body.trynka-in-table .room-head-label{
+  min-width:0!important;flex:1 1 auto!important;
+  display:flex!important;flex-direction:column!important;gap:2px!important;
+  text-align:left!important;
+}
+body.trynka-in-table .room-head-label b{
+  font-size:clamp(12px,3.3vw,15px)!important;letter-spacing:.035em!important;
+  line-height:1!important;font-weight:950!important;color:#f6e9c5!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+body.trynka-in-table .room-head-count{
+  color:#a5bfaf!important;font-size:10px!important;line-height:1!important;font-weight:650!important;
+  text-align:left!important;white-space:nowrap!important;
+}
+body.trynka-in-table .room-head .tg-wallet{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  flex:0 0 auto!important;min-width:68px!important;max-width:100px!important;
+  height:34px!important;min-height:34px!important;
+  margin:0!important;padding:6px 7px!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  border-radius:11px!important;border:1px solid #8e7954!important;
+  background:#2b3025!important;color:#f0d79e!important;
+  font:850 clamp(10px,2.9vw,12px)/1 system-ui,sans-serif!important;
+  box-shadow:none!important;
+}
+body.trynka-in-table .room-head .tg-room-tools{
+  display:flex!important;align-items:center!important;flex:0 0 auto!important;
+  gap:4px!important;margin:0!important;
+}
+body.trynka-in-table .room-head .tg-tool-btn{
+  display:grid!important;place-items:center!important;
+  width:35px!important;height:35px!important;min-height:35px!important;
+  padding:0!important;margin:0!important;
+  border:1px solid #456452!important;border-radius:11px!important;
+  background:#17382a!important;color:#eee9d8!important;
+  font:700 17px/1 system-ui,sans-serif!important;
+  box-shadow:none!important;
+}
+body.trynka-in-table .room-back-btn:focus-visible,
+body.trynka-in-table .tg-tool-btn:focus-visible,
+body.trynka-in-table .tg-round-buttons button:focus-visible{
+  outline:2px solid #e4c98e!important;outline-offset:2px!important;
+}
+
+/* A broad poker table rather than the previous tall vertical stadium */
+body.trynka-in-table .felt-wrap{
+  position:relative!important;z-index:2!important;
+  width:100%!important;height:100%!important;max-width:none!important;min-height:0!important;
+  aspect-ratio:auto!important;overflow:visible!important;
+  margin:0!important;padding:0!important;
+  background:transparent!important;
+}
+body.trynka-in-table .felt{
+  position:absolute!important;
+  inset:17% 9% 17%!important;
+  border:7px solid #785838!important;outline:1px solid #bd9a64!important;
+  border-radius:44% / 42%!important;
+  background:
+    radial-gradient(ellipse 75% 72% at 44% 35%,#1b8055 0%,#12623f 57%,#0c442f 100%),
+    repeating-linear-gradient(38deg,#ffffff03 0 1px,transparent 1px 6px)!important;
+  box-shadow:0 0 0 2px #35291b,0 9px 24px #0009,
+    inset 0 0 0 2px #bda06f7a,inset 0 0 0 5px #0d3b29,
+    inset 0 0 24px #041e15a8!important;
+}
+body.trynka-in-table .felt::before{
+  content:""!important;display:block!important;
+  position:absolute!important;inset:9%!important;
+  border:1px solid #a6c0a15e!important;border-radius:44% / 42%!important;
+  box-shadow:none!important;
+}
+body.trynka-in-table .felt::after{
+  content:none!important;display:none!important;
+}
+body.trynka-in-table .felt-center{
+  position:absolute!important;top:48%!important;left:50%!important;transform:translate(-50%,-50%)!important;
+  color:#e0c997!important;text-shadow:none!important;
+  font:800 clamp(15px,5.4vw,23px)/1.15 Georgia,serif!important;
+  letter-spacing:.13em!important;white-space:nowrap!important;
+}
+body.trynka-in-table .felt-center::before{
+  content:"♠"!important;display:block!important;margin-bottom:8px!important;
+  color:#dabd81!important;font-size:clamp(21px,6vw,30px)!important;
+  text-shadow:none!important;
+}
+body.trynka-in-table .felt-center::after{content:none!important;display:none!important}
+body.trynka-in-table .felt-center small{
+  display:block!important;margin-top:5px!important;
+  font:700 10px/1.1 system-ui,sans-serif!important;
+  letter-spacing:3px!important;color:#d4bd8b9e!important;text-shadow:none!important;
+}
+body.trynka-in-table .seat{
+  position:absolute!important;z-index:5!important;
+  width:clamp(36px,11vw,52px)!important;overflow:visible!important;
+}
+body.trynka-in-table .seat.empty{
+  opacity:.58!important;
+  width:clamp(27px,8.5vw,35px)!important;
+}
+body.trynka-in-table .seat.empty .seat-name{display:none!important}
+body.trynka-in-table .seat.empty .seat-icon{
+  width:clamp(24px,7vw,31px)!important;height:clamp(24px,7vw,31px)!important;
+  border:1px dashed #bdad88!important;border-radius:50%!important;
+  background:#0c3425!important;color:#c1d1b9!important;
+  font-size:13px!important;box-shadow:0 2px 5px #0006!important;
+  opacity:1!important;
+}
+body.trynka-in-table .seat:not(.empty) .seat-icon{
+  width:clamp(35px,10vw,46px)!important;height:clamp(35px,10vw,46px)!important;
+  border:2px solid #bca577!important;border-radius:50%!important;
+  background:#275d44!important;color:#f2ebd4!important;
+  font-size:14px!important;box-shadow:0 3px 8px #0008!important;
+}
+body.trynka-in-table .seat:not(.empty) .seat-name{
+  display:block!important;width:max-content!important;max-width:82px!important;
+  position:relative!important;left:50%!important;transform:translateX(-50%)!important;
+  padding:3px 6px!important;margin-top:2px!important;
+  border:1px solid #52745e!important;border-radius:6px!important;
+  background:#06180fec!important;color:#f2eee2!important;
+  font-size:9px!important;line-height:1.1!important;white-space:nowrap!important;
+  text-overflow:ellipsis!important;overflow:hidden!important;
+  text-align:center!important;box-shadow:0 1px 5px #0008!important;
+}
+body.trynka-in-table .seat.mine{
+  width:50px!important;z-index:7!important;
+}
+body.trynka-in-table .seat.mine::before{content:none!important;display:none!important}
+body.trynka-in-table .seat.mine .seat-icon{
+  width:43px!important;height:43px!important;
+  border:2px solid #f1d293!important;border-radius:50%!important;
+  background:linear-gradient(155deg,#34ad86,#116749)!important;
+  color:#fff9e6!important;box-shadow:0 0 0 3px #f0c77844,0 2px 13px #2affb23e!important;
+}
+body.trynka-in-table .seat.is-turn .seat-icon{
+  border-color:#f1d998!important;box-shadow:0 0 0 3px #e9ce8d85,0 0 14px #26e3a653!important;
+}
+body.trynka-in-table .seat.is-ready .seat-icon{
+  border-color:#64d9a8!important;box-shadow:0 0 0 3px #4edda851!important;
+}
+body.trynka-in-table .seat.is-ready .seat-name{color:#8ee8b5!important}
+
+/* Actions anchored to the bottom; no separate scrolling region */
+body.trynka-in-table .tg-round{
+  position:relative!important;z-index:8!important;
+  width:100%!important;min-height:0!important;max-width:100%!important;
+  margin:0!important;padding:11px!important;
+  border:1px solid #385746!important;border-radius:16px!important;
+  background:linear-gradient(160deg,#142d22,#0b1e15)!important;
+  box-shadow:0 5px 17px #0005,inset 0 1px #ffffff0c!important;
+}
+body.trynka-in-table .tg-round::before{content:none!important;display:none!important}
+body.trynka-in-table .tg-round-head{
+  color:#adbea9!important;font-size:10px!important;letter-spacing:.02em!important;
+}
+body.trynka-in-table .tg-round-head .tg-pot{
+  border:0!important;border-radius:7px!important;
+  background:#244333!important;color:#e4d5b1!important;
+  padding:4px 7px!important;font-size:10px!important;
+}
+body.trynka-in-table .tg-round-title{
+  font:900 clamp(14px,4vw,17px)/1.17 system-ui,sans-serif!important;
+  letter-spacing:0!important;margin:6px 0 4px!important;
+  color:#f1eee0!important;text-transform:none!important;text-shadow:none!important;
+}
+body.trynka-in-table .tg-round-title.own-turn{color:#80e2ad!important}
+body.trynka-in-table .tg-round-line{
+  color:#b6c6b7!important;font-size:11px!important;line-height:1.26!important;
+  margin:2px 0!important;
+}
+body.trynka-in-table .tg-clock{margin:3px 0!important;font-size:11px!important}
+body.trynka-in-table .tg-clock strong{color:#e5d5ac!important}
+body.trynka-in-table .tg-time-track{margin:2px 0 4px!important}
+body.trynka-in-table .tg-time-fill{background:linear-gradient(90deg,#74ba88,#21c78c)!important}
+body.trynka-in-table .tg-own-hand{margin:5px 0 1px!important}
+body.trynka-in-table .tg-own-label b{color:#f4e0ac!important}
+body.trynka-in-table .tg-peek-cover{
+  background:repeating-linear-gradient(45deg,#20543b 0 6px,#123924 6px 12px)!important;
+  border:2px solid #cbb481!important;box-shadow:inset 0 0 0 2px #0d2b1e!important;
+}
+body.trynka-in-table .tg-round-buttons{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:7px!important;margin:8px 0 0!important;
+}
+body.trynka-in-table .tg-round-buttons button{
+  min-width:0!important;min-height:45px!important;height:45px!important;
+  padding:5px 3px!important;
+  border:1px solid #506557!important;border-radius:11px!important;
+  background:#2a4c38!important;color:#f8f4e3!important;
+  box-shadow:none!important;text-shadow:none!important;
+  font:850 clamp(10px,2.9vw,12px)/1.12 system-ui,sans-serif!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button{
+  grid-column:span 3!important;
+  background:linear-gradient(145deg,#8bedb1,#41b97b)!important;
+  border-color:#baf8cc!important;color:#103322!important;
+  box-shadow:none!important;text-shadow:none!important;
+  font-size:14px!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button.ready{
+  background:#204937!important;color:#a5efc1!important;border-color:#58ad7e!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-secondary-button{
+  grid-column:span 1!important;
+  border:1px solid #796d53!important;
+  background:#2b342a!important;color:#d7ccae!important;
+}
+body.trynka-in-table .tg-round-buttons button.danger{
+  background:#5d3131!important;color:#f9dfd9!important;border-color:#946362!important;
+}
+body.trynka-in-table .tg-round-buttons button:disabled{
+  opacity:.45!important;filter:none!important;box-shadow:none!important;
+}
+body.trynka-in-table .tg-round-buttons button:not(.tg-ready-button):not(.tg-secondary-button):not(.tg-next-button):first-child:not(.danger){
+  background:#2a7553!important;color:#f7fff7!important;
+}
+body.trynka-in-table .tg-round-buttons button:not(.tg-ready-button):not(.tg-secondary-button):not(.tg-next-button):nth-child(2){
+  background:#a38a51!important;color:#101e16!important;
+}
+body.trynka-in-table .tg-round-buttons button:not(.tg-ready-button):not(.tg-secondary-button):not(.tg-next-button):nth-child(3){
+  background:#2f6766!important;color:#fff!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-next-button{
+  background:#bca06d!important;color:#17271a!important;
+}
+@media(max-width:370px){
+ body.trynka-in-table main{padding-left:5px!important;padding-right:5px!important}
+ body.trynka-in-table #table-list>.room{padding:8px 6px!important}
+ body.trynka-in-table .room-head .tg-wallet{min-width:60px!important;padding:5px!important}
+ body.trynka-in-table .room-head-label b{font-size:12px!important}
+ body.trynka-in-table .room-head .tg-tool-btn{width:32px!important;height:32px!important}
+ body.trynka-in-table .room-back-btn{width:32px!important;min-width:32px!important}
+}
+@media(max-height:640px){
+ body.trynka-in-table main{
+   padding-top:calc(max(env(safe-area-inset-top,0px),62px) + 6px)!important;
+ }
+ body.trynka-in-table #table-list>.room{
+   grid-template-rows:38px minmax(0,1fr) auto!important;
+   gap:3px!important;padding:5px 7px!important;
+ }
+ body.trynka-in-table .room-head{height:38px!important;min-height:38px!important}
+ body.trynka-in-table .felt{inset:16% 10% 18%!important}
+ body.trynka-in-table .tg-round{padding:7px 9px!important}
+ body.trynka-in-table .tg-round-title{font-size:12px!important;margin:2px 0!important}
+ body.trynka-in-table .tg-round-buttons{margin-top:4px!important}
+ body.trynka-in-table .tg-round-buttons button{min-height:38px!important;height:38px!important}
+ body.trynka-in-table .tg-own-hand .tg-card{width:43px!important;height:59px!important}
+}
