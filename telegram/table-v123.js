@@ -171,6 +171,10 @@
     if(list)new MutationObserver(syncTools).observe(list,{childList:true,subtree:false});
     const balance=$('balance-value');
     if(balance)new MutationObserver(syncTools).observe(balance,{childList:true,characterData:true,subtree:true});
+    // Moving from a room back to the lobby must restore the wallet to the header.
+    const detail=$('detail');
+    if(detail)new MutationObserver(syncTools).observe(detail,{attributes:true,attributeFilter:['hidden']});
+    new MutationObserver(syncTools).observe(document.body,{attributes:true,attributeFilter:['class']});
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});
   else setup();
