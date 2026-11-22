@@ -123,24 +123,41 @@
   });
   window.setInterval(()=>{if(chatOpen&&!document.hidden)refreshChat()},4500);
   function syncTools(){
-    const active=document.body.classList.contains('trynka-in-table')&&!!document.querySelector('#detail:not([hidden]) .room');
+    const active=document.body.classList.contains('trynka-in-table')
+      &&!!document.querySelector('#detail:not([hidden]) .room');
     const top=document.querySelector('.top');
     if(!top)return;
-    let wallet=top.querySelector('.tg-wallet');
-    if(!wallet){wallet=document.createElement('div');wallet.className='tg-wallet';top.insertBefore(wallet,$('avatar')||null);}
+    let wallet=document.querySelector('.tg-wallet');
+    if(!wallet){
+      wallet=document.createElement('div');
+      wallet.className='tg-wallet';
+      top.insertBefore(wallet,$('avatar')||null);
+    }
     wallet.textContent='◈ '+num($('balance-value')?.textContent||'—');
-    if(!active)return;
+    if(!active){
+      if(wallet.parentElement!==top)top.insertBefore(wallet,$('avatar')||null);
+      return;
+    }
     const head=document.querySelector('#detail .room-head');
-    if(!head||head.querySelector('.tg-room-tools'))return;
-    const tools=document.createElement('div');
+    if(!head)return;
+    // One balance display, next to the table controls, not hidden behind Telegram chrome.
+    if(wallet.parentElement!==head)head.append(wallet);
+    let tools=head.querySelector('.tg-room-tools');
+    if(tools)return;
+    tools=document.createElement('div');
     tools.className='tg-room-tools';
     const invite=document.createElement('button');
     invite.type='button';invite.className='tg-tool-btn';
-    invite.textContent='✉ Друг';
+    invite.textContent='↗';
+    invite.title='Запросити друга';
+    invite.setAttribute('aria-label','Запросити друга за стіл');
     invite.onclick=()=>head.closest('.room')?.querySelector('.trynka-invite-btn')?.click();
     const chat=document.createElement('button');
     chat.type='button';chat.className='tg-tool-btn';
-    chat.textContent='💬 Чат';chat.onclick=openChat;
+    chat.textContent='💬';
+    chat.title='Чат';
+    chat.setAttribute('aria-label','Відкрити спільний чат');
+    chat.onclick=openChat;
     tools.append(invite,chat);
     head.append(tools);
   }
