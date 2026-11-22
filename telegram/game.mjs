@@ -5,7 +5,8 @@ import { randomInt } from 'node:crypto';
 const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['6','7','8','9','10','J','Q','K','A'];
 const TURN_MS = 30000;
-const RESTART_MS = 7000;
+const RESTART_MS = 25000; // preserve the visible showdown instead of hiding results after 7s
+const RESULT_HOLD_MS = 5000; // player may start another round after results have been shown
 const READY_DELAY_MS = 5000;
 const MAX_PLAYERS = 4;
 const BOT_THINK_MS = 1100;
@@ -200,7 +201,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
       table, status: round.status, roundId: round.id,
       pot: round.pot, stake: round.stake, turnEndsAt: round.turnEndsAt,
       dealStartedAt: round.dealStartedAt, finishedAt: round.finishedAt,
-      nextRoundAt: finished ? round.finishedAt + RESTART_MS : null,
+      nextRoundAt: finished ? round.finishedAt + RESULT_HOLD_MS : null,
       reason: finished ? round.reason : null,
       myTurn: round.status === 'playing' && player?.id === userId,
       turnSeat: round.status === 'playing' ? player?.seat : null,
@@ -210,12 +211,15 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
       lastAction:round.actionLog.at(-1)||null,
       actionLog:round.actionLog.slice(-6),
       payouts:finished?round.payouts:[],
+      // Never send another player's cards or score while the round is active.
+      myScore:!finished&&round.players.some(p=>p.id===userId)
+        ?scoreHand(round.players.find(p=>p.id===userId).cards).label:null,
       players: round.players.map(p => ({
         seat: p.seat, name: p.name, isBot: p.isBot, folded: p.folded, acted: p.acted,
         contributed:p.contributed, lastAction:p.lastAction,
         won:finished?(round.payouts.find(w=>w.seat===p.seat)?.amount||0):0,
         cards: finished || p.id === userId ? p.cards : null,
-        result: finished && !p.folded ? scoreHand(p.cards).label : null,
+        result: finished ? scoreHand(p.cards).label : null,
         winner: finished && round.winners.includes(p.id)
       }))
     };
@@ -285,7 +289,13 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
     }
     if (action === 'start') {
       if (round?.status === 'playing') return json(res,409,{error:'Роздача вже триває'});
-      if (round?.status === 'finished') return json(res,409,{error:'Дочекайся завершення попередньої роздачі'});
+      if (round?.status === 'finished') {
+        if (Date.now() < round.finishedAt + RESULT_HOLD_MS) {
+          return json(res,409,{error:'Спочатку переглянь карти та результат попередньої роздачі'});
+        }
+        rounds.delete(table);
+        round = null;
+      }
       const entries = [...seats.entries()].filter(([,p]) => p.table === table)
         .sort((a,b) => a[1].seat - b[1].seat).slice(0,MAX_PLAYERS);
       if (entries.length < 2) return json(res,409,{error:'Для гри потрібно щонайменше двоє'});
