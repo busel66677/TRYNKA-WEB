@@ -192,6 +192,7 @@
     const state=snapshotTable===currentTable()?snapshot:null;
     setSeatHighlights(state);
     window.trynkaBankHudUpdate?.(state);
+    window.trynkaRoundVisualsUpdate?.(state,{animateDeal:false,animateReveal:false});
   };
   function clockUpdate(){
     if(!snapshot||snapshotTable!==currentTable())return;
@@ -326,7 +327,8 @@
     panel.append(node('p','tg-round-note','Тестова партія: віртуальні грн не списуються та не нараховуються.'));
     setSeatHighlights(data);
     clockUpdate();
-    if(showWinner)showdownOverlay(data);
+    // The v133 table showdown stays on-screen, rather than a 4-second disappearing toast.
+    // State-driven visual layers also render if the page reconnects mid-showdown.
   }
   function applyState(table,data){
     if(currentTable()!==table)return;
@@ -346,6 +348,7 @@
     lastStatus=data.status;
     setSeatHighlights(data);
     window.trynkaBankHudUpdate?.(data);
+    window.trynkaRoundVisualsUpdate?.(data,{animateDeal,animateReveal,showWinner});
     clockUpdate();
     if(data.myTurn&&data.status==='playing'&&data.turnSeat!==window.__trynkaLastTurnSeat){
       // Only subtle haptic feedback; no loud audio.
