@@ -50,7 +50,7 @@
   const chatButton = entry('💬', 'СПІЛЬНИЙ ЧАТ', 'Спілкуйся з усіма гравцями');
   chatButton.onclick = openChat;
   home.insertBefore(chatButton, home.querySelector('#referral-open'));
-  const adminButton = entry('👑', 'АДМІН-ПАНЕЛЬ', 'Гравці · фішки · модерація', 'club-admin-entry');
+  const adminButton = entry('👑', 'АДМІН-ПАНЕЛЬ', 'Гравці · віртуальні грн · модерація', 'club-admin-entry');
   adminButton.hidden = true;
   adminButton.onclick = () => window.openPage?.('profile');
   home.insertBefore(adminButton, home.querySelector('#referral-open'));
@@ -205,7 +205,7 @@
         });
         row.className='club-admin-player';
         const title=document.createElement('span');title.textContent=p.name || 'Гравець';
-        const side=document.createElement('small');side.textContent='ID '+p.telegramId+' · '+Number(p.chips||0).toLocaleString('uk-UA')+' ◉';
+        const side=document.createElement('small');side.textContent='ID '+p.telegramId+' · '+Number(p.chips||0).toLocaleString('uk-UA')+' грн';
         row.append(title,side);recent.append(row);
       }
       overview.append(recent);
