@@ -100,7 +100,7 @@ body.trynka-in-table .felt-wrap::after{
     radial-gradient(ellipse 5% 24% at 3% 50%,#c3a55d25,transparent 100%),
     radial-gradient(ellipse 5% 24% at 97% 50%,#c3a55d25,transparent 100%);
 }
-body.trynka-in-table .felt-wrap>.felt{
+body.trynka-in-table #table-list>.room .felt-wrap>.felt{
   z-index:2!important;
   inset:10.5% 10% 10%!important;
   border:clamp(8px,2.6vw,13px) solid #b48943!important;
@@ -294,11 +294,11 @@ body.trynka-in-table .tg-card.pullable{
   body.trynka-in-table .room-head .tg-wallet{min-width:57px!important;padding:5px!important}
   body.trynka-in-table .felt-wrap::before{height:21px!important;font-size:11px!important}
   body.trynka-in-table .seat.empty .seat-name{font-size:7px!important;min-width:35px!important}
-  body.trynka-in-table .felt-wrap>.felt{border-width:8px!important}
+  body.trynka-in-table #table-list>.room .felt-wrap>.felt{border-width:8px!important}
 }
 @media(max-height:670px){
   body.trynka-in-table .felt-wrap::before{height:19px!important;font-size:10px!important}
-  body.trynka-in-table .felt-wrap>.felt{inset:10% 10% 11%!important;border-width:7px!important}
+  body.trynka-in-table #table-list>.room .felt-wrap>.felt{inset:10% 10% 11%!important;border-width:7px!important}
   body.trynka-in-table .seat.empty .seat-name{display:none!important}
   body.trynka-in-table .tg-round-title{font-size:13px!important}
   body.trynka-in-table .tg-round-buttons button{height:40px!important;min-height:40px!important}
