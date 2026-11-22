@@ -99,3 +99,10 @@ main{position:relative;z-index:1;max-width:540px;padding-left:16px;padding-right
 }
 #detail .trynka-invite-btn:active{transform:scale(.98)}
 .club-play:disabled{opacity:.66;cursor:wait;transform:none!important}
+/* Filter occupied tables without visual clutter */
+.trynka-table-filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 14px}
+.trynka-table-filter{min-height:43px;border:1px solid #8b967a;border-radius:12px;background:#193428;color:#dbe5d8;font:800 13px system-ui,-apple-system,sans-serif;box-shadow:0 3px 9px #0003}
+.trynka-table-filter[aria-pressed="true"]{background:#e3c990;border-color:#f9e9b9;color:#1d3025;box-shadow:inset 0 1px #fff8}
+.trynka-table-filter:focus-visible{outline:2px solid #fff0ba;outline-offset:2px}
+.trynka-tables-empty{padding:20px 17px;border:1px dashed #8c9b84;border-radius:14px;background:#183226;color:#d6e2d1;font-size:13px;line-height:1.5;text-align:center}
+@media(max-width:360px){.trynka-table-filter{font-size:12px;padding:8px 4px}}
