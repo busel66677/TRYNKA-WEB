@@ -1,0 +1,250 @@
+/* TRYNKA v128 — fine-detail pass for the clean Telegram table.
+   Visual-only; no change to game state, balance, gestures or seat geometry. */
+
+/* Refined club ambience without large illustrations or neon borders */
+body.trynka-in-table{
+  background:
+    radial-gradient(ellipse 85% 85% at 50% 30%,#124733 0%,#08241a 46%,#04150f 100%)!important;
+}
+body.trynka-in-table #table-list>.room{
+  border:1px solid #55705c!important;
+  background:
+    radial-gradient(ellipse 75% 50% at 50% 37%,#164332 0%,#09271c 74%,transparent),
+    repeating-linear-gradient(140deg,#ffffff02 0 1px,transparent 1px 13px),
+    linear-gradient(155deg,#0b271b,#061810 87%)!important;
+  box-shadow:
+    inset 0 1px 0 #b6d9b12a,
+    inset 0 0 0 1px #e3c8950d,
+    0 10px 28px #0007!important;
+}
+
+/* Header: one quiet gold separator and crisp navigation controls */
+body.trynka-in-table .room-head{
+  border-bottom:1px solid #cfb77a28!important;
+  padding-bottom:5px!important;
+}
+body.trynka-in-table .room-head-label b{
+  color:#f4e3ba!important;letter-spacing:.015em!important;
+}
+body.trynka-in-table .room-head-count{
+  color:#a9c4b1!important;font-size:10px!important;
+  font-variant-numeric:tabular-nums!important;
+}
+body.trynka-in-table .room-back-btn,
+body.trynka-in-table .room-head .tg-tool-btn{
+  border-color:#63836b66!important;
+  background:linear-gradient(165deg,#1b3f2e,#123224)!important;
+  color:#f2dfb7!important;
+  box-shadow:inset 0 1px #ffffff14,0 2px 5px #0003!important;
+  transition:background .14s ease,transform .14s ease,border-color .14s ease!important;
+}
+body.trynka-in-table .room-back-btn:active,
+body.trynka-in-table .room-head .tg-tool-btn:active{
+  transform:scale(.94)!important;
+  border-color:#c4a66d!important;
+  background:#23513a!important;
+}
+body.trynka-in-table .room-head .tg-wallet{
+  border-color:#a9925e!important;
+  background:linear-gradient(160deg,#34372a,#242d24)!important;
+  color:#f7dfa7!important;
+  box-shadow:inset 0 1px #f8e1aa20,0 2px 6px #0004!important;
+}
+
+/* Tactile felt: stitched ring, subtle relief and two-tone brushed wood rail */
+body.trynka-in-table .felt{
+  background:
+    repeating-linear-gradient(38deg,#e4ffe405 0 1px,transparent 1px 5px),
+    radial-gradient(ellipse 77% 67% at 42% 27%,#218057 0%,#146a48 48%,#0b4933 100%)!important;
+  border-color:#967149!important;
+  outline-color:#dec18b82!important;
+  box-shadow:
+    0 0 0 2px #39271b,
+    0 7px 0 #24190f,
+    0 11px 26px #0008,
+    inset 0 0 0 2px #e8c89766,
+    inset 0 0 0 5px #153829,
+    inset 0 0 34px #022719b5!important;
+}
+body.trynka-in-table .felt::before{
+  border:1px dashed #f1dda34a!important;
+  inset:8.5%!important;
+  opacity:.62!important;
+}
+body.trynka-in-table .felt::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  inset:3.4%!important;
+  border:1px solid #c4ddac36!important;
+  border-radius:44% / 42%!important;
+  box-shadow:inset 0 0 18px #b2ec9a09!important;
+  pointer-events:none!important;
+}
+body.trynka-in-table .felt-center{
+  font-family:Georgia,'Times New Roman',serif!important;
+  font-size:clamp(14px,5.1vw,22px)!important;
+  color:#e8d3a5!important;
+  letter-spacing:.13em!important;
+  text-shadow:0 1px 2px #092318,0 0 12px #e2c47f18!important;
+}
+body.trynka-in-table .felt-center::before{
+  margin-bottom:5px!important;
+  color:#d6ba7d!important;
+  font-size:clamp(19px,5.8vw,29px)!important;
+  opacity:.9!important;
+}
+body.trynka-in-table .felt-center small{
+  font-size:clamp(9px,2.6vw,11px)!important;
+  letter-spacing:2.2px!important;
+  color:#e4ca9385!important;
+}
+
+/* Empty seats gently recede. Active/ready players are immediately recognizable. */
+body.trynka-in-table .seat.empty{
+  opacity:.61!important;
+  transition:opacity .18s ease!important;
+}
+body.trynka-in-table .seat.empty .seat-icon{
+  border-color:#b1bfa7a0!important;
+  background:linear-gradient(150deg,#194735,#0b3325)!important;
+  color:#d0d9c2!important;
+  box-shadow:inset 0 1px #ffffff1b,0 2px 6px #0005!important;
+}
+body.trynka-in-table .seat:not(.empty) .seat-icon{
+  background:
+    radial-gradient(circle at 38% 22%,#3b8d68,#174c35 75%)!important;
+  border-color:#e7c98e!important;
+  box-shadow:inset 0 1px #ffffff3d,0 3px 9px #0008!important;
+}
+body.trynka-in-table .seat:not(.empty) .seat-name{
+  border-color:#bcad7c6e!important;
+  background:linear-gradient(120deg,#0d2b1ecf,#09251ae3)!important;
+  color:#f6e9ca!important;
+}
+body.trynka-in-table .seat.mine .seat-icon{
+  background:radial-gradient(circle at 35% 19%,#60dcb6,#228a66 57%,#145d44)!important;
+  box-shadow:0 0 0 3px #f1d48b5d,0 3px 13px #00bb8d3d!important;
+}
+body.trynka-in-table .seat.is-ready::after{
+  content:"✓";
+  position:absolute;right:-2px;top:-4px;
+  display:grid;place-items:center;
+  width:15px;height:15px;line-height:15px;
+  border-radius:50%;border:1px solid #d9ffe2;
+  background:#177547;color:white;
+  font:900 11px/1 system-ui,sans-serif;
+  box-shadow:0 1px 5px #000a;
+  pointer-events:none;
+}
+body.trynka-in-table .seat.is-turn{
+  z-index:9!important;
+}
+body.trynka-in-table .seat.is-turn .seat-icon{
+  border-color:#f3d88f!important;
+  box-shadow:0 0 0 3px #f5d68944,0 0 17px #e8cf7b90!important;
+  animation:trynka-v128-turn 1.9s ease-in-out infinite;
+}
+body.trynka-in-table .seat.is-winner .seat-icon{
+  border-color:#f6e7b6!important;
+  box-shadow:0 0 0 3px #f3d78966,0 0 20px #d7ba7290!important;
+}
+
+/* Readable action panel with a small gold accent, no oversized ornamentation. */
+body.trynka-in-table .tg-round{
+  border-color:#55705c!important;
+  background:
+    radial-gradient(ellipse 95% 60% at 0% 0%,#1f513a66,transparent 88%),
+    linear-gradient(160deg,#163828,#0b2318)!important;
+  box-shadow:inset 0 1px #ffffff14,0 4px 18px #0006!important;
+}
+body.trynka-in-table .tg-round::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  top:0;left:21px;right:21px;height:1px;
+  background:linear-gradient(90deg,transparent,#dfc88c88,transparent)!important;
+  pointer-events:none;
+}
+body.trynka-in-table .tg-round-head{
+  color:#b6c7b4!important;
+}
+body.trynka-in-table .tg-round-head .tg-pot{
+  background:#244c37!important;
+  border:1px solid #85a17c32!important;
+  color:#ead3a4!important;
+  font-variant-numeric:tabular-nums!important;
+}
+body.trynka-in-table .tg-round-title{
+  color:#fff5dd!important;letter-spacing:-.015em!important;
+}
+body.trynka-in-table .tg-round-title.own-turn{
+  color:#85f3b6!important;
+}
+body.trynka-in-table .tg-time-track{
+  height:5px!important;
+  background:#091c12!important;
+  border-radius:20px!important;
+}
+body.trynka-in-table .tg-time-fill{
+  background:linear-gradient(90deg,#80d9a2,#35bd85)!important;
+  border-radius:20px!important;
+}
+body.trynka-in-table .tg-time-track.urgent .tg-time-fill{
+  background:linear-gradient(90deg,#ef9273,#d95f58)!important;
+}
+
+/* Cards remain native draggable peeking cards, with better finger affordance */
+body.trynka-in-table .tg-card.pullable{
+  border:1px solid #eed7a9!important;
+  border-radius:9px!important;
+  box-shadow:0 3px 10px #0008,0 1px 0 #fff4c63d!important;
+}
+body.trynka-in-table .tg-card.pullable .tg-peek-cover{
+  border:2px solid #d5bc8c!important;
+  background:
+    repeating-linear-gradient(45deg,#1e4d38 0 5px,#113829 5px 10px)!important;
+  box-shadow:inset 0 0 0 2px #062217,inset 0 0 0 4px #c3ad7563!important;
+}
+body.trynka-in-table .tg-card.pullable.tg-peeking{
+  box-shadow:0 4px 14px #000a,0 0 0 2px #edce8266!important;
+}
+
+/* Press affordance without triggering game actions in CSS */
+body.trynka-in-table .tg-round-buttons button{
+  transition:transform .13s ease,filter .13s ease,box-shadow .13s ease!important;
+  box-shadow:inset 0 1px #ffffff1d,0 2px 7px #0004!important;
+  -webkit-tap-highlight-color:transparent;
+}
+body.trynka-in-table .tg-round-buttons button:not(:disabled):active{
+  transform:translateY(1px) scale(.985)!important;
+  filter:brightness(1.1)!important;
+  box-shadow:inset 0 2px 6px #0005!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button:not(:disabled){
+  border-color:#b0f5c7!important;
+  background:linear-gradient(155deg,#83e9b3,#45c185)!important;
+  box-shadow:inset 0 1px #e9ffeb6e,0 3px 8px #0005!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button.ready{
+  background:linear-gradient(155deg,#245f45,#1b4835)!important;
+  border-color:#6dc993!important;
+  color:#c9f6dc!important;
+}
+body.trynka-in-table .tg-round-buttons button:disabled{
+  transition:none!important;box-shadow:none!important;
+}
+@keyframes trynka-v128-turn{
+  0%,100%{box-shadow:0 0 0 3px #f5d6893a,0 0 9px #dfc47759}
+  50%{box-shadow:0 0 0 4px #f5d68983,0 0 19px #ead18e91}
+}
+@media(max-height:640px){
+  body.trynka-in-table .tg-round::before{left:13px;right:13px}
+  body.trynka-in-table .seat.is-ready::after{width:13px;height:13px;font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  body.trynka-in-table .seat.is-turn .seat-icon{animation:none!important}
+  body.trynka-in-table .tg-round-buttons button,
+  body.trynka-in-table .room-back-btn,
+  body.trynka-in-table .room-head .tg-tool-btn{transition:none!important}
+}
