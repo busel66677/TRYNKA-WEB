@@ -1,0 +1,308 @@
+/* TRYNKA Telegram v130 — faithfully themed after the user's chosen FIRST concept.
+   Keep LIVE game DOM/gestures/actions; photograph is ambient artwork only. */
+body.trynka-in-table{
+  --vip-gold:#f8dc98;
+  --vip-green:#14f3a5;
+  --vip-dark:#03160e;
+  background:radial-gradient(ellipse 90% 100% at 50% 35%,#073826 0%,#00110b 84%)!important;
+}
+body.trynka-in-table #table-list>.room{
+  position:relative!important;isolation:isolate!important;
+  border:1.5px solid #d4b06b!important;border-radius:23px!important;
+  background:
+    linear-gradient(180deg,rgba(0,18,11,.12),rgba(0,20,12,.30) 76%,rgba(0,18,11,.65)),
+    url('/telegram/vip-photo-atmosphere-v130.svg') center center/100% 100% no-repeat,
+    linear-gradient(165deg,#092a1b,#03150e)!important;
+  box-shadow:
+    inset 0 0 0 1px #ffe4a75e,
+    inset 0 0 28px #00130acc,
+    0 0 0 3px #012216,
+    0 0 0 4px #bd914e88,
+    0 8px 20px #000b!important;
+}
+body.trynka-in-table #table-list>.room::before{
+  content:""!important;display:block!important;
+  position:absolute!important;inset:5% 0 14%!important;
+  z-index:0!important;pointer-events:none!important;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 44%,#00ffc816,transparent 80%),
+    linear-gradient(90deg,transparent 0%,#f1ce7a14 3%,transparent 5% 95%,#f1ce7a14 97%,transparent 100%);
+}
+body.trynka-in-table #table-list>.room::after{
+  content:none!important;display:none!important;
+}
+body.trynka-in-table .room-head{
+  position:relative!important;z-index:12!important;
+  height:43px!important;min-height:43px!important;
+  margin:0!important;padding:0 1px 5px!important;
+  border-bottom:1px solid #eccb824b!important;
+  box-shadow:0 2px 0 -1px #11e0a177!important;
+  color:#fff0ca!important;
+}
+body.trynka-in-table .room-head-label b{
+  font:900 clamp(11px,3.3vw,15px)/1 Georgia,serif!important;
+  letter-spacing:.045em!important;
+  color:#ffe3a6!important;text-shadow:0 1px 4px #000a!important;
+}
+body.trynka-in-table .room-head-count{
+  font-size:clamp(8px,2.3vw,10px)!important;color:#b8d7c3!important;
+}
+body.trynka-in-table .room-back-btn{
+  background:linear-gradient(145deg,#234635,#09291c)!important;
+  border:1px solid #cda968!important;
+  border-radius:11px!important;color:#ffdf99!important;
+  box-shadow:inset 0 1px #fff4cf4b,0 2px 8px #0007!important;
+}
+body.trynka-in-table .room-head .tg-wallet{
+  color:#ffde9b!important;
+  border:1px solid #e6ba74!important;
+  border-radius:999px!important;
+  background:linear-gradient(165deg,#4a402b,#112b20 75%)!important;
+  box-shadow:inset 0 1px #fff8ce63,0 0 9px #f4d08c2d!important;
+}
+body.trynka-in-table .room-head .tg-tool-btn{
+  color:#ffe5af!important;
+  background:linear-gradient(155deg,#14533b,#063021)!important;
+  border:1px solid #a48f61!important;
+  border-radius:10px!important;
+  box-shadow:inset 0 1px #fff9d12b,0 1px 6px #000a!important;
+}
+body.trynka-in-table .room-head .tg-tool-btn:active{
+  transform:translateY(1px)!important;
+  filter:brightness(1.14)!important;
+}
+/* The reference's gold VIP seal floats ABOVE the large live felt.
+   This is not a fake button; all player and game data remains dynamic. */
+body.trynka-in-table .felt-wrap{
+  z-index:2!important;
+  position:relative!important;
+  overflow:visible!important;
+}
+body.trynka-in-table .felt-wrap::before{
+  content:"♛ VIP";
+  display:grid!important;place-items:center!important;
+  position:absolute!important;z-index:8!important;
+  top:1px!important;left:50%!important;transform:translateX(-50%)!important;
+  min-width:54px!important;height:26px!important;padding:1px 10px!important;
+  border:1.5px solid #f8d49b!important;
+  border-radius:7px 7px 13px 13px!important;
+  background:linear-gradient(165deg,#6e6330 0%,#133a2a 46%,#06160f 100%)!important;
+  color:#ffe7a8!important;font:900 13px/1.1 Georgia,serif!important;
+  letter-spacing:.055em!important;text-shadow:0 2px #0009!important;
+  box-shadow:inset 0 1px #fffae899,0 2px 5px #000a,0 0 14px #29ffb54d!important;
+  pointer-events:none!important;
+}
+body.trynka-in-table .felt-wrap::after{
+  content:"";display:block!important;position:absolute!important;z-index:1!important;
+  inset:5% 1% 3%!important;pointer-events:none!important;
+  background:
+    radial-gradient(ellipse 56% 45% at 48% 50%,#18f6ab20,transparent 87%),
+    radial-gradient(ellipse 5% 24% at 3% 50%,#c3a55d25,transparent 100%),
+    radial-gradient(ellipse 5% 24% at 97% 50%,#c3a55d25,transparent 100%);
+}
+body.trynka-in-table .felt-wrap>.felt{
+  z-index:2!important;
+  inset:10.5% 10% 10%!important;
+  border:clamp(8px,2.6vw,13px) solid #b48943!important;
+  outline:2px solid #f8dc9fbd!important;
+  border-radius:48% / 46%!important;
+  background:
+    radial-gradient(ellipse 65% 56% at 48% 40%,#0e6c49 0%,#07583d 57%,#053322 97%),
+    repeating-linear-gradient(37deg,#bafbe805 0px,#bafbe805 1px,transparent 1px,transparent 5px)!important;
+  box-shadow:
+    0 0 0 2px #221409,
+    0 0 0 5px #745329,
+    0 0 0 7px #b99660aa,
+    0 6px 0 8px #312311,
+    0 13px 21px #000d,
+    0 0 23px #22ef9b4d,
+    inset 0 0 0 2px #ffeaa5,
+    inset 0 0 0 5px #103c2a,
+    inset 0 0 0 7px #13e9a4,
+    inset 0 0 17px #00ffae99,
+    inset 0 0 48px #002116ba!important;
+}
+/* glowing inner neon ring + dotted stitching, like the picture */
+body.trynka-in-table .felt::before{
+  display:block!important;content:""!important;
+  position:absolute!important;inset:6% 6.8%!important;
+  border:2px solid #1ff8b0c9!important;
+  border-radius:47% / 46%!important;
+  box-shadow:0 0 11px #00ef9cdd,inset 0 0 11px #11e89e50!important;
+  opacity:1!important;pointer-events:none!important;
+}
+body.trynka-in-table .felt::after{
+  display:block!important;content:""!important;
+  position:absolute!important;inset:11% 15%!important;
+  border:1px dashed #24d99988!important;
+  border-radius:46% / 46%!important;
+  box-shadow:none!important;pointer-events:none!important;
+}
+body.trynka-in-table .felt-center{
+  top:47%!important;z-index:3!important;
+  font:900 clamp(20px,6.1vw,30px)/1.06 Georgia,serif!important;
+  letter-spacing:.11em!important;
+  color:#ffdf97!important;
+  text-shadow:0 3px 3px #00120c,0 0 14px #e6b96a8f!important;
+}
+body.trynka-in-table .felt-center::before{
+  display:block!important;content:"♛"!important;
+  font-size:clamp(28px,8vw,39px)!important;
+  margin-bottom:8px!important;color:#ffdd89!important;
+  text-shadow:0 1px 2px #000a,0 0 10px #edc16a!important;
+}
+body.trynka-in-table .felt-center::after{
+  content:"❦"!important;
+  position:absolute!important;top:10%!important;left:50%;
+  transform:translate(-50%,-50%) scale(4,2.4)!important;
+  display:block!important;opacity:.075!important;
+  font:900 27px/1 Georgia,serif!important;
+  color:#eacc83!important;pointer-events:none!important;
+}
+body.trynka-in-table .felt-center small{
+  display:block!important;margin-top:8px!important;
+  color:#f3d291!important;
+  font:700 clamp(10px,3vw,13px)/1.2 Georgia,serif!important;
+  letter-spacing:3px!important;
+  text-shadow:0 1px 3px #00100abf!important;
+}
+/* Gold-ring seats, small dark labels and a special highlighted own seat. */
+body.trynka-in-table .seat{z-index:5!important}
+body.trynka-in-table .seat.empty{opacity:1!important;width:clamp(36px,10.3vw,49px)!important}
+body.trynka-in-table .seat.empty .seat-icon{
+  width:clamp(29px,8.9vw,40px)!important;height:clamp(29px,8.9vw,40px)!important;
+  background:radial-gradient(circle at 31% 22%,#1d7552 0%,#07452f 53%,#031d14 100%)!important;
+  border:2px dashed #f5d998!important;color:#fff0bb!important;
+  font:bold 18px/1 system-ui,sans-serif!important;
+  box-shadow:0 0 0 2px #07190f,0 0 6px #d8b1654d,0 3px 6px #0009!important;
+}
+body.trynka-in-table .seat.empty .seat-name{
+  display:block!important;
+  position:relative!important;left:50%!important;transform:translateX(-50%)!important;
+  width:max-content!important;max-width:55px!important;min-width:42px!important;
+  padding:2px 3px!important;margin-top:1px!important;
+  border:1px solid #ad8855!important;border-radius:7px!important;
+  background:#021c13ef!important;color:#edeee5!important;
+  font:500 8px/1.05 system-ui,sans-serif!important;
+  text-shadow:0 1px #000!important;box-shadow:0 1px 5px #0009!important;
+}
+body.trynka-in-table .seat:not(.empty) .seat-icon{
+  border:2px solid #f5d892!important;
+  background:radial-gradient(circle at 32% 20%,#44a97f,#0e6949 63%,#07412d)!important;
+  box-shadow:0 0 0 2px #1b1b0e,0 0 12px #0fe7a46b,0 4px 8px #0009!important;
+  color:#fff6d7!important;
+}
+body.trynka-in-table .seat.mine{
+  z-index:7!important;width:58px!important;
+}
+body.trynka-in-table .seat.mine::before{
+  content:"♛"!important;display:block!important;
+  color:#fce0a2!important;left:50%!important;top:-15px!important;
+  font-size:15px!important;text-shadow:0 0 8px #ffd77dd6!important;
+}
+body.trynka-in-table .seat.mine .seat-icon{
+  width:46px!important;height:46px!important;
+  border:2px solid #ffe5a4!important;
+  background:radial-gradient(circle at 35% 17%,#59eed0 0%,#09a675 58%,#086b4c)!important;
+  box-shadow:0 0 0 3px #cca36279,0 0 17px #07ffd0c4,0 3px 7px #0008!important;
+}
+body.trynka-in-table .seat:not(.empty) .seat-name{
+  color:#ffe3aa!important;border:1px solid #d4aa6a!important;
+  background:#041d14ed!important;border-radius:8px!important;
+}
+body.trynka-in-table .seat.is-turn .seat-icon{
+  border-color:#fff0b8!important;
+  box-shadow:0 0 0 3px #e4c98390,0 0 21px #24ffab9c!important;
+}
+body.trynka-in-table .seat.is-ready::after{
+  background:#0c9f66!important;color:#fff!important;
+  border:1px solid #ffe8a4!important;
+}
+/* Live action panel matches the lower screenshot; still uses server state. */
+body.trynka-in-table .tg-round{
+  border:2px solid #d7ad63!important;border-radius:20px!important;
+  padding:clamp(8px,1.7vh,12px)!important;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 0%,#0d5b3d 0%,#062a1c 68%,transparent),
+    linear-gradient(160deg,#0a3524,#05170f 90%)!important;
+  box-shadow:inset 0 0 0 2px #123d2b,inset 0 1px #fff3c57f,
+    0 0 14px #08f4a849,0 4px 16px #000b!important;
+}
+body.trynka-in-table .tg-round::before{
+  content:""!important;display:block!important;
+  position:absolute!important;top:0;left:9%;right:9%;height:2px!important;
+  background:linear-gradient(90deg,transparent,#26ffbb,transparent)!important;
+  box-shadow:0 0 9px #00ffaaaf!important;
+}
+body.trynka-in-table .tg-round-head{
+  font-weight:900!important;
+  letter-spacing:.06em!important;
+  color:#eacf8c!important;
+  text-shadow:0 1px 3px #000a!important;
+}
+body.trynka-in-table .tg-round-head .tg-pot{
+  color:#f6e0ae!important;
+  background:#0d3726!important;border:1px solid #be9c57!important;
+  border-radius:999px!important;padding:4px 7px!important;
+}
+body.trynka-in-table .tg-round-title{
+  color:#fff9e1!important;
+  font:950 clamp(14px,4.1vw,18px)/1.14 system-ui,sans-serif!important;
+  letter-spacing:.015em!important;text-transform:uppercase!important;
+  margin:5px 0 3px!important;text-shadow:0 2px 4px #000c!important;
+}
+body.trynka-in-table .tg-round-line{color:#d4e4d6!important;font-size:clamp(10px,2.8vw,12px)!important}
+body.trynka-in-table .tg-round-buttons{
+  gap:6px!important;margin:8px 0 0!important;
+}
+body.trynka-in-table .tg-round-buttons button{
+  min-height:42px!important;height:clamp(42px,6.2vh,50px)!important;
+  border-radius:12px!important;border:1px solid #c6a76a!important;
+  background:linear-gradient(155deg,#234c34,#08281c)!important;
+  color:#ffe7b8!important;font-weight:900!important;
+  box-shadow:inset 0 1px #ffffff24,0 2px 8px #0008!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button:not(.ready):not(:disabled){
+  background:linear-gradient(155deg,#61ffc4 0%,#14ea93 52%,#05a567 100%)!important;
+  border:2px solid #b3ffda!important;color:#03271a!important;
+  box-shadow:inset 0 2px #edffdfaa,0 0 13px #00ffaa91,0 3px 8px #0009!important;
+  text-shadow:0 1px #eaffec!important;
+  font-size:clamp(13px,3.5vw,16px)!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-ready-button.ready{
+  background:linear-gradient(155deg,#155138,#0a3324)!important;
+  border:1px solid #66dba3!important;color:#c5ffe1!important;
+}
+body.trynka-in-table .tg-round-buttons .tg-secondary-button{
+  background:linear-gradient(165deg,#24412e,#081f15)!important;
+  color:#f9dfaa!important;border:1px solid #c2a36e!important;
+}
+body.trynka-in-table .tg-round-buttons button:disabled{opacity:.52!important;box-shadow:none!important}
+/* Cards: emerald and gold, still draggable with original pointer events. */
+body.trynka-in-table .tg-card.pullable .tg-peek-cover{
+  border:2px solid #f3d792!important;border-radius:8px!important;
+  background:radial-gradient(circle at 50% 50%,#19d29c52 0%,transparent 42%),
+    repeating-linear-gradient(45deg,#195e44 0 5px,#0a3829 5px 10px)!important;
+  color:#ffe19f!important;
+  box-shadow:inset 0 0 0 2px #051d12,inset 0 0 0 4px #b9905069!important;
+}
+body.trynka-in-table .tg-card.pullable{
+  border-color:#f6dca0!important;box-shadow:0 3px 9px #000b,0 0 8px #e2bc743c!important;
+}
+@media(max-width:370px){
+  body.trynka-in-table .room-head-label b{font-size:11px!important}
+  body.trynka-in-table .room-head .tg-wallet{min-width:57px!important;padding:5px!important}
+  body.trynka-in-table .felt-wrap::before{height:21px!important;font-size:11px!important}
+  body.trynka-in-table .seat.empty .seat-name{font-size:7px!important;min-width:35px!important}
+  body.trynka-in-table .felt-wrap>.felt{border-width:8px!important}
+}
+@media(max-height:670px){
+  body.trynka-in-table .felt-wrap::before{height:19px!important;font-size:10px!important}
+  body.trynka-in-table .felt-wrap>.felt{inset:10% 10% 11%!important;border-width:7px!important}
+  body.trynka-in-table .seat.empty .seat-name{display:none!important}
+  body.trynka-in-table .tg-round-title{font-size:13px!important}
+  body.trynka-in-table .tg-round-buttons button{height:40px!important;min-height:40px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.trynka-in-table .seat.is-turn .seat-icon{animation:none!important}
+}
