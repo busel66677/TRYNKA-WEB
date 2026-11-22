@@ -6,7 +6,7 @@ const tg=window.Telegram?.WebApp;
 const statusEl=document.getElementById('status');
 const name=tg?.initDataUnsafe?.user?.first_name||'Гравець';
 const stakes=[2,5,10,20,50,100,200,500,1000];
-let signedIn=false;let currentTable=null;let lastTables=[];let mySeat=null;let isAdmin=false;
+let signedIn=false;let currentTable=null;let lastTables=[];let mySeat=null;let isAdmin=false;let lastRoomPlayers=[];
 let homeTableFilter='all';
 try{tg?.ready();tg?.expand();}catch(e){console.warn('Telegram SDK',e)}
 async function login(){
@@ -23,7 +23,7 @@ async function login(){
 }
 async function apiPost(url,data){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg?.initData,...data})});const result=await r.json();if(!r.ok)throw Error(result.error||'Помилка');return result}
 async function loadAccount(){
- try{const data=await apiPost('/api/account',{});isAdmin=data.admin===true;document.getElementById('balance-value').textContent=data.balance===null?'—':Number(data.balance).toLocaleString('uk-UA')+' грн';document.getElementById('role-label').textContent=isAdmin?'Адмін':'Профіль';document.getElementById('avatar').textContent=isAdmin?'👑':'♛';if(isAdmin)statusEl.textContent='✓ Telegram підключено · 👑 Адмін';window.clubRoleChanged?.(isAdmin)}
+ try{const data=await apiPost('/api/account',{});isAdmin=data.admin===true;document.getElementById('balance-value').textContent=data.balance===null?'—':Number(data.balance).toLocaleString('uk-UA')+' грн';document.getElementById('role-label').textContent=isAdmin?'Адмін':'Профіль';document.getElementById('avatar').textContent=isAdmin?'👑':'♛';if(isAdmin)statusEl.textContent='✓ Telegram підключено · 👑 Адмін';window.clubRoleChanged?.(isAdmin);if(isAdmin&&currentTable)renderRoom(lastRoomPlayers)}
  catch(e){console.warn('Account',e.message)}
 }
 function showAdmin(){
@@ -159,6 +159,7 @@ async function joinTable(table){
  }catch(e){statusEl.textContent='Не вдалося сісти за стіл: '+e.message}
 }
 function renderRoom(players){
+ lastRoomPlayers=players;
  const list=document.getElementById('table-list');
  // Preserve the animated round panel across 20s presence updates.
  const previous=list.querySelector('.room');
@@ -182,13 +183,37 @@ function renderRoom(players){
   const relative=(seatNo-origin+11)%11;
   const angle=(Math.PI*2*relative/11)+Math.PI/2;
   const x=50+41*Math.cos(angle),y=50+32*Math.sin(angle);
-  const el=document.createElement('div');el.className='seat'+(player?'':' empty')+(seatNo===mySeat?' mine':'');el.dataset.seat=String(seatNo);
+  const el=document.createElement('div');el.className='seat'+(player?'':' empty')+(seatNo===mySeat?' mine':'')+(player?.isBot?' test-bot':'');el.dataset.seat=String(seatNo);
   el.style.left=x+'%';el.style.top=y+'%';
   const icon=document.createElement('div');icon.className='seat-icon';
   if(player?.photo){const img=document.createElement('img');img.src=player.photo;img.alt='';img.referrerPolicy='no-referrer';icon.append(img)}
   else icon.textContent=player?(player.name||'Г').slice(0,1).toUpperCase():'+';
   const label=document.createElement('div');label.className='seat-name';label.textContent=player?(seatNo===mySeat?'Ви · ':'')+player.name:'Вільно';
   el.append(icon,label);wrap.append(el);
+ }
+ if(isAdmin){
+   const botCount=players.filter(p=>p.isBot===true).length;
+   const toggle=document.createElement('button');
+   toggle.type='button';toggle.className='tg-test-bot-toggle';
+   toggle.textContent=botCount?'🤖 Прибрати':'🤖 + Бот';
+   toggle.title='Тестовий суперник: сам натискає готовність і робить ходи';
+   toggle.setAttribute('aria-label',botCount?'Прибрати тестового бота':'Додати тестового бота');
+   toggle.onclick=async()=>{
+     const table=currentTable;
+     if(!table)return;
+     toggle.disabled=true;toggle.textContent='Завантаження…';
+     try{
+       await apiPost('/api/game',{table,action:botCount?'test_bot_remove':'test_bot_add'});
+       const refreshed=await postPresence('heartbeat',table);
+       if(currentTable===table)renderRoom(refreshed.players||[]);
+     }catch(e){
+       toggle.disabled=false;toggle.textContent=botCount?'🤖 Прибрати':'🤖 + Бот';
+       const message=String(e?.message||'Не вдалося змінити тестового бота').slice(0,180);
+       if(typeof tg?.showAlert==='function')tg.showAlert(message);
+       else alert(message);
+     }
+   };
+   wrap.append(toggle);
  }
  room.append(wrap);
  if(savedPanel)room.append(savedPanel);
