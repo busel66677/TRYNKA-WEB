@@ -8,6 +8,8 @@ const TURN_MS = 30000;
 const RESTART_MS = 7000;
 const READY_DELAY_MS = 5000;
 const MAX_PLAYERS = 4;
+const BOT_THINK_MS = 1100;
+const BOT_NAME = '🤖 Тест-бот';
 
 function makeDeck() {
   const cards = [];
@@ -46,7 +48,7 @@ export function scoreHand(hand) {
   return {value: best.value, label: best.label + ' · джокер J♠'};
 }
 
-export function createGameApi({ seats, stakes, validate, readPayload, json }) {
+export function createGameApi({ seats, stakes, validate, readPayload, json, adminId }) {
   const rounds = new Map();
   const readyByTable = new Map();
   let sequence = 0;
@@ -55,8 +57,18 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
     let state = readyByTable.get(table);
     if (!state) {state = {ids: new Set(), endsAt: null};readyByTable.set(table, state);}
     for (const id of state.ids) if (seats.get(id)?.table !== table) state.ids.delete(id);
+    // Testing bots auto-ready every round; a real player still presses "Готово".
+    for (const [id, p] of seats) {
+      if (p.table === table && p.isBot === true) state.ids.add(id);
+    }
     if (state.ids.size < 2) state.endsAt = null;
     return state;
+  }
+  function ownedBotEntries(table, ownerId) {
+    return [...seats.entries()].filter(([,p]) => p.table === table && p.isBot === true && p.ownerId === ownerId);
+  }
+  function testBotCount(table, ownerId) {
+    return ownedBotEntries(table, ownerId).length;
   }
   function waitingView(table, userId) {
     const state = readyState(table);
@@ -65,19 +77,21 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
       seated: [...seats.values()].filter(p => p.table === table).length,
       maxPlayers: MAX_PLAYERS, readyCount: state.ids.size,
       readySeats: [...state.ids].map(id => seats.get(id)?.seat).filter(Boolean),
-      myReady: state.ids.has(userId), readyEndsAt: state.endsAt
+      myReady: state.ids.has(userId), readyEndsAt: state.endsAt,
+      testBotCount: testBotCount(table, userId)
     };
   }
   function startRound(table, entries) {
     const deck = makeDeck();
     const players = entries.slice(0, MAX_PLAYERS).map(([uid,p]) => ({
-      id: uid, seat: p.seat, name: p.name,
+      id: uid, seat: p.seat, name: p.name, isBot: p.isBot === true,
       cards: [deck.pop(), deck.pop(), deck.pop()], folded: false, acted: false
     }));
     const round = {
       id: ++sequence, table, status: 'playing', dealStartedAt: Date.now(),
       stake: stakes[table - 1], pot: stakes[table - 1] * players.length,
       players, turn: 0, turnEndsAt: Date.now() + TURN_MS,
+      turnStartedAt: Date.now(),
       winners: [], reason: null, finishedAt: null
     };
     readyByTable.delete(table);
@@ -117,6 +131,7 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
       const p = round.players[next];
       if (!p.folded && !p.acted) {
         round.turn = next;
+        round.turnStartedAt = Date.now();
         round.turnEndsAt = Date.now() + TURN_MS;
         return;
       }
@@ -129,14 +144,28 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
       if (!isPresent(p, round.table)) { p.folded = true; p.acted = true; }
     }
     if (surviving(round).length <= 1) { finish(round, 'Гравці вийшли зі столу'); return; }
-    // A timed-out player automatically folds; this also resolves disconnected players.
+    // One server-controlled bot action after a short thinking delay.
+    // The same turn state as human play is used; never give the bot a bypass.
+    const p = round.players[round.turn];
+    if (!p || p.folded || p.acted) { advance(round); return; }
     if (Date.now() >= round.turnEndsAt) {
-      const p = round.players[round.turn];
-      if (p && !p.acted) { p.folded = true; p.acted = true; }
+      p.folded = true;
+      p.acted = true;
       advance(round);
-    } else {
-      const p = round.players[round.turn];
-      if (!p || p.folded || p.acted) advance(round);
+      return;
+    }
+    if (p.isBot && Date.now() - round.turnStartedAt >= BOT_THINK_MS) {
+      p.acted = true;
+      const strength = scoreHand(p.cards).value;
+      const roll = randomInt(100);
+      if (strength < 16 && roll < 12 && surviving(round).length > 2) {
+        p.folded = true;
+      } else if (strength >= 25 && roll < 24) {
+        round.pot += round.stake * 2; // raise
+      } else {
+        round.pot += round.stake; // call
+      }
+      advance(round);
     }
   }
   function view(round, userId, table) {
@@ -153,8 +182,9 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
       turnSeat: round.status === 'playing' ? player?.seat : null,
       winners: finished ? round.players.filter(p => round.winners.includes(p.id)).map(p => p.seat) : [],
       maxPlayers: MAX_PLAYERS,
+      testBotCount: testBotCount(table, userId),
       players: round.players.map(p => ({
-        seat: p.seat, name: p.name, folded: p.folded, acted: p.acted,
+        seat: p.seat, name: p.name, isBot: p.isBot, folded: p.folded, acted: p.acted,
         cards: finished || p.id === userId ? p.cards : null,
         result: finished && !p.folded ? scoreHand(p.cards).label : null,
         winner: finished && round.winners.includes(p.id)
@@ -185,6 +215,31 @@ export function createGameApi({ seats, stakes, validate, readPayload, json }) {
     }
     if (!round) round = maybeStartReady(table);
     const action = data.action;
+    if (action === 'test_bot_add' || action === 'test_bot_remove') {
+      // Test-only controls must never be available to regular players.
+      if (user.id !== adminId) return json(res, 403, {error:'Тестові боти доступні лише адміністратору'});
+      if (round?.status === 'playing') return json(res, 409, {error:'Змінювати ботів можна лише між роздачами'});
+      if (action === 'test_bot_add') {
+        const humans = [...seats.entries()].filter(([,p]) => p.table === table && p.isBot !== true);
+        if (humans.length !== 1 || humans[0][0] !== id) {
+          return json(res, 409, {error:'Бота можна додати лише за столом без інших реальних гравців'});
+        }
+        if (testBotCount(table, id) >= 1) return json(res, 409, {error:'Тест-бот уже за цим столом'});
+        const used = new Set([...seats.values()].filter(p => p.table === table).map(p => p.seat));
+        const freeSeat = Array.from({length:11},(_,i)=>i+1).find(n=>!used.has(n));
+        if (!freeSeat) return json(res, 409, {error:'Немає вільного місця'});
+        const botId = 'test-bot:'+id+':'+table;
+        seats.set(botId, {table, seat:freeSeat, name:BOT_NAME, photo:null,
+          lastSeen:Date.now(), isBot:true, ownerId:id});
+        const waiting = readyState(table);
+        if (waiting.ids.size >= 2 && waiting.endsAt === null) waiting.endsAt = Date.now()+READY_DELAY_MS;
+      } else {
+        for (const [botId] of ownedBotEntries(table, id)) seats.delete(botId);
+        readyState(table);
+      }
+      return json(res, 200, {ok:true, testBotCount:testBotCount(table,id),
+        game:view(round,id,table)});
+    }
     if (action === 'state') return json(res, 200, view(round, id, table));
     if (action === 'ready') {
       if (round) return json(res, 409, {error:'Дочекайся наступної роздачі'});
