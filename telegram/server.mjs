@@ -139,7 +139,7 @@ http.createServer(async (req,res)=>{
   try { pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname); } catch {res.writeHead(400);return res.end();}
   if(pathname === '/' || pathname === '/telegram') pathname='/telegram/standalone.html';
   const file = path.resolve(root, '.'+pathname);
-  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html','/telegram/game-client.js','/telegram/club-theme.css','/telegram/lounge-theme.css','/telegram/club-ui.js'].includes(pathname))){res.writeHead(404);return res.end();}
+  if(!file.startsWith(root+path.sep) || pathname.includes('\\') || pathname.split('/').some(s=>s.startsWith('.')) || /\.(env|map|md|lock)$/i.test(pathname) || (pathname.startsWith('/telegram/') && !['/telegram/quick-entry.js','/telegram/standalone.html','/telegram/game-client.js','/telegram/club-theme.css','/telegram/lounge-theme.css','/telegram/club-ui.js','/telegram/table-v123.css','/telegram/table-v123.js'].includes(pathname))){res.writeHead(404);return res.end();}
   try {
     const info=await stat(file);
     if(!info.isFile()){res.writeHead(404);return res.end();}
