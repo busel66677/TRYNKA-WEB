@@ -211,6 +211,11 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
       lastAction:round.actionLog.at(-1)||null,
       actionLog:round.actionLog.slice(-6),
       payouts:finished?round.payouts:[],
+      // Only surviving hands are shown to EVERYONE after the result.
+      // A folded hand stays private (the owner can still view their own cards).
+      revealMode:finished?(surviving(round).length===1?'last-standing':'showdown'):null,
+      lastPlayerSeat:finished&&surviving(round).length===1?surviving(round)[0].seat:null,
+      revealedSeats:finished?surviving(round).map(p=>p.seat):[],
       // Never send another player's cards or score while the round is active.
       myScore:!finished&&round.players.some(p=>p.id===userId)
         ?scoreHand(round.players.find(p=>p.id===userId).cards).label:null,
@@ -218,8 +223,9 @@ export function createGameApi({ seats, stakes, validate, readPayload, json, admi
         seat: p.seat, name: p.name, isBot: p.isBot, folded: p.folded, acted: p.acted,
         contributed:p.contributed, lastAction:p.lastAction,
         won:finished?(round.payouts.find(w=>w.seat===p.seat)?.amount||0):0,
-        cards: finished || p.id === userId ? p.cards : null,
-        result: finished ? scoreHand(p.cards).label : null,
+        cards: (p.id === userId || (finished && !p.folded)) ? p.cards : null,
+        result: (p.id === userId || (finished && !p.folded)) ? scoreHand(p.cards).label : null,
+        revealed:finished && !p.folded,
         winner: finished && round.winners.includes(p.id)
       }))
     };
