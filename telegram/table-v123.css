@@ -1,0 +1,81 @@
+
+/* TRYNKA Telegram table v123: one-viewport mobile layout */
+body.trynka-in-table{height:100dvh;overflow:hidden;overscroll-behavior:none}
+body.trynka-in-table main{height:100dvh;max-height:100dvh;max-width:760px;display:flex;flex-direction:column;overflow:hidden;padding:calc(env(safe-area-inset-top) + 4px) 9px calc(env(safe-area-inset-bottom) + 5px)}
+body.trynka-in-table .top{flex:0 0 auto;padding:1px 4px 4px;min-height:42px;border-bottom:0}
+body.trynka-in-table .logo{font-size:16px;letter-spacing:1px}
+body.trynka-in-table .sub{font-size:7px}
+body.trynka-in-table .brand-icon{width:30px;height:30px}
+body.trynka-in-table .avatar{width:32px;height:32px;font-size:16px}
+body.trynka-in-table #home,body.trynka-in-table .footer,body.trynka-in-table #status{display:none!important}
+body.trynka-in-table #detail{display:flex!important;flex:1;flex-direction:column;min-height:0}
+body.trynka-in-table #detail>.back{flex:none;margin:0;padding:2px 9px;font-size:12px;line-height:22px;text-align:left}
+body.trynka-in-table #detail>.panel{flex:1;min-height:0;margin:0;display:flex;flex-direction:column;overflow:hidden}
+body.trynka-in-table #detail .panel>h2,body.trynka-in-table #detail .panel>p{display:none!important}
+body.trynka-in-table #table-list{flex:1;min-height:0;display:flex;flex-direction:column}
+body.trynka-in-table .room{flex:1;min-height:0;min-width:0;margin:0;padding:5px 4px 4px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:1px;overflow:hidden;border-radius:18px;background:radial-gradient(ellipse at 50% 48%,#143b2c,#07180f 87%);border-color:#a17d4c77}
+body.trynka-in-table .room-head{margin:0;min-height:24px;display:flex;justify-content:space-between;align-items:center;padding:0 8px;font-size:10px;letter-spacing:.8px}
+body.trynka-in-table .felt-wrap{position:relative;min-height:0;width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;overflow:visible}
+body.trynka-in-table .felt{inset:13% 10% 13%;border-width:7px;outline-width:1px}
+body.trynka-in-table .felt-center{font-size:clamp(13px,4.8vw,22px);top:49%;letter-spacing:1px}
+body.trynka-in-table .seat{width:clamp(38px,13.5vw,62px)}
+body.trynka-in-table .seat-icon{width:clamp(25px,8.4vw,39px);height:clamp(25px,8.4vw,39px);font-size:11px}
+body.trynka-in-table .seat-name{font-size:8px;margin-top:1px;padding:2px 1px;line-height:1.1}
+body.trynka-in-table .seat.is-ready .seat-icon{border-color:#79dda0!important;box-shadow:0 0 0 3px #56c77d35,0 0 12px #48cf7a66}
+body.trynka-in-table .seat.is-ready .seat-name{color:#a1f5b9}
+body.trynka-in-table .room-foot,body.trynka-in-table .room>.trynka-invite-btn,body.trynka-in-table .room>.leave-btn{display:none!important}
+body.trynka-in-table .tg-round{flex:0 0 auto;min-height:0;margin:0 3px 2px;padding:8px 10px 7px;border-radius:13px;background:linear-gradient(150deg,#17382a,#0c2018);box-shadow:0 3px 13px #0006}
+body.trynka-in-table .tg-round-head{font-size:10px}
+body.trynka-in-table .tg-round-head .tg-pot{font-size:11px}
+body.trynka-in-table .tg-round-title{font-size:14px;margin:5px 0 3px;line-height:1.2}
+body.trynka-in-table .tg-round-line{margin:3px 0;font-size:10px;line-height:1.25}
+body.trynka-in-table .tg-clock{margin:2px 0;gap:5px;font-size:11px}
+body.trynka-in-table .tg-clock strong{font-size:13px}
+body.trynka-in-table .tg-time-track{height:4px;margin:0 0 5px}
+body.trynka-in-table .tg-round-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:6px 0 1px}
+body.trynka-in-table .tg-round-buttons button{min-width:0;min-height:39px;padding:7px 2px;font-size:clamp(10px,2.8vw,13px);border-radius:8px;white-space:normal}
+body.trynka-in-table .tg-round-buttons .tg-ready-button{grid-column:span 3;background:linear-gradient(125deg,#95e0a4,#4cb87c);color:#0b2318}
+body.trynka-in-table .tg-round-buttons .tg-ready-button.ready{background:#214334;border-color:#88daa8;color:#b6ffd1}
+body.trynka-in-table .tg-round-buttons .tg-secondary-button{grid-column:span 1;background:#273c2b;color:#ebd4ab}
+body.trynka-in-table .tg-round-buttons .tg-next-button{grid-column:1/-1}
+body.trynka-in-table .tg-player{display:none!important}
+body.trynka-in-table .tg-round-note{display:none}
+body.trynka-in-table .tg-own-hand{display:flex;align-items:center;justify-content:space-between;gap:7px;margin:4px 0 0}
+body.trynka-in-table .tg-own-label{flex:1;min-width:0;font-size:10px;color:#f1d69b;line-height:1.25}
+body.trynka-in-table .tg-own-label b{display:block;color:#ffe8ab;font-size:12px}
+body.trynka-in-table .tg-hand{min-height:0;margin:0;gap:6px;justify-content:flex-end}
+body.trynka-in-table .tg-card{width:clamp(42px,13vw,57px);height:clamp(57px,17.6vw,73px);font-size:18px;overflow:hidden;padding:0}
+body.trynka-in-table .tg-card.pullable{touch-action:none;user-select:none;cursor:grab;appearance:none;font-family:Georgia,serif}
+body.trynka-in-table .tg-card.pullable:active{cursor:grabbing}
+body.trynka-in-table .tg-card-face{position:absolute;inset:0;display:grid;place-items:center;background:#fdf8e9;color:#263427}
+body.trynka-in-table .tg-card.red .tg-card-face{color:#bf4141}
+body.trynka-in-table .tg-peek-cover{position:absolute;inset:0;display:grid;place-items:center;border:2px solid #e5c681;border-radius:7px;background:repeating-linear-gradient(42deg,#194b37 0 6px,#103326 6px 12px);color:#f5d68a;font-size:25px;box-shadow:inset 0 0 0 2px #10281c;will-change:transform}
+body.trynka-in-table .tg-results{margin-top:4px;font-size:11px;color:#eed39a}
+body.trynka-in-table .tg-results summary{cursor:pointer;font-weight:800}
+body.trynka-in-table .tg-results-content{max-height:23vh;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:5px}
+body.trynka-in-table .tg-results-content .tg-player{display:block!important;margin:0;padding:5px;font-size:10px}
+body.trynka-in-table .tg-results-content .tg-player-heading{font-size:9px}
+body.trynka-in-table .tg-results-content .tg-hand{justify-content:flex-start;gap:3px}
+body.trynka-in-table .tg-results-content .tg-card{width:24px;height:34px;font-size:11px}
+body.trynka-in-table .tg-wallet{display:none;min-width:0;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#3e3724;border:1px solid #aa9160;border-radius:10px;padding:5px 8px;color:#ffe6aa;font-size:11px;font-weight:850}
+body.trynka-in-table .tg-wallet{display:block}
+body.trynka-in-table .tg-tool-btn{border:1px solid #877452;background:#173425;border-radius:8px;color:#f3dbab;padding:4px 7px;font-size:11px}
+body.trynka-in-table .tg-room-tools{display:flex;gap:5px}
+body.trynka-in-table .tg-showdown{padding:10px;min-width:180px}
+body.trynka-in-table .tg-showdown-heading{font-size:17px}
+body.trynka-in-table .tg-showdown-subtitle{font-size:11px}
+.tg-chat-shade{position:fixed;inset:0;z-index:200;background:#0009;display:grid;place-items:end center}
+.tg-chat-shade[hidden]{display:none}
+.tg-chat-drawer{width:min(100%,760px);height:min(72dvh,580px);background:#10291e;border:1px solid #d0ab6c;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;padding:14px 12px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -8px 35px #0009}
+.tg-chat-header{display:flex;justify-content:space-between;align-items:center;color:#ffe6a9;font-weight:900}
+.tg-chat-header button{color:#fbe8bd;background:none;border:0;font-size:22px}
+.tg-chat-messages{flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain;padding:9px 3px;font-size:12px}
+.tg-chat-message{padding:8px 10px;margin:5px 0;border:1px solid #46664d;border-radius:10px;background:#173627;overflow-wrap:anywhere}
+.tg-chat-message b{color:#f7d898;margin-right:4px}
+.tg-chat-compose{display:flex;gap:7px}
+.tg-chat-compose input{min-width:0;flex:1;padding:9px;font-size:13px}
+.tg-chat-compose button{border:0;background:#e1c487;color:#11271b;border-radius:10px;padding:8px 12px;font-weight:900}
+.tg-chat-hint{font-size:11px;color:#c2d3c3;min-height:16px}
+@media(min-width:600px){body.trynka-in-table .room{max-width:600px;width:100%;margin:auto}body.trynka-in-table .felt-wrap{max-width:none}}
+@media(max-height:690px){body.trynka-in-table .top{min-height:32px}body.trynka-in-table .felt{inset:13% 10%}body.trynka-in-table .tg-card{height:53px;width:40px}body.trynka-in-table .tg-round{padding:5px 7px}body.trynka-in-table .tg-round-title{margin:3px 0}body.trynka-in-table .tg-round-buttons button{min-height:34px;padding:4px 2px}body.trynka-in-table .seat-icon{height:25px;width:25px}}
+@media(prefers-reduced-motion:reduce){.tg-peek-cover{will-change:auto}}
