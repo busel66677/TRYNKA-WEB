@@ -59,8 +59,10 @@
     previous?.remove();
     const board=node('section','tg-reveal-board');
     board.setAttribute('role','status');
-    board.setAttribute('aria-label','Відкриті карти, очки та переможець');
-    board.append(node('div','tg-reveal-title','🃏 ВСКРИТТЯ КАРТ'));
+    const lastStanding=state.revealMode==='last-standing';
+    board.classList.toggle('tg-last-standing',lastStanding);
+    board.setAttribute('aria-label',lastStanding?'Карти останнього гравця, очки та виграш':'Відкриті карти, очки та переможець');
+    board.append(node('div','tg-reveal-title',lastStanding?'🃏 ОСТАННІЙ ГРАВЕЦЬ ВІДКРИВАЄ КАРТИ':'🃏 ВСКРИТТЯ КАРТ'));
     const winners=(state.payouts||[]).filter(w=>Number(w.amount)>0);
     const bannerText=winners.length
       ?winners.length===1
@@ -71,13 +73,19 @@
     const list=node('div','tg-reveal-list');
     const me=seatOfMe();
     const players=Array.isArray(state.players)?state.players:[];
-    for(const p of players){
+    // When everyone else folds, display the LAST player's entire hand to every viewer.
+    // At a regular showdown compare only surviving hands (folded hands stay private).
+    const shown=players.filter(p=>p.revealed===true && Array.isArray(p.cards));
+    const display=lastStanding
+      ?shown.filter(p=>Number(p.seat)===Number(state.lastPlayerSeat))
+      :shown;
+    for(const p of display){
       const own=Number(p.seat)===me;
       const row=node('div','tg-reveal-row'+(p.winner?' is-winner':'')+(own?' is-mine':'')+(p.folded?' is-folded':''));
       const info=node('div','tg-reveal-info');
       info.append(node('b','tg-reveal-name',own?'ВИ':short(p.name,16)));
-      const result=p.result?(p.folded?'Пас · '+p.result:p.result):p.folded?'Пас':'Результат відсутній';
-      info.append(node('span','tg-reveal-score',result));
+      const result=p.result||'Комбінація не визначена';
+      info.append(node('span','tg-reveal-score',(lastStanding?'ОЧКИ: ':'')+result));
       const hand=node('div','tg-reveal-hand');
       for(let i=0;i<3;i++){
         const card=createFace(p.cards?.[i],animateReveal?'tg-face-flip':'');
@@ -88,6 +96,9 @@
       list.append(row);
     }
     board.append(list);
+    if(lastStanding){
+      board.append(node('div','tg-reveal-note','Усі інші гравці впали · карти переможця відкрито для всіх'));
+    }
     board.append(node('div','tg-reveal-bank','Банк: '+money(state.pot)+' · тестова гра'));
     wrap.append(board);
   }
