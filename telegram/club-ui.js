@@ -15,7 +15,9 @@
   const play = document.createElement('button');
   play.className = 'club-play';
   play.type = 'button';
-  play.innerHTML = '⚡ ГРАТИ ЗАРАЗ <small>ШВИДКИЙ ПОШУК СТОЛУ</small>';
+  const playIdle = '<span class="club-play-icon" aria-hidden="true">♠</span><span class="club-play-copy"><strong>Грати зараз</strong><small>Швидкий пошук столу</small></span><span class="club-play-arrow" aria-hidden="true">↗</span>';
+  const playLoading = '<span class="club-play-icon" aria-hidden="true">⌛</span><span class="club-play-copy"><strong>Шукаємо стіл</strong><small>Перевіряємо вільні місця</small></span><span class="club-play-arrow" aria-hidden="true">…</span>';
+  play.innerHTML = playIdle;
   play.onclick = async () => {
     if (play.disabled) return;
     if (typeof window.trynkaQuickJoin !== 'function') {
@@ -23,12 +25,12 @@
       return;
     }
     play.disabled = true;
-    play.innerHTML = '⌛ ШУКАЄМО СТІЛ <small>ПЕРЕВІРЯЄМО ВІЛЬНІ МІСЦЯ</small>';
+    play.innerHTML = playLoading;
     try { await window.trynkaQuickJoin(); }
     catch (e) { status.textContent = 'Швидкий вхід: ' + (e.message || 'помилка'); }
     finally {
       play.disabled = false;
-      play.innerHTML = '⚡ ГРАТИ ЗАРАЗ <small>ШВИДКИЙ ПОШУК СТОЛУ</small>';
+      play.innerHTML = playIdle;
     }
   };
   home.insertBefore(play, home.querySelector('.grid'));
@@ -37,7 +39,7 @@
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'club-chat-entry' + (extraClass ? ' ' + extraClass : '');
-    const emoji = document.createElement('span'); emoji.textContent = icon; emoji.style.fontSize = '29px';
+    const emoji = document.createElement('span'); emoji.className = 'club-entry-icon'; emoji.textContent = icon;
     const label = document.createElement('span'); label.className = 'club-chat-label'; label.textContent = title;
     const note = document.createElement('span'); note.className = 'club-chat-desc'; note.textContent = hint;
     label.append(note);
